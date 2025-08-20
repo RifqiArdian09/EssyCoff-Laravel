@@ -1,15 +1,10 @@
 <section class="w-full">
-    <x-page-heading>
-        <x-slot:title>POS Kasir</x-slot:title>
-        <x-slot:description>Kelola transaksi pelanggan dengan mudah</x-slot:description>
-    </x-page-heading>
-
     <div class="flex flex-col lg:flex-row gap-6" style="min-height: calc(100vh - 120px);">
 
         <!-- Left Panel - Products -->
         <section class="lg:w-3/5">
             <div class="space-y-6 border p-4 rounded-lg dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50 transition-colors duration-200">
-                <flux:input wire:model.live.debounce.300ms="search" label="Cari Produk" placeholder="Cari produk..." />
+                <flux:input wire:model.live.debounce.300ms="search" placeholder="Cari produk..." />
 
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4">
                     @foreach($products as $product)
