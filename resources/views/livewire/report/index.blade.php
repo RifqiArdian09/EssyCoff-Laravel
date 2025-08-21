@@ -37,7 +37,6 @@
                     <x-table.heading>Total</x-table.heading>
                     <x-table.heading>Uang Dibayar</x-table.heading>
                     <x-table.heading>Kembalian</x-table.heading>
-                    <x-table.heading>Sumber</x-table.heading>
                 </x-table.row>
             </x-slot:head>
 
@@ -51,7 +50,6 @@
                         <x-table.cell>Rp {{ number_format($order->total,0,',','.') }}</x-table.cell>
                         <x-table.cell>Rp {{ number_format($order->uang_dibayar,0,',','.') }}</x-table.cell>
                         <x-table.cell>Rp {{ number_format($order->kembalian,0,',','.') }}</x-table.cell>
-                        <x-table.cell>{{ ucfirst($order->source) }}</x-table.cell>
                     </x-table.row>
                 @empty
                     <x-table.row>

@@ -6,7 +6,6 @@
         <div class="mb-4">
             <p><strong>Tanggal:</strong> {{ $order->created_at->format('d/m/Y H:i') }}</p>
             <p><strong>Kasir:</strong> {{ $order->user ? $order->user->name : '-' }}</p>
-            <p><strong>Sumber:</strong> {{ ucfirst($order->source) }}</p>
             <p><strong>Status:</strong> {{ ucfirst($order->status) }}</p>
         </div>
 

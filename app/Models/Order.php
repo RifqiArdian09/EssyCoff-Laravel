@@ -12,10 +12,10 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'no_order',
+        'customer_name',
         'total',
         'uang_dibayar',
         'kembalian',
-        'source',
         'status'
     ];
 

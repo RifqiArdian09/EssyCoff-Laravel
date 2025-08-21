@@ -1,71 +1,140 @@
 <x-layouts.app :title="__('Dashboard')">
-    <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
+    <div class="flex flex-col gap-8">
 
-        <!-- Summary Cards -->
-        <div class="grid gap-4 md:grid-cols-3">
-            <!-- Total Pendapatan -->
-            <x-card class="flex items-center justify-between p-4">
-                <div>
-                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Pendapatan</h3>
-                    <p class="mt-1 text-2xl font-bold text-green-600 dark:text-green-400">
-                        Rp {{ number_format($totalRevenue,0,',','.') }}
-                    </p>
-                </div>
-                <flux:icon icon="currency-dollar" class="w-8 h-8 text-green-600 dark:text-green-400" />
-            </x-card>
+        <!-- Ringkasan Hari Ini -->
+        <div>
+            <h2 class="text-xl font-semibold text-gray-200 mb-4">📊 Ringkasan Hari Ini</h2>
+            <div class="grid gap-6 md:grid-cols-3">
+                <!-- Total Transaksi -->
+                <x-card class="p-6 bg-gray-800 border border-gray-700 rounded-2xl shadow-md">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-400">Total Transaksi</p>
+                            <p class="text-3xl font-bold text-blue-400">{{ $totalOrdersToday }}</p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-blue-500/20 text-blue-400 text-2xl">
+                            🛒
+                        </div>
+                    </div>
+                </x-card>
 
-            <!-- Total Transaksi -->
-            <x-card class="flex items-center justify-between p-4">
-                <div>
-                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Transaksi</h3>
-                    <p class="mt-1 text-2xl font-bold text-blue-600 dark:text-blue-400">
-                        {{ $totalOrders }}
-                    </p>
-                </div>
-                <flux:icon icon="shopping-cart" class="w-8 h-8 text-blue-600 dark:text-blue-400" />
-            </x-card>
+                <!-- Total Omzet -->
+                <x-card class="p-6 bg-gray-800 border border-gray-700 rounded-2xl shadow-md">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-400">Total Omzet</p>
+                            <p class="text-3xl font-bold text-green-400">
+                                Rp {{ number_format($totalRevenueToday,0,',','.') }}
+                            </p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-green-500/20 text-green-400 text-2xl">
+                            💰
+                        </div>
+                    </div>
+                </x-card>
 
-            <!-- Total Produk -->
-            <x-card class="flex items-center justify-between p-4">
-                <div>
-                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Produk</h3>
-                    <p class="mt-1 text-2xl font-bold text-purple-600 dark:text-purple-400">
-                        {{ $totalProducts }}
-                    </p>
-                </div>
-                <flux:icon icon="archive-box" class="w-8 h-8 text-purple-600 dark:text-purple-400" />
-            </x-card>
+                <!-- Pesanan -->
+                <x-card class="p-6 bg-gray-800 border border-gray-700 rounded-2xl shadow-md">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-sm text-gray-400">Status Pesanan</p>
+                            <div class="mt-3 space-y-1 text-sm">
+                                <p class="text-yellow-400 font-semibold">⏳ Pending: {{ $statusCounts['pending'] }}</p>
+                                <p class="text-blue-400 font-semibold">🔄 Diproses: {{ $statusCounts['diproses'] }}</p>
+                                <p class="text-green-400 font-semibold">✅ Selesai: {{ $statusCounts['selesai'] }}</p>
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-gray-500/20 text-gray-400 text-2xl">
+                            📋
+                        </div>
+                    </div>
+                </x-card>
+            </div>
         </div>
 
-        <!-- Riwayat Transaksi Terbaru -->
-        <div class="relative h-full flex-1 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-4">
-            <h3 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-200">Riwayat Transaksi Terbaru</h3>
-            <x-table>
-                <x-slot:head>
-                    <x-table.row>
-                        <x-table.heading>#</x-table.heading>
-                        <x-table.heading>No Order</x-table.heading>
-                        <x-table.heading>Tanggal</x-table.heading>
-                        <x-table.heading>Total</x-table.heading>
-                        <x-table.heading>Kasir</x-table.heading>
-                    </x-table.row>
-                </x-slot:head>
-                <x-slot:body>
-                    @forelse($latestOrders as $index => $order)
-                        <x-table.row>
-                            <x-table.cell>{{ $index + 1 }}</x-table.cell>
-                            <x-table.cell>{{ $order->no_order }}</x-table.cell>
-                            <x-table.cell>{{ $order->created_at->format('d/m/Y H:i') }}</x-table.cell>
-                            <x-table.cell>Rp {{ number_format($order->total,0,',','.') }}</x-table.cell>
-                            <x-table.cell>{{ $order->user?->name ?? '-' }}</x-table.cell>
-                        </x-table.row>
-                    @empty
-                        <x-table.row>
-                            <x-table.cell colspan="5" class="text-center text-gray-500">Belum ada transaksi.</x-table.cell>
-                        </x-table.row>
-                    @endforelse
-                </x-slot:body>
-            </x-table>
+        <!-- Grafik Omzet 7 Hari -->
+        <x-card class="p-6 bg-gray-800 border border-gray-700 rounded-2xl shadow-md">
+            <h3 class="text-lg font-semibold text-gray-200 mb-4 flex items-center gap-2">
+                📈 Grafik Omzet 7 Hari Terakhir
+            </h3>
+            <canvas id="chartOmzet" height="100"></canvas>
+        </x-card>
+
+        <!-- Produk Terlaris -->
+        <x-card class="p-6 bg-gray-800 border border-gray-700 rounded-2xl shadow-md">
+            <h3 class="text-lg font-semibold text-gray-200 mb-4">🔥 Produk Terlaris</h3>
+            <ul class="divide-y divide-gray-700">
+                @forelse($topProducts as $item)
+                    <li class="flex items-center justify-between py-3">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <img src="{{ $item->product?->image_url ?? 'https://via.placeholder.com/80?text=No+Image' }}" 
+                                 class="w-12 h-12 rounded-lg object-cover border border-gray-600">
+                            <span class="truncate text-gray-300">{{ $item->product?->name ?? 'Produk Dihapus' }}</span>
+                        </div>
+                        <span class="font-semibold text-blue-400 shrink-0">{{ $item->total_sold }} terjual</span>
+                    </li>
+                @empty
+                    <li class="text-gray-500 text-center py-2">Belum ada data.</li>
+                @endforelse
+            </ul>
+        </x-card>
+
+        <!-- Quick Action -->
+        <div class="grid gap-6 md:grid-cols-2">
+            <a href="{{ route('pos.cashier') }}" class="p-5 bg-blue-600 text-white rounded-2xl shadow hover:bg-blue-700 font-medium flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    ➕ <span>Buat Transaksi Baru</span>
+                </div>
+                ➡️
+            </a>
+            <a href="{{ route('pos.history') }}" class="p-5 bg-green-600 text-white rounded-2xl shadow hover:bg-green-700 font-medium flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    ⏰ <span>Lihat Riwayat Transaksi</span>
+                </div>
+                ➡️
+            </a>
         </div>
     </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('chartOmzet').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {!! json_encode($last7Days->pluck('date')) !!},
+                datasets: [{
+                    label: 'Omzet',
+                    data: {!! json_encode($last7Days->pluck('total')) !!},
+                    borderColor: '#60A5FA',
+                    backgroundColor: 'rgba(96, 165, 250, 0.2)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { labels: { color: '#D1D5DB' } }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#9CA3AF' },
+                        grid: { color: 'rgba(75, 85, 99, 0.2)' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#9CA3AF',
+                            callback: function(value) {
+                                return 'Rp ' + value.toLocaleString();
+                            }
+                        },
+                        grid: { color: 'rgba(75, 85, 99, 0.2)' }
+                    }
+                }
+            }
+        });
+    </script>
 </x-layouts.app>

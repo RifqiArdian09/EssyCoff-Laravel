@@ -1,9 +1,9 @@
 <section class="w-full p-4">
     <!-- Header -->
-    <div class="flex justify-between items-center mb-4">
-        <h1 class="text-xl font-bold text-gray-800 dark:text-gray-200">Product</h1>
+    <div class="flex items-center justify-between mb-4">
+        <h1 class="text-xl font-bold text-gray-800 dark:text-gray-200">Products</h1>
         <a href="{{ route('products.create') }}" wire:navigate
-           class="px-4 py-2 bg-white text-gray-800 rounded-lg hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600">
+           class="px-3 py-2 rounded-lg text-sm bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-600 dark:hover:bg-blue-700">
             Add Product
         </a>
     </div>
@@ -21,17 +21,7 @@
     @endif
 
     <!-- Search Bar -->
-    <div class="mb-6">
-        <div class="relative">
-            <input type="text" 
-                   wire:model.debounce.300ms="search" 
-                   placeholder="Search products or categories..." 
-                   class="w-full px-4 py-2 pl-10 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-        </div>
-    </div>
+    <flux:input wire:model.live.debounce.300ms="search" placeholder="Cari produk..." class="mb-4" />
 
     <!-- Products Table -->
     <x-table>
@@ -41,9 +31,9 @@
                 <x-table.heading class="w-24">Image</x-table.heading>
                 <x-table.heading>Name</x-table.heading>
                 <x-table.heading>Category</x-table.heading>
-                <x-table.heading>Price</x-table.heading>
-                <x-table.heading class="w-20">Stock</x-table.heading>
-                <x-table.heading class="w-32">Actions</x-table.heading>
+                <x-table.heading class="text-right">Price</x-table.heading>
+                <x-table.heading class="w-20 text-center">Stock</x-table.heading>
+                <x-table.heading class="w-32 text-right">Actions</x-table.heading>
             </x-table.row>
         </x-slot:head>
 
@@ -88,7 +78,7 @@
                         @endif
                     </x-table.cell>
 
-                    <x-table.cell class="font-medium text-green-400">
+                    <x-table.cell class="font-medium text-green-400 text-right">
                         Rp {{ number_format($product->price, 0, ',', '.') }}
                     </x-table.cell>
 
@@ -98,13 +88,13 @@
                         </span>
                     </x-table.cell>
 
-                    <x-table.cell class="flex gap-2">
-                        <a href="{{ route('products.edit', $product) }}" 
-                           class="px-2 py-1 bg-white text-gray-800 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600">
+                    <x-table.cell class="flex gap-2 justify-end">
+                        <a href="{{ route('products.edit', $product) }}"
+                           class="px-2 py-1 text-sm rounded bg-white text-gray-800 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600">
                             Edit
                         </a>
-                        <button wire:click="delete({{ $product->id }})"
-                                class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700">
+                        <button type="button" aria-label="Delete product {{ $product->name }}" wire:click="delete({{ $product->id }})"
+                                class="px-2 py-1 text-sm rounded bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-red-600 dark:hover:bg-red-700">
                             Delete
                         </button>
                     </x-table.cell>

@@ -22,7 +22,7 @@
             <td>{{ $order->total }}</td>
             <td>{{ $order->uang_dibayar }}</td>
             <td>{{ $order->kembalian }}</td>
-            <td>{{ ucfirst($order->source) }}</td>
+         
         </tr>
         @endforeach
     </tbody>

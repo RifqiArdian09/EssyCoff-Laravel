@@ -16,6 +16,6 @@ class OrderDetail extends Component
 
     public function render()
     {
-        return view('livewire.pos.order-detail');
+        return view('livewire.pos.detail');
     }
 }

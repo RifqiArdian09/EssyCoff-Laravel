@@ -13,7 +13,7 @@ class Index extends Component
     public $search = '';
     public $perPage = 10;
 
-    protected $queryString = ['search'];
+    protected $updatesQueryString = ['search'];
 
     // Reset halaman saat search berubah
     public function updatingSearch()

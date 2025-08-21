@@ -7,6 +7,7 @@ use Livewire\WithPagination;
 use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Category;
 
 class Cashier extends Component
 {
@@ -15,14 +16,19 @@ class Cashier extends Component
     public $search = '';
     public $cart = [];
     public $total = 0;
-    public $uangCustomer = '';  // Changed to empty string instead of 0
+    public $uangCustomer = '';
     public $kembalian = 0;
+    public $categoryId = null;
+    public $customerName = '';
 
     protected $paginationTheme = 'tailwind';
     protected $updatesQueryString = ['search'];
 
-    public function updatingSearch()
+    public function updatingSearch() { $this->resetPage(); }
+
+    public function filterCategory($categoryId)
     {
+        $this->categoryId = $categoryId;
         $this->resetPage();
     }
 
@@ -34,8 +40,6 @@ class Cashier extends Component
         if (isset($this->cart[$productId])) {
             if ($this->cart[$productId]['qty'] < $product->stock) {
                 $this->cart[$productId]['qty']++;
-            } else {
-                session()->flash('error', $product->name . ' stok tidak cukup!');
             }
         } else {
             $this->cart[$productId] = [
@@ -84,95 +88,71 @@ class Cashier extends Component
 
     public function updatedUangCustomer($value)
     {
-        // Handle empty string or null values
         $this->uangCustomer = $value;
         $this->calculateKembalian();
     }
 
     public function calculateKembalian()
     {
-        // Convert to float, handle empty string as 0
         $uang = $this->uangCustomer === '' ? 0 : (float) $this->uangCustomer;
         $total = (float) $this->total;
-        
-        // Only calculate kembalian if customer money is sufficient and total > 0
         $this->kembalian = ($uang >= $total && $total > 0) ? $uang - $total : 0;
     }
 
     public function checkout()
     {
-        if (empty($this->cart)) {
-            session()->flash('error', 'Keranjang masih kosong!');
-            return;
-        }
-
-        if ($this->total <= 0) {
-            session()->flash('error', 'Total tidak valid!');
-            return;
-        }
+        if (empty($this->cart)) return;
 
         $uangCustomer = $this->uangCustomer === '' ? 0 : (float) $this->uangCustomer;
-        
-        if ($uangCustomer < $this->total) {
-            session()->flash('error', 'Uang customer tidak mencukupi!');
-            return;
-        }
+        if ($uangCustomer < $this->total) return;
 
-        try {
-            $order = Order::create([
-                'no_order' => 'ORD-' . date('YmdHis') . rand(100, 999),
-                'user_id' => auth()->id(),
-                'total' => $this->total,
-                'uang_dibayar' => $uangCustomer,
-                'kembalian' => $this->kembalian,
-                'source' => 'kasir',
-                'status' => 'paid'
+        $order = Order::create([
+            'no_order' => 'ORD-' . date('YmdHis') . rand(100, 999),
+            'user_id' => auth()->id(),
+            'customer_name' => $this->customerName,
+            'total' => $this->total,
+            'uang_dibayar' => $uangCustomer,
+            'kembalian' => $this->kembalian,
+        
+            'status' => 'paid'
+        ]);
+
+        foreach ($this->cart as $productId => $item) {
+            $product = Product::find($productId);
+
+            OrderItem::create([
+                'order_id' => $order->id,
+                'product_id' => $productId,
+                'qty' => $item['qty'],
+                'harga' => $item['price'],
+                'subtotal' => $item['price'] * $item['qty']
             ]);
 
-            foreach ($this->cart as $productId => $item) {
-                $product = Product::find($productId);
-
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $productId,
-                    'qty' => $item['qty'],
-                    'harga' => $item['price'],
-                    'subtotal' => $item['price'] * $item['qty']
-                ]);
-
-                // Kurangi stok
-                if ($product) {
-                    $product->stock -= $item['qty'];
-                    $product->save();
-                }
+            if ($product) {
+                $product->stock -= $item['qty'];
+                $product->save();
             }
-
-            // Reset all values including uangCustomer to empty string
-            $this->reset(['cart', 'total', 'kembalian']);
-            $this->uangCustomer = '';  // Explicitly set to empty string
-            
-            session()->flash('message', 'Transaksi berhasil! No. Order: ' . $order->no_order);
-
-        } catch (\Exception $e) {
-            session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-    }
 
-    public function clearCart()
-    {
-        $this->reset(['cart', 'total', 'kembalian']);
-        $this->uangCustomer = '';  // Keep input empty when clearing cart
-        session()->flash('message', 'Keranjang berhasil dikosongkan!');
+        // Reset cart
+        $this->reset(['cart', 'total', 'kembalian', 'customerName']);
+        $this->uangCustomer = '';
+
+        // Redirect ke halaman detail transaksi (untuk cetak struk)
+        return redirect()->route('pos.transaction-detail', $order->id);
     }
 
     public function render()
     {
-        $products = Product::with('category')
-            ->where('name', 'like', '%'.$this->search.'%')
-            ->paginate(12);
+        $query = Product::with('category')->where('name', 'like', '%'.$this->search.'%');
+        if ($this->categoryId) $query->where('category_id', $this->categoryId);
+
+        $products = $query->paginate(12);
+        $categories = Category::all();
 
         return view('livewire.pos.cashier', [
-            'products' => $products
+            'products' => $products,
+            'categories' => $categories,
         ]);
     }
 }
