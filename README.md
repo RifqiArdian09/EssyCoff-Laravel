@@ -1,7 +1,5 @@
 # Clone dulu Mas Mbak
 
-# Yang kemaren dak jadi
-
 ### 1. Clone project
 
 ```bash
