@@ -9,7 +9,6 @@
             <th>Total</th>
             <th>Uang Dibayar</th>
             <th>Kembalian</th>
-            <th>Sumber</th>
         </tr>
     </thead>
     <tbody>
@@ -19,9 +18,9 @@
             <td>{{ $order->no_order }}</td>
             <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
             <td>{{ $order->user?->name ?? '-' }}</td>
-            <td>{{ $order->total }}</td>
-            <td>{{ $order->uang_dibayar }}</td>
-            <td>{{ $order->kembalian }}</td>
+            <td>Rp {{ number_format($order->total,0,',','.') }}</td>
+            <td>Rp {{ number_format($order->uang_dibayar,0,',','.') }}</td>
+            <td>Rp {{ number_format($order->kembalian,0,',','.') }}</td>
          
         </tr>
         @endforeach

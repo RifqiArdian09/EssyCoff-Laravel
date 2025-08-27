@@ -16,7 +16,9 @@ class TransactionDetail extends Component
 
     public function printReceipt()
 {
-    return redirect()->route('pos.receipt.print', $this->order->id);
+    // Tetap di halaman detail; trigger print dari browser/JS jika diperlukan
+    $this->dispatch('printReceipt');
+    return null;
 }
 
 

@@ -10,26 +10,20 @@ class History extends Component
 {
     use WithPagination;
 
-    public $search = ''; // jika mau fitur search
+    public int $perPage = 10;
 
     protected $paginationTheme = 'tailwind';
 
-    public function updatingSearch()
-    {
-        $this->resetPage();
-    }
-
     public function render()
     {
-        $orders = Order::with('items.product', 'user')
-            ->when($this->search, function($query) {
-                $query->where('no_order', 'like', '%'.$this->search.'%');
-            })
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+        $orders = Order::with('user')
+            ->orderByDesc('created_at')
+            ->paginate($this->perPage);
 
         return view('livewire.pos.history', [
-            'orders' => $orders
+            'orders' => $orders,
         ]);
     }
 }
+
+

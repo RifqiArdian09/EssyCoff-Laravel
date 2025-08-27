@@ -35,7 +35,10 @@ class Create extends Component
             'image' => 'nullable|image|max:2048',
         ]);
         
-        $imagePath = $this->image ? $this->image->store('products', 'public') : null;
+        $imagePath = null;
+        if ($this->image && method_exists($this->image, 'store')) {
+            $imagePath = $this->image->store('products', 'public');
+        }
         
         Product::create([
             'name' => $this->name,

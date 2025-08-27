@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Category;
+use Illuminate\Support\Facades\Auth;
 
 class Cashier extends Component
 {
@@ -59,6 +60,15 @@ class Cashier extends Component
         $this->calculateTotal();
     }
 
+    public function clearCart()
+    {
+        $this->cart = [];
+        $this->total = 0;
+        $this->kembalian = 0;
+        $this->uangCustomer = '';
+        $this->customerName = '';
+    }
+
     public function updateQuantity($productId, $qty)
     {
         $product = Product::find($productId);
@@ -101,14 +111,28 @@ class Cashier extends Component
 
     public function checkout()
     {
-        if (empty($this->cart)) return;
+        // Validasi keranjang tidak kosong
+        if (count($this->cart) === 0) {
+            session()->flash('error', 'Keranjang masih kosong!');
+            return;
+        }
+
+        // Validasi total > 0
+        if ($this->total <= 0) {
+            session()->flash('error', 'Total tidak valid!');
+            return;
+        }
 
         $uangCustomer = $this->uangCustomer === '' ? 0 : (float) $this->uangCustomer;
-        if ($uangCustomer < $this->total) return;
+        if ($uangCustomer < $this->total) {
+            session()->flash('error', 'Uang customer tidak cukup!');
+            return;
+        }
 
+        /** @var \App\Models\Order $order */
         $order = Order::create([
             'no_order' => 'ORD-' . date('YmdHis') . rand(100, 999),
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'customer_name' => $this->customerName,
             'total' => $this->total,
             'uang_dibayar' => $uangCustomer,
@@ -117,11 +141,13 @@ class Cashier extends Component
             'status' => 'paid'
         ]);
 
+        $orderId = $order->getKey();
+
         foreach ($this->cart as $productId => $item) {
             $product = Product::find($productId);
 
             OrderItem::create([
-                'order_id' => $order->id,
+                'order_id' => $orderId,
                 'product_id' => $productId,
                 'qty' => $item['qty'],
                 'harga' => $item['price'],
@@ -138,8 +164,8 @@ class Cashier extends Component
         $this->reset(['cart', 'total', 'kembalian', 'customerName']);
         $this->uangCustomer = '';
 
-        // Redirect ke halaman detail transaksi (untuk cetak struk)
-        return redirect()->route('pos.transaction-detail', $order->id);
+        // Arahkan ke halaman detail transaksi
+        return redirect()->route('pos.transaction-detail', $orderId);
     }
 
     public function render()

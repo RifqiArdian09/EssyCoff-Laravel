@@ -4,7 +4,8 @@
     @include('partials.head')
 </head>
 <body class="min-h-screen bg-white dark:bg-zinc-800">
-
+    
+    @if(auth()->check() && !request()->routeIs('home'))
     <!-- Sidebar -->
     <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
     <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
@@ -14,20 +15,33 @@
     </a>
 
     <flux:navlist variant="outline">
-        <flux:navlist.group :heading="__('Platform')">
-            <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
-                {{ __('Dashboard') }}
-            </flux:navlist.item>
-        </flux:navlist.group>
+        @php 
+            $isManager = auth()->user() && auth()->user()->role === 'manager';
+            $isCashier = auth()->user() && auth()->user()->role === 'cashier';
+        @endphp
 
-        <flux:navlist.group :heading="__('Master Data')">
-            <flux:navlist.item icon="folder" :href="route('categories.index')" :current="request()->routeIs('categories.*')" wire:navigate>
-                {{ __('Categories') }}
-            </flux:navlist.item>
-            <flux:navlist.item icon="archive-box" :href="route('products.index')" :current="request()->routeIs('products.*')" wire:navigate>
-                {{ __('Products') }}
-            </flux:navlist.item>
-        </flux:navlist.group>
+        @if($isManager)
+            <flux:navlist.group :heading="__('Platform')">
+                <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
+                    {{ __('Dashboard') }}
+                </flux:navlist.item>
+            </flux:navlist.group>
+
+            <flux:navlist.group :heading="__('Master Data')">
+                <flux:navlist.item icon="folder" :href="route('categories.index')" :current="request()->routeIs('categories.*')" wire:navigate>
+                    {{ __('Categories') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="archive-box" :href="route('products.index')" :current="request()->routeIs('products.*')" wire:navigate>
+                    {{ __('Products') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="archive-box" :href="route('users.index')" :current="request()->routeIs('users.*')" wire:navigate>
+                    {{ __('Users') }}
+                </flux:navlist.item>
+            </flux:navlist.group>
+        @endif
+
+        @if($isCashier)
+        @endif
 
         <flux:navlist.group :heading="__('Transaksi')">
             <flux:navlist.item icon="shopping-cart" :href="route('pos.cashier')" :current="request()->routeIs('pos.cashier')" wire:navigate>
@@ -70,8 +84,10 @@
         </flux:menu>
     </flux:dropdown>
 </flux:sidebar>
+    @endif
 
 
+    @if(auth()->check())
     <!-- Mobile Header -->
     <flux:header class="lg:hidden">
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
@@ -84,37 +100,38 @@
                 <!-- User Info -->
                 <div class="p-2 text-sm font-normal">
                     <div class="flex items-center gap-2">
-                        <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
-                            <span class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
-                                {{ auth()->user()->initials() }}
-                            </span>
+                    <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
+                        <span class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                            {{ auth()->user()->initials() }}
                         </span>
-                        <div class="flex-1 flex flex-col text-start text-sm leading-tight">
-                            <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
-                            <span class="truncate text-xs">{{ auth()->user()->email }}</span>
-                        </div>
+                    </span>
+                    <div class="flex-1 flex flex-col text-start text-sm leading-tight">
+                        <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
+                        <span class="truncate text-xs">{{ auth()->user()->email }}</span>
                     </div>
                 </div>
+            </div>
 
-                <flux:menu.separator />
+            <flux:menu.separator />
 
-                <!-- Settings -->
-                <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>
-                    {{ __('Settings') }}
+            <!-- Settings -->
+            <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>
+                {{ __('Settings') }}
+            </flux:menu.item>
+
+            <flux:menu.separator />
+
+            <!-- Logout -->
+            <form method="POST" action="{{ route('logout') }}" class="w-full">
+                @csrf
+                <flux:menu.item as="button" type="submit"  class="w-full">
+                    {{ __('Log Out') }}
                 </flux:menu.item>
-
-                <flux:menu.separator />
-
-                <!-- Logout -->
-                <form method="POST" action="{{ route('logout') }}" class="w-full">
-                    @csrf
-                    <flux:menu.item as="button" type="submit"  class="w-full">
-                        {{ __('Log Out') }}
-                    </flux:menu.item>
-                </form>
-            </flux:menu>
-        </flux:dropdown>
-    </flux:header>
+            </form>
+        </flux:menu>
+    </flux:dropdown>
+</flux:header>
+    @endif
 
     <!-- Main Content Slot -->
     {{ $slot }}

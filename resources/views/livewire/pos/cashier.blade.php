@@ -57,19 +57,16 @@
             </div>
         </section>
 
-        <!-- Right Panel - Cart & Payment -->
         <section class="lg:w-2/5 flex flex-col gap-4">
            
-            <!-- Cart Section -->
             <div class="space-y-2 border p-2 rounded-lg dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50 transition-colors duration-200">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="text-sm font-semibold">Keranjang</h2>
                     @if(!empty($cart))
-                        <button wire:click="clearCart" class="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400">Kosongkan</button>
+                        <button wire:click="clearCart" class="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400">Kosongkan Semua</button>
                     @endif
                 </div>
 
-                <!-- Scrollable Cart Content dengan max height untuk 4 items -->
                 <div class="max-h-80 overflow-y-auto">
                     @if(empty($cart))
                         <div class="text-center py-8 text-gray-500 dark:text-gray-400 text-xs">
@@ -102,10 +99,24 @@
 
             <!-- Payment Section -->
             <div class="space-y-2 border p-2 rounded-lg dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50 transition-colors duration-200">
+                <!-- Error Messages -->
+                @if(session()->has('error'))
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-xs">
+                        {{ session('error') }}
+                    </div>
+                @endif
+                
                 <div class="space-y-2 text-xs">
                     <div class="flex justify-between font-semibold">
                         <span>Total:</span>
                         <span>Rp {{ number_format($total,0,',','.') }}</span>
+                    </div>
+                    
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        <p>Cart count: {{ count($cart) }}</p>
+                        <p>Total: {{ $total }}</p>
+                        <p>Uang Customer: {{ $uangCustomer ?: '0' }}</p>
+                        <p>Kembalian: {{ $kembalian }}</p>
                     </div>
 
                     <flux:input 
@@ -137,7 +148,7 @@
                         wire:click="checkout" 
                         variant="primary" 
                         class="w-full mt-2 text-xs"
-                        :disabled="empty($cart) || $total <= 0 || ($uangCustomer === '' ? 0 : (float) $uangCustomer) < $total"
+                        :disabled="count($cart) === 0 || $total <= 0 || ($uangCustomer === '' ? 0 : (float) $uangCustomer) < $total"
                     >
                         Buat Transaksi
                     </flux:button>

@@ -16,17 +16,19 @@ use App\Livewire\Products\Edit as ProductEdit;
 // POS
 use App\Livewire\Pos\Cashier;
 use App\Livewire\Pos\History;
-use App\Livewire\Pos\OrderDetail;
 use App\Livewire\Pos\TransactionDetail;
 
 // Report
 use App\Livewire\Report\Index as ReportIndex;
 use App\Exports\OrdersExport;
 
+// User;
+use App\Livewire\User\Index;
+use App\Livewire\User\Create;
+use App\Livewire\User\Edit;
+
 // Dashboard
 use App\Http\Controllers\DashboardController;
-
-use App\Livewire\Pos\ReceiptPrint; // tambahkan ini di atas
 
 
 /*
@@ -83,6 +85,12 @@ Route::middleware(['auth'])->prefix('products')->name('products.')->group(functi
     Volt::route('/{product}/edit', ProductEdit::class)->name('edit');
 });
 
+Route::middleware(['auth'])->prefix('users')->name('users.')->group(function() {
+    Volt::route('/', Index::class)->name('index');
+    Volt::route('/create', Create::class)->name('create');
+    Volt::route('/{user}/edit', Edit::class)->name('edit');
+});
+
 /*
 |--------------------------------------------------------------------------
 | POS Kasir
@@ -91,9 +99,7 @@ Route::middleware(['auth'])->prefix('products')->name('products.')->group(functi
 Route::middleware(['auth'])->prefix('pos')->group(function() {
     Volt::route('cashier', Cashier::class)->name('pos.cashier');
     Volt::route('history', History::class)->name('pos.history');
-    Volt::route('order/{order}', OrderDetail::class)->name('pos.order.detail');
     Volt::route('transaction/{order}', TransactionDetail::class)->name('pos.transaction-detail');
-    Route::get('receipt/{order}', ReceiptPrint::class)->name('pos.receipt.print'); // ✅ betul
 });
 
 /*

@@ -12,6 +12,11 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // Check if user is a cashier and redirect to POS
+        if (auth()->user()->role === 'cashier') {
+            return redirect()->route('pos.cashier');
+        }
+
         // Hari ini
         $today = Carbon::today();
 

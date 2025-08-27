@@ -24,8 +24,7 @@ class Edit extends Component
         $this->category_id = $product->category_id;
         $this->price = $product->price;
         $this->stock = $product->stock;
-        $this->currentImage = $product->image; // Store original image path
-        // Don't set $this->image here as it's for new uploads only
+        $this->currentImage = $product->image;
     }
 
     public function updatedImage()
@@ -52,9 +51,9 @@ class Edit extends Component
         ]);
 
         // Handle image upload logic
-        $imagePath = $this->currentImage; // Default to current image
+        $imagePath = $this->currentImage;
         
-        if ($this->image && $this->image instanceof \Livewire\TemporaryUploadedFile) {
+        if ($this->image && method_exists($this->image, 'store')) {
             // New image uploaded, delete old one if exists
             if ($this->product->image && Storage::disk('public')->exists($this->product->image)) {
                 Storage::disk('public')->delete($this->product->image);
@@ -68,23 +67,14 @@ class Edit extends Component
             $imagePath = null;
         }
 
-        // Update the product with proper data
-        $updateData = [
+        // Update the product
+        $this->product->update([
             'name' => $this->name,
             'category_id' => $this->category_id,
             'price' => $this->price,
             'stock' => $this->stock,
             'image' => $imagePath,
-        ];
-
-        // Debug: Log the data being updated
-        \Log::info('Updating product with data:', $updateData);
-
-        $this->product->update($updateData);
-
-        // Verify the update
-        $this->product->refresh();
-        \Log::info('Product after update:', $this->product->toArray());
+        ]);
 
         session()->flash('message', 'Product updated successfully.');
         return redirect()->route('products.index');

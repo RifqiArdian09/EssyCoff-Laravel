@@ -14,8 +14,7 @@
 
             <flux:button wire:click="$refresh" variant="primary">Filter</flux:button>
             <flux:button wire:click="exportExcel" variant="ghost">Export Excel</flux:button>
-            <flux:button wire:click="exportPDF" variant="ghost">Export PDF</flux:button>
-            <flux:button onclick="window.print()" variant="ghost">Print</flux:button>
+            <flux:button wire:click="exportPDF" variant="ghost">Export PDF</flux:button>    
         </div>
 
         <div class="flex gap-4 mb-4">
