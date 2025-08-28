@@ -43,14 +43,21 @@ php artisan key:generate
 
 ```
 
-### 5. npm
+### 5. Munculkan gambar
+
+```bash
+
+php artisan storage:link
+
+```
+### 6. npm
 
 ```bash
 
 npm install
 
 ```
-### 5. Jalankan 
+### 7. Jalankan 
 ```bash
 
 php artisan serve
