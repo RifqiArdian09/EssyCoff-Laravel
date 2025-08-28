@@ -30,6 +30,8 @@ use App\Livewire\User\Edit;
 // Dashboard
 use App\Http\Controllers\DashboardController;
 
+use App\Livewire\Pos\OrderDetail;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -100,6 +102,8 @@ Route::middleware(['auth'])->prefix('pos')->group(function() {
     Volt::route('cashier', Cashier::class)->name('pos.cashier');
     Volt::route('history', History::class)->name('pos.history');
     Volt::route('transaction/{order}', TransactionDetail::class)->name('pos.transaction-detail');
+    Volt::route('transaction/{order}', OrderDetail::class)
+    ->name('pos.detail');
 });
 
 /*

@@ -61,7 +61,7 @@
                     </x-table.cell>
 
                     <x-table.cell class="flex gap-2">
-                        <a href="#"
+                        <a href="{{ route('pos.detail', $order) }}"
                            class="px-2 py-1 bg-white text-gray-800 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600">
                             Detail
                         </a>

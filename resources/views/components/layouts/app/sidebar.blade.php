@@ -34,7 +34,7 @@
                 <flux:navlist.item icon="archive-box" :href="route('products.index')" :current="request()->routeIs('products.*')" wire:navigate>
                     {{ __('Products') }}
                 </flux:navlist.item>
-                <flux:navlist.item icon="archive-box" :href="route('users.index')" :current="request()->routeIs('users.*')" wire:navigate>
+                <flux:navlist.item icon="users" :href="route('users.index')" :current="request()->routeIs('users.*')" wire:navigate>
                     {{ __('Users') }}
                 </flux:navlist.item>
             </flux:navlist.group>

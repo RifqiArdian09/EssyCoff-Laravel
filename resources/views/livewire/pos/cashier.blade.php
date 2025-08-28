@@ -111,13 +111,6 @@
                         <span>Total:</span>
                         <span>Rp {{ number_format($total,0,',','.') }}</span>
                     </div>
-                    
-                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        <p>Cart count: {{ count($cart) }}</p>
-                        <p>Total: {{ $total }}</p>
-                        <p>Uang Customer: {{ $uangCustomer ?: '0' }}</p>
-                        <p>Kembalian: {{ $kembalian }}</p>
-                    </div>
 
                     <flux:input 
                         wire:model.live="customerName" 
