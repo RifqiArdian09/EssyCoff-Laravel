@@ -74,54 +74,142 @@ new #[Layout('components.layouts.auth')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
+    <!-- Header -->
+    <div class="text-center mb-6">
+        <h1 class="text-3xl font-bold text-primary mb-2">
+            <i class="fas fa-sign-in-alt mr-2"></i>
+            Masuk ke Akun Anda
+        </h1>
+        <p class="text-gray-600">Masukkan email dan password untuk melanjutkan</p>
+    </div>
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />
 
     <form method="POST" wire:submit="login" class="flex flex-col gap-6">
         <!-- Email Address -->
-        <flux:input
-            wire:model="email"
-            :label="__('Email address')"
-            type="email"
-            required
-            autofocus
-            autocomplete="email"
-            placeholder="email@example.com"
-        />
+        <div class="space-y-2">
+            <label for="email" class="block text-sm font-medium text-dark">
+                <i class="fas fa-envelope mr-2 text-primary"></i>
+                Alamat Email
+            </label>
+            <input
+                wire:model="email"
+                id="email"
+                type="email"
+                required
+                autofocus
+                autocomplete="email"
+                placeholder="contoh@email.com"
+                class="w-full px-4 py-3 border border-secondary rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 bg-accent bg-opacity-30 hover:bg-white"
+            />
+            @error('email')
+                <p class="text-red-600 text-sm mt-1">
+                    <i class="fas fa-exclamation-circle mr-1"></i>
+                    {{ $message }}
+                </p>
+            @enderror
+        </div>
 
         <!-- Password -->
-        <div class="relative">
-            <flux:input
-                wire:model="password"
-                :label="__('Password')"
-                type="password"
-                required
-                autocomplete="current-password"
-                :placeholder="__('Password')"
-                viewable
-            />
-
-            @if (Route::has('password.request'))
-                <flux:link class="absolute end-0 top-0 text-sm" :href="route('password.request')" wire:navigate>
-                    {{ __('Forgot your password?') }}
-                </flux:link>
-            @endif
+        <div class="space-y-2">
+            <div class="flex justify-between items-center">
+                <label for="password" class="block text-sm font-medium text-dark">
+                    <i class="fas fa-lock mr-2 text-primary"></i>
+                    Password
+                </label>
+                @if (Route::has('password.request'))
+                    <a href="{{ route('password.request') }}" 
+                       class="text-sm text-primary hover:text-dark transition-colors duration-200"
+                       wire:navigate>
+                        Lupa password?
+                    </a>
+                @endif
+            </div>
+            <div class="relative">
+                <input
+                    wire:model="password"
+                    id="password"
+                    type="password"
+                    required
+                    autocomplete="current-password"
+                    placeholder="Masukkan password"
+                    class="w-full px-4 py-3 border border-secondary rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 bg-accent bg-opacity-30 hover:bg-white pr-12"
+                />
+                <button type="button" 
+                        onclick="togglePassword()"
+                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-secondary hover:text-primary transition-colors">
+                    <i class="fas fa-eye" id="toggleIcon"></i>
+                </button>
+            </div>
+            @error('password')
+                <p class="text-red-600 text-sm mt-1">
+                    <i class="fas fa-exclamation-circle mr-1"></i>
+                    {{ $message }}
+                </p>
+            @enderror
         </div>
 
         <!-- Remember Me -->
-        <flux:checkbox wire:model="remember" :label="__('Remember me')" />
-
-        <div class="flex items-center justify-end">
-            <flux:button variant="primary" type="submit" class="w-full">{{ __('Log in') }}</flux:button>
+        <div class="flex items-center">
+            <input
+                wire:model="remember"
+                id="remember"
+                type="checkbox"
+                class="h-4 w-4 text-primary focus:ring-primary border-secondary rounded"
+            />
+            <label for="remember" class="ml-2 block text-sm text-dark">
+                Ingat saya
+            </label>
         </div>
+
+        <!-- Login Button -->
+        <button
+            type="submit"
+            class="w-full bg-primary hover:bg-dark text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg flex items-center justify-center"
+        >
+            <i class="fas fa-sign-in-alt mr-2"></i>
+            Masuk
+        </button>
     </form>
 
+    <!-- Register Link -->
     @if (Route::has('register'))
-        <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
-            <span>{{ __('Don\'t have an account?') }}</span>
-            <flux:link :href="route('register')" wire:navigate>{{ __('Sign up') }}</flux:link>
+        <div class="text-center pt-4 border-t border-secondary">
+            <p class="text-dark mb-3">Belum punya akun?</p>
+            <a href="{{ route('register') }}" 
+               class="inline-flex items-center justify-center w-full bg-transparent border-2 border-primary text-primary font-medium py-3 px-6 rounded-xl hover:bg-primary hover:text-white transition-all duration-300"
+               wire:navigate>
+                <i class="fas fa-user-plus mr-2"></i>
+                Daftar Sekarang
+            </a>
         </div>
     @endif
+
+    <!-- Back to Home -->
+    <div class="text-center">
+        <a href="{{ url('/') }}" 
+           class="text-secondary hover:text-primary text-sm transition-colors duration-200"
+           wire:navigate>
+            <i class="fas fa-arrow-left mr-1"></i>
+            Kembali ke Beranda
+        </a>
+    </div>
 </div>
+
+<script>
+function togglePassword() {
+    const passwordField = document.getElementById('password');
+    const toggleIcon = document.getElementById('toggleIcon');
+    
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordField.type = 'password';
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+    }
+}
+</script>
