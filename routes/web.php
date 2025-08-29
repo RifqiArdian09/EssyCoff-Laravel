@@ -31,6 +31,7 @@ use App\Livewire\User\Edit;
 use App\Http\Controllers\DashboardController;
 
 use App\Livewire\Pos\OrderDetail;
+use App\Livewire\Pos\Receipt\Index as ReceiptIndex;
 
 
 /*
@@ -101,9 +102,8 @@ Route::middleware(['auth'])->prefix('users')->name('users.')->group(function() {
 Route::middleware(['auth'])->prefix('pos')->group(function() {
     Volt::route('cashier', Cashier::class)->name('pos.cashier');
     Volt::route('history', History::class)->name('pos.history');
-    Volt::route('transaction/{order}', TransactionDetail::class)->name('pos.transaction-detail');
-    Volt::route('transaction/{order}', OrderDetail::class)
-    ->name('pos.detail');
+    Volt::route('transaction/{order}', OrderDetail::class)->name('pos.detail');
+    Volt::route('receipt/{order}', ReceiptIndex::class)->name('pos.receipt.index');
 });
 
 /*
