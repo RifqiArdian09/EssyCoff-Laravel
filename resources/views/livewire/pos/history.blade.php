@@ -29,7 +29,8 @@
                 <x-table.heading>Tanggal</x-table.heading>
                 <x-table.heading>Kasir</x-table.heading>
                 <x-table.heading>Total</x-table.heading>
-                <x-table.heading class="w-32">Actions</x-table.heading>
+                <x-table.heading>Status</x-table.heading>
+                <x-table.heading class="w-40">Actions</x-table.heading>
             </x-table.row>
         </x-slot:head>
 
@@ -60,9 +61,27 @@
                         Rp {{ number_format($order->total,0,',','.') }}
                     </x-table.cell>
 
+                    <x-table.cell>
+                        @if($order->status === 'pending_payment')
+                            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                                Pending Payment
+                            </span>
+                        @else
+                            <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                                Paid
+                            </span>
+                        @endif
+                    </x-table.cell>
+
                     <x-table.cell class="flex gap-2">
-                        <a href="#"
-                           class="px-2 py-1 bg-white text-gray-800 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600">
+                        @if($order->status === 'pending_payment')
+                            <button wire:click="confirmPayment({{ $order->id }})"
+                                    class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs">
+                                Konfirmasi Bayar
+                            </button>
+                        @endif
+                        <a href="{{ route('pos.transaction-detail', $order) }}"
+                           class="px-2 py-1 bg-white text-gray-800 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 text-xs">
                             Detail
                         </a>
                     </x-table.cell>
@@ -80,6 +99,71 @@
     @if($orders->hasPages())
         <div class="mt-6">
             {{ $orders->links() }}
+        </div>
+    @endif
+
+    <!-- Payment Confirmation Modal -->
+    @if($showPaymentModal && $selectedOrder)
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4">
+                    Konfirmasi Pembayaran
+                </h3>
+                
+                <div class="space-y-4">
+                    <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">No. Order:</span>
+                            <span class="font-medium">{{ $selectedOrder->no_order }}</span>
+                        </div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Customer:</span>
+                            <span class="font-medium">{{ $selectedOrder->customer_name }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Total:</span>
+                            <span class="font-bold text-green-600">Rp {{ number_format($selectedOrder->total, 0, ',', '.') }}</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Uang yang Dibayar
+                        </label>
+                        <input type="number" 
+                               wire:model.live="uangDibayar" 
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                               placeholder="Masukkan jumlah uang"
+                               min="{{ $selectedOrder->total }}">
+                        @error('uangDibayar')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    @if($uangDibayar && $uangDibayar >= $selectedOrder->total)
+                        <div class="bg-blue-100 dark:bg-blue-900 p-4 rounded-lg">
+                            <div class="flex justify-between">
+                                <span class="text-sm text-blue-600 dark:text-blue-300">Kembalian:</span>
+                                <span class="font-bold text-blue-600 dark:text-blue-300">
+                                    Rp {{ number_format($uangDibayar - $selectedOrder->total, 0, ',', '.') }}
+                                </span>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                <div class="flex space-x-3 mt-6">
+                    <button wire:click="closeModal" 
+                            class="flex-1 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition">
+                        Batal
+                    </button>
+                    <button wire:click="processPayment" 
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                            @if(!$uangDibayar || $uangDibayar < $selectedOrder->total) disabled @endif>
+                        Konfirmasi
+                    </button>
+                </div>
+            </div>
         </div>
     @endif
 </section>

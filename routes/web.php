@@ -29,6 +29,7 @@ use App\Livewire\User\Edit;
 
 // Dashboard
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CustomerController;
 
 
 /*
@@ -110,5 +111,9 @@ Route::middleware(['auth'])->prefix('pos')->group(function() {
 Route::middleware(['auth'])->prefix('report')->group(function() {
     Volt::route('/', ReportIndex::class)->name('report.index');
 });
+
+Route::get('customer', [CustomerController::class, 'index'])->name('customer');
+Route::post('customer/order', [CustomerController::class, 'createOrder'])->name('customer.order');
+Route::get('customer/history', [CustomerController::class, 'getOrderHistory'])->name('customer.history');
 
 require __DIR__.'/auth.php';
