@@ -1,71 +1,71 @@
-# EssyCoff - Laravel POS System
+# EssyCoff - Sistem POS Laravel
 
-A modern Point of Sale (POS) system built with Laravel 12, Livewire, and Flux UI. EssyCoff provides a complete solution for managing coffee shop operations including inventory management, sales transactions, reporting, and user management.
+Sistem Point of Sale (POS) modern yang dibangun dengan Laravel 12, Livewire, dan Flux UI. EssyCoff menyediakan solusi lengkap untuk mengelola operasi kedai kopi termasuk manajemen inventori, transaksi penjualan, pelaporan, dan manajemen pengguna.
 
-## 🚀 Features
+## 🚀 Fitur
 
-### 📊 **Dashboard & Analytics**
-- Real-time sales overview
-- Revenue tracking and statistics
-- Interactive charts and graphs
-- Key performance indicators (KPIs)
+### 📊 **Dashboard & Analitik**
+- Ringkasan penjualan real-time
+- Pelacakan pendapatan dan statistik
+- Grafik dan chart interaktif
+
 
 ### 🛍️ **Point of Sale (POS)**
-- Intuitive cashier interface
-- Product search and selection
-- Cart management
-- Multiple payment methods
-- Receipt generation and printing
-- Transaction history
+- Interface kasir yang intuitif
+- Pencarian dan pemilihan produk
+- Manajemen keranjang belanja
+- Berbagai metode pembayaran
+- Pembuatan dan pencetakan struk
+- Riwayat transaksi
 
-### 📦 **Inventory Management**
-- Product catalog with categories
-- Stock tracking and management
-- Product image uploads
-- Price management
-- Low stock alerts
+### 📦 **Manajemen Inventori**
+- Katalog produk dengan kategori
+- Pelacakan dan manajemen stok
+- Upload gambar produk
+- Manajemen harga
+- Peringatan stok rendah
 
-### 👥 **User Management**
-- Role-based access control
-- User profiles and authentication
-- Staff management
-- Activity logging
+### 👥 **Manajemen Pengguna**
+- Kontrol akses berbasis peran
+- Profil pengguna dan autentikasi
+- Manajemen staff
+- Log aktivitas
 
-### 📈 **Reporting System**
-- Sales reports with date filtering
-- Export to PDF and Excel formats
-- Revenue analysis
-- Product performance metrics
-- Light/Dark theme support
+### 📈 **Sistem Pelaporan**
+- Laporan penjualan dengan filter tanggal
+- Export ke format PDF dan Excel
+- Analisis pendapatan
+- Metrik performa produk
+- Dukungan tema terang/gelap
 
-### 🎨 **Modern UI/UX**
-- Responsive design with Tailwind CSS
-- Dark/Light theme toggle
-- Flux UI components
-- Mobile-friendly interface
-- Smooth animations and transitions
+### 🎨 **UI/UX Modern**
+- Desain responsif dengan Tailwind CSS
+- Toggle tema gelap/terang
+- Komponen Flux UI
+- Interface ramah mobile
+- Animasi dan transisi yang halus
 
-## 🛠️ Tech Stack
+## 🛠️ Stack Teknologi
 
 - **Backend**: Laravel 12 (PHP 8.2+)
 - **Frontend**: Livewire 3, Flux UI, Tailwind CSS 4
 - **Database**: MySQL
 - **File Storage**: Laravel Storage
-- **PDF Generation**: DomPDF
-- **Excel Export**: Maatwebsite Excel
+- **Pembuatan PDF**: DomPDF
+- **Export Excel**: Maatwebsite Excel
 - **Icons**: Blade Heroicons
 - **Build Tool**: Vite
 
-## 📋 Requirements
+## 📋 Persyaratan
 
-- PHP 8.2 or higher
+- PHP 8.2 atau lebih tinggi
 - Composer
 - Node.js & NPM
-- MySQL database
+- Database MySQL
 
-## 🚀 Installation
+## 🚀 Instalasi
 
-### 1. Clone the Repository
+### 1. Clone Repository
 
 ```bash
 git clone https://github.com/RifqiArdian09/EssyCoff-Laravel.git
@@ -75,28 +75,28 @@ cd EssyCoff-Laravel
 ### 2. Install Dependencies
 
 ```bash
-# Install PHP dependencies
+# Install dependencies PHP
 composer install
 
-# Install Node.js dependencies
+# Install dependencies Node.js
 npm install
 ```
 
-### 3. Environment Setup
+### 3. Setup Environment
 
 ```bash
-# Copy environment file
+# Copy file environment
 cp .env.example .env
 
 # Generate application key
 php artisan key:generate
 ```
 
-### 4. Database Configuration
+### 4. Konfigurasi Database
 
-Edit your `.env` file with your database credentials:
+Edit file `.env` dengan kredensial database Anda:
 
-**For MySQL:**
+**Untuk MySQL:**
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -106,80 +106,62 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-### 5. Database Migration & Seeding
+### 5. Migrasi & Seeding Database
 
 ```bash
-# Run migrations
+# Jalankan migrasi
 php artisan migrate
 
-# Seed the database with sample data
+# Seed database dengan data contoh
 php artisan db:seed
 ```
 
-### 6. Storage Setup
+### 6. Setup Storage
 
 ```bash
-# Create symbolic link for file storage
+# Buat symbolic link untuk file storage
 php artisan storage:link
 ```
 
-### 7. Start Development Server
+### 7. Jalankan Development Server
 
 ```bash
-# Start Laravel development server
+# Jalankan Laravel development server
 php artisan serve
 
-# In another terminal, start Vite dev server
+# Di terminal lain, jalankan Vite dev server
 npm run dev
 ```
 
-Visit `http://localhost:8000` to access the application.
+Kunjungi `http://localhost:8000` untuk mengakses aplikasi.
 
-## 🔧 Development Commands
-
-```bash
-# Run all development services (Laravel + Queue + Vite)
-composer run dev
-
-# Run tests
-composer run test
-php artisan test
-
-# Code formatting
-./vendor/bin/pint
-
-# Build for production
-npm run build
-```
-
-## 📁 Project Structure
+## 📁 Struktur Project
 
 ```
 ├── app/
-│   ├── Exports/           # Excel export classes
+│   ├── Exports/           # Kelas export Excel
 │   ├── Http/Controllers/  # HTTP controllers
-│   ├── Livewire/         # Livewire components
-│   │   ├── Auth/         # Authentication components
-│   │   ├── Categories/   # Category management
-│   │   ├── Pos/          # POS system components
-│   │   ├── Products/     # Product management
-│   │   └── Report/       # Reporting components
-│   └── Models/           # Eloquent models
+│   ├── Livewire/         # Komponen Livewire
+│   │   ├── Auth/         # Komponen autentikasi
+│   │   ├── Categories/   # Manajemen kategori
+│   │   ├── Pos/          # Komponen sistem POS
+│   │   ├── Products/     # Manajemen produk
+│   │   └── Report/       # Komponen pelaporan
+│   └── Models/           # Model Eloquent
 ├── database/
-│   ├── migrations/       # Database migrations
-│   └── seeders/         # Database seeders
+│   ├── migrations/       # Migrasi database
+│   └── seeders/         # Seeder database
 ├── resources/
-│   ├── css/             # Stylesheets
-│   ├── js/              # JavaScript files
-│   └── views/           # Blade templates
-└── routes/              # Application routes
+│   ├── css/             # File CSS
+│   ├── js/              # File JavaScript
+│   └── views/           # Template Blade
+└── routes/              # Route aplikasi
 ```
 
+## 📊 Fitur Pelaporan
 
-## 📊 Reporting Features
-
-- **Sales Reports**: Filter by date range, export to PDF/Excel
-- **Product Analytics**: Best-selling products, stock levels
-- **Revenue Tracking**: Daily, weekly, monthly revenue reports
-- **Export Options**: PDF reports, Excel spreadsheets
+- **Laporan Penjualan**: Filter berdasarkan rentang tanggal, export ke PDF/Excel
+- **Analitik Produk**: Produk terlaris, level stok
+- **Pelacakan Pendapatan**: Laporan pendapatan harian, mingguan, bulanan
+- **Opsi Export**: Laporan PDF, spreadsheet Excel
 
