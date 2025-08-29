@@ -80,7 +80,7 @@
                                 Konfirmasi Bayar
                             </button>
                         @endif
-                        <a href="{{ route('pos.transaction-detail', $order) }}"
+                        <a href="{{ route('pos.detail', $order) }}"
                            class="px-2 py-1 bg-white text-gray-800 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 text-xs">
                             Detail
                         </a>

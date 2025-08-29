@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Livewire\Pos;
+namespace App\Livewire\Pos\Receipt;
 
 use Livewire\Component;
 use App\Models\Order;
 
-class TransactionDetail extends Component
+class Index extends Component
 {
     public $order;
 
@@ -15,12 +15,10 @@ class TransactionDetail extends Component
     }
 
     public function printReceipt()
-{
-    // Tetap di halaman detail; trigger print dari browser/JS jika diperlukan
-    $this->dispatch('printReceipt');
-    return null;
-}
-
+    {
+        // Trigger print dari browser (ditangani lewat JS listener di Blade)
+        $this->dispatch('printReceipt');
+    }
 
     public function backToPOS()
     {
@@ -29,6 +27,6 @@ class TransactionDetail extends Component
 
     public function render()
     {
-        return view('livewire.pos.transaction-detail');
+        return view('livewire.pos.receipt.index');
     }
 }
