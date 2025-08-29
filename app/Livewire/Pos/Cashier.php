@@ -25,7 +25,10 @@ class Cashier extends Component
     protected $paginationTheme = 'tailwind';
     protected $updatesQueryString = ['search'];
 
-    public function updatingSearch() { $this->resetPage(); }
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
 
     public function filterCategory($categoryId)
     {
@@ -67,6 +70,12 @@ class Cashier extends Component
         $this->kembalian = 0;
         $this->uangCustomer = '';
         $this->customerName = '';
+
+        // Flash message sukses
+        session()->flash('success', 'Keranjang berhasil dikosongkan!');
+        
+        // Dispatch event untuk menutup modal
+        $this->dispatch('cart-cleared');
     }
 
     public function updateQuantity($productId, $qty)
@@ -111,13 +120,11 @@ class Cashier extends Component
 
     public function checkout()
     {
-        // Validasi keranjang tidak kosong
         if (count($this->cart) === 0) {
             session()->flash('error', 'Keranjang masih kosong!');
             return;
         }
 
-        // Validasi total > 0
         if ($this->total <= 0) {
             session()->flash('error', 'Total tidak valid!');
             return;
@@ -129,49 +136,60 @@ class Cashier extends Component
             return;
         }
 
-        /** @var \App\Models\Order $order */
-        $order = Order::create([
-            'no_order' => 'ORD-' . date('YmdHis') . rand(100, 999),
-            'user_id' => Auth::id(),
-            'customer_name' => $this->customerName,
-            'total' => $this->total,
-            'uang_dibayar' => $uangCustomer,
-            'kembalian' => $this->kembalian,
-        
-            'status' => 'paid'
-        ]);
-
-        $orderId = $order->getKey();
-
-        foreach ($this->cart as $productId => $item) {
-            $product = Product::find($productId);
-
-            OrderItem::create([
-                'order_id' => $orderId,
-                'product_id' => $productId,
-                'qty' => $item['qty'],
-                'harga' => $item['price'],
-                'subtotal' => $item['price'] * $item['qty']
-            ]);
-
-            if ($product) {
-                $product->stock -= $item['qty'];
-                $product->save();
-            }
+        if (empty($this->customerName)) {
+            session()->flash('error', 'Nama customer harus diisi!');
+            return;
         }
 
-        // Reset cart
-        $this->reset(['cart', 'total', 'kembalian', 'customerName']);
-        $this->uangCustomer = '';
+        try {
+            $order = Order::create([
+                'no_order' => 'ORD-' . date('YmdHis') . rand(100, 999),
+                'user_id' => Auth::id(),
+                'customer_name' => $this->customerName,
+                'total' => $this->total,
+                'uang_dibayar' => $uangCustomer,
+                'kembalian' => $this->kembalian,
+                'status' => 'paid'
+            ]);
 
-        // Arahkan ke halaman detail transaksi
-        return redirect()->route('pos.transaction-detail', $orderId);
+            $orderId = $order->getKey();
+
+            foreach ($this->cart as $productId => $item) {
+                $product = Product::find($productId);
+
+                OrderItem::create([
+                    'order_id' => $orderId,
+                    'product_id' => $productId,
+                    'qty' => $item['qty'],
+                    'harga' => $item['price'],
+                    'subtotal' => $item['price'] * $item['qty']
+                ]);
+
+                if ($product) {
+                    $product->decrement('stock', $item['qty']);
+                }
+            }
+
+            // Reset keranjang
+            $this->reset(['cart', 'total', 'kembalian', 'customerName']);
+            $this->uangCustomer = '';
+
+            session()->flash('success', 'Transaksi berhasil dibuat!');
+
+            // Redirect ke struk
+            return redirect()->route('pos.receipt.index', $orderId);
+
+        } catch (\Exception $e) {
+            session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     public function render()
     {
-        $query = Product::with('category')->where('name', 'like', '%'.$this->search.'%');
-        if ($this->categoryId) $query->where('category_id', $this->categoryId);
+        $query = Product::with('category')->where('name', 'like', '%' . $this->search . '%');
+        if ($this->categoryId) {
+            $query->where('category_id', $this->categoryId);
+        }
 
         $products = $query->paginate(12);
         $categories = Category::all();
