@@ -81,7 +81,7 @@
                                 {{ $order->no_order }}
                             </td>
                             <td class="px-4 py-3 text-sm text-gray-600 dark:text-zinc-400">
-                                {{ $order->created_at->format('d/m H:i') }}
+                                {{ $order->created_at->format('d M, H:i') }}
                             </td>
                             <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
                                 {{ $order->user?->name ?? 'Sistem' }}

@@ -30,7 +30,7 @@
 
 
             <flux:navlist.group :heading="__('Master Data')">
-                <flux:navlist.item icon="folder" :href="route('categories.index')" :current="request()->routeIs('categories.*')" wire:navigate>
+                <flux:navlist.item icon="squares-2x2" :href="route('categories.index')" :current="request()->routeIs('categories.*')" wire:navigate>
                     {{ __('Categories') }}
                 </flux:navlist.item>
                 <flux:navlist.item icon="archive-box" :href="route('products.index')" :current="request()->routeIs('products.*')" wire:navigate>

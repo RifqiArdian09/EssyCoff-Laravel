@@ -8,7 +8,7 @@
                         Dashboard
                     </h1>
                     <p class="text-gray-600 dark:text-zinc-300 mt-1">
-                        Selamat datang kembali {{ Auth::user()->name }} ! Berikut ringkasan bisnis hari ini.
+                        Selamat datang kembali {{ Auth::user()->name }} ! Berikut ringkasan hari ini.
                     </p> 
                 </div>
             
@@ -194,65 +194,80 @@
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        function initChart() {
-            const ctx = document.getElementById('chartPendapatan').getContext('2d');
-            const labels = @json($last7Days->pluck('date'));
-            const data = @json($last7Days->pluck('total'));
+<script>
+    document.addEventListener('livewire:init', () => {
+        // Inisialisasi saat pertama kali
+        initChart();
 
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Pendapatan (Rp)',
-                        data: data,
-                        borderColor: '#60A5FA',
-                        backgroundColor: 'rgba(96, 165, 250, 0.2)',
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#4B5563',
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            ticks: {
-                                color: '#6B7280'
-                            },
-                            grid: {
-                                color: 'rgba(75, 85, 99, 0.1)'
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                color: '#6B7280',
-                                callback: function(value) {
-                                    return 'Rp ' + value.toLocaleString();
-                                }
-                            },
-                            grid: {
-                                color: 'rgba(75, 85, 99, 0.1)'
+        // Jika ada update dari Livewire (misalnya navigasi internal)
+        document.addEventListener('livewire:dom:updated', initChart);
+    });
+
+    function initChart() {
+        const chartEl = document.getElementById('chartPendapatan');
+        if (!chartEl) return;
+
+        const ctx = chartEl.getContext('2d');
+
+        // Cegah duplikasi chart
+        if (chartEl.chart) {
+            chartEl.chart.destroy();
+        }
+
+        const labels = @json($last7Days->pluck('date'));
+        const data = @json($last7Days->pluck('total'));
+
+        chartEl.chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Pendapatan (Rp)',
+                    data: data,
+                    borderColor: '#60A5FA',
+                    backgroundColor: 'rgba(96, 165, 250, 0.2)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#4B5563',
+                            font: {
+                                size: 12
                             }
                         }
                     }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: '#6B7280'
+                        },
+                        grid: {
+                            color: 'rgba(75, 85, 99, 0.1)'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#6B7280',
+                            callback: function(value) {
+                                return 'Rp ' + value.toLocaleString();
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(75, 85, 99, 0.1)'
+                        }
+                    }
                 }
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', initChart);
-    </script>
+            }
+        });
+    }
+</script>
 </x-layouts.app>
