@@ -38,7 +38,7 @@ class History extends Component
             return;
         }
 
-        $this->uangDibayar = 0; // 👈 Harus angka, bukan string
+        $this->uangDibayar = '';
         $this->showPaymentModal = true;
     }
 
@@ -65,13 +65,14 @@ class History extends Component
             'user_id' => auth()->id(),
         ]);
 
+        // Reset
         $this->showPaymentModal = false;
-        $this->selectedOrder = null;
         $this->uangDibayar = 0;
+        $this->resetErrorBag();
 
+        // Flash message dan trigger cetak
         session()->flash('message', 'Pembayaran berhasil! Struk akan dicetak.');
         $this->dispatch('printReceipt');
-        $this->resetPage();
     }
 
     /**
