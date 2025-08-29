@@ -12,46 +12,58 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Check if user is a cashier and redirect to POS
-        if (auth()->user()->role === 'cashier') {
-            return redirect()->route('pos.cashier');
-        }
 
-        // Hari ini
         $today = Carbon::today();
 
+        // 📊 Statistik Hari Ini
         $totalOrdersToday = Order::whereDate('created_at', $today)->count();
         $totalRevenueToday = Order::whereDate('created_at', $today)->sum('total');
 
-        $statusCounts = [
-            'pending'   => Order::where('status', 'pending')->count(),
-            'diproses'  => Order::where('status', 'diproses')->count(),
-            'selesai'   => Order::where('status', 'selesai')->count(),
-        ];
+        // 🔢 Total produk terjual hari ini
+        $totalProductsSold = OrderItem::whereHas('order', function ($query) use ($today) {
+            $query->whereDate('created_at', $today);
+        })->sum('qty');
 
-        // Grafik omzet 7 hari terakhir
+        // 🏆 Produk terlaris (top 5)
+        $topProducts = OrderItem::selectRaw('product_id, SUM(qty) as total_sold')
+            ->whereHas('order', function ($query) use ($today) {
+                $query->whereDate('created_at', $today);
+            })
+            ->with('product')
+            ->groupBy('product_id')
+            ->orderByDesc('total_sold')
+            ->take(5)
+            ->get(); // Ambil 5 produk terlaris
+
+        // 📈 Grafik Omzet 7 Hari Terakhir
         $last7Days = collect(range(6, 0))->map(function ($day) {
             $date = Carbon::today()->subDays($day);
             return [
                 'date' => $date->format('d M'),
-                'total' => Order::whereDate('created_at', $date)->sum('total')
+                'total' => Order::whereDate('created_at', $date)->sum('total'),
             ];
         });
 
-        // Produk terlaris (Top 5)
-        $topProducts = OrderItem::selectRaw('product_id, SUM(qty) as total_sold')
-            ->groupBy('product_id')
-            ->orderByDesc('total_sold')
-            ->with('product')
+        // 📋 5 Transaksi Terakhir
+        $recentOrders = Order::with('user') // Agar nama kasir muncul
+            ->latest('created_at')
             ->take(5)
             ->get();
+
+        // 📌 Status Counts (jika kamu masih butuh)
+        $statusCounts = [
+            'pending_payment' => Order::where('status', 'pending_payment')->count(),
+            'paid'            => Order::where('status', 'paid')->count(),
+        ];
 
         return view('dashboard', compact(
             'totalOrdersToday',
             'totalRevenueToday',
-            'statusCounts',
+            'totalProductsSold',
+            'topProducts',
             'last7Days',
-            'topProducts'
+            'recentOrders',
+            'statusCounts'
         ));
     }
 }

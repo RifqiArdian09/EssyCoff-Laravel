@@ -16,7 +16,16 @@ class Order extends Model
         'total',
         'uang_dibayar',
         'kembalian',
-        'status'
+        'status',
+    ];
+
+    // 🔽 Tambahkan ini: pastikan field numerik jadi float
+    protected $casts = [
+        'total' => 'float',
+        'uang_dibayar' => 'float',
+        'kembalian' => 'float',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function user()

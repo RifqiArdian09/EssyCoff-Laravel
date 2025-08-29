@@ -1,4 +1,4 @@
-<div class="p-6 space-y-8 bg-gray-50 dark:bg-zinc-800 min-h-screen text-gray-900 dark:text-white">
+<div class="p-6 space-y-8 bg-white dark:bg-zinc-800 min-h-screen text-gray-900 dark:text-white">
     <div class="flex flex-col lg:flex-row gap-6">
         
         <!-- Left Panel - Products -->

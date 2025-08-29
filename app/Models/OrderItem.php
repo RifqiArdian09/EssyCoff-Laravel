@@ -26,4 +26,10 @@ class OrderItem extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    protected $casts = [
+        'harga' => 'float',
+        'subtotal' => 'float',
+        'qty' => 'integer',
+    ];
 }

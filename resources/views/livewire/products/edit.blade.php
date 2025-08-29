@@ -67,8 +67,8 @@
         </div>
 
         <div class="flex gap-2">
-            <flux:button type="submit" variant="primary">Update Product</flux:button>
-            <flux:button href="{{ route('products.index') }}" variant="ghost">Cancel</flux:button>
+            <flux:button type="submit" icon="arrow-path" variant="primary">Update Product</flux:button>
+            <flux:button href="{{ route('products.index') }}" icon="x-mark" variant="ghost">Cancel</flux:button>
         </div>
     </x-form>
 </section>

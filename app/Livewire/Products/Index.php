@@ -12,6 +12,7 @@ class Index extends Component
 
     public $search = '';
     public $perPage = 10;
+    public $isDarkMode = false;
 
     protected $updatesQueryString = ['search'];
 
@@ -19,6 +20,12 @@ class Index extends Component
     public function updatingSearch()
     {
         $this->resetPage();
+    }
+
+    // Toggle theme
+    public function toggleTheme()
+    {
+        $this->isDarkMode = !$this->isDarkMode;
     }
 
     // Delete product

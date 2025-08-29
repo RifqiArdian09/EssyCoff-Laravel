@@ -54,7 +54,7 @@
 
     <!-- Tambahkan ringkasan -->
     <div class="summary">
-        <p><strong>Total Pendapatan (Periode Ini):</strong> Rp {{ number_format($totalFiltered ?? 0, 0, ',', '.') }}</p>
+        <p><strong>Total Pendapatan :</strong> Rp {{ number_format($totalFiltered ?? 0, 0, ',', '.') }}</p>
     </div>
 
 </body>

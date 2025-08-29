@@ -39,7 +39,6 @@ class OrdersExport implements FromCollection, WithHeadings, WithEvents
                 'Total' => $order->total,
                 'Uang Dibayar' => $order->uang_dibayar,
                 'Kembalian' => $order->kembalian,
-                'Sumber' => ucfirst($order->source),
             ];
         });
 
@@ -54,7 +53,6 @@ class OrdersExport implements FromCollection, WithHeadings, WithEvents
             'Total' => "Total Pendapatan: Rp " . number_format($totalFiltered, 0, ',', '.'),
             'Uang Dibayar' => '',
             'Kembalian' => '',
-            'Sumber' => '',
         ];
 
         return $orders->push((object)$summary);
@@ -62,7 +60,7 @@ class OrdersExport implements FromCollection, WithHeadings, WithEvents
 
     public function headings(): array
     {
-        return ['No Order', 'Tanggal', 'Kasir', 'Total', 'Uang Dibayar', 'Kembalian', 'Sumber'];
+        return ['No Order', 'Tanggal', 'Kasir', 'Total', 'Uang Dibayar', 'Kembalian'];
     }
 
     public function registerEvents(): array

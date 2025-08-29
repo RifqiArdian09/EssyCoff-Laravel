@@ -11,8 +11,8 @@
             class="dark:text-gray-200"
         />
         <div class="flex gap-2">
-            <flux:button type="submit" variant="primary">Update</flux:button>
-            <flux:button href="{{ route('categories.index') }}">Cancel</flux:button>
+            <flux:button type="submit" icon="arrow-path" variant="primary">Update</flux:button>
+            <flux:button href="{{ route('categories.index') }}" icon="x-mark" variant="ghost">Cancel</flux:button>
         </div>
     </x-form>
 </section>

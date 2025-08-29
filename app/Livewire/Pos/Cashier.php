@@ -143,7 +143,7 @@ class Cashier extends Component
 
         try {
             $order = Order::create([
-                'no_order' => 'ORD-' . date('YmdHis') . rand(100, 999),
+                'no_order' => 'ORD-' . date('Ymd') . '-' . str_pad(Order::whereDate('created_at', today())->count() + 1, 4, '0', STR_PAD_LEFT),
                 'user_id' => Auth::id(),
                 'customer_name' => $this->customerName,
                 'total' => $this->total,

@@ -1,83 +1,116 @@
-<section class="w-full p-4">
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-4">
-        <h1 class="text-xl font-bold text-gray-800 dark:text-gray-200">Users</h1>
-        <a href="{{ route('users.create') }}" wire:navigate
-        class="px-4 py-2 bg-white text-gray-800 rounded-lg hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600">
-            Add User
-        </a>
+<div class="p-6 space-y-8 bg-white dark:bg-zinc-800 min-h-screen text-gray-900 dark:text-white">
+    <!-- Judul -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Pengguna</h1>
+            <p class="text-gray-600 dark:text-zinc-300">Kelola semua pengguna dalam sistem</p>
+        </div>
+        <flux:button 
+            variant="primary" 
+            color="sky" 
+            icon="plus" 
+            href="{{ route('users.create') }}" 
+            size="sm">
+            Tambah Pengguna
+        </flux:button>
     </div>
 
     <!-- Flash Message -->
     @if (session()->has('message'))
-        <div class="mb-4 px-4 py-3 rounded-lg bg-green-800 text-green-100 border border-green-700">
-            <div class="flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                {{ session('message') }}
-            </div>
+        <div class="px-4 py-3 rounded-lg bg-emerald-50 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-100 border border-emerald-200 dark:border-emerald-700 flex items-center gap-2 shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span>{{ session('message') }}</span>
         </div>
     @endif
 
     <!-- Search Bar -->
-    <flux:input wire:model.live.debounce.300ms="search" placeholder="Cari user..." class="mb-4" />
+    <div class="bg-white dark:bg-zinc-800 p-5 rounded-lg shadow-lg border border-gray-200 dark:border-zinc-700 space-y-4 transition-colors duration-200">
+        <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Cari Pengguna</label>
+        <flux:input 
+            wire:model.live.debounce.300ms="search" 
+            placeholder="Cari pengguna berdasarkan nama atau email..." 
+            class="w-full" 
+            icon="magnifying-glass" 
+        />
+    </div>
 
-    <!-- Users Table -->
-    <x-table>
-        <x-slot:head>
-            <x-table.row>
-                <x-table.heading>No</x-table.heading>
-                <x-table.heading>Name</x-table.heading>
-                <x-table.heading>Role</x-table.heading>
-                <x-table.heading>Actions</x-table.heading>
-            </x-table.row>
-        </x-slot:head>
+    <!-- Tabel Pengguna -->
+    <div class="bg-white dark:bg-zinc-800 shadow rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700 transition-colors duration-200">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-gray-700 dark:text-zinc-200">
+                <thead class="bg-gray-100 dark:bg-zinc-700 text-gray-900 dark:text-zinc-100 uppercase text-xs font-semibold">
+                    <tr>
+                        <th class="px-4 py-3">No</th>
+                        <th class="px-4 py-3">Nama</th>
+                        <th class="px-4 py-3">Role</th>
+                        <th class="px-4 py-3 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
+                    @forelse ($users as $index => $user)
+                        <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition duration-150 ease-in-out">
+                            <td class="px-4 py-3 font-medium text-gray-500 dark:text-zinc-400">
+                                {{ ($users->currentPage() - 1) * $users->perPage() + $index + 1 }}
+                            </td>
+                            <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">
+                                {{ $user->name }}
+                            </td>
+                            <td class="px-4 py-3">
+                                @php
+                                    $role = ucfirst($user->role);
+                                    $badgeClass = match($user->role) {
+                                        'manager' => 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200',
+                                        'cashier' => 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200',
+                                    };
+                                @endphp
+                                <span class="px-2 py-1 rounded-full text-xs {{ $badgeClass }}">
+                                    {{ $role }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-right">
+                                <div class="flex gap-2 justify-end">
+                                    <flux:button 
+                                        variant="primary" 
+                                        icon="pencil-square" 
+                                        href="{{ route('users.edit', $user) }}" 
+                                        size="sm">
+                                        Edit
+                                    </flux:button>
 
-        <x-slot:body>
-            @forelse ($users as $index => $user)
-                <x-table.row>
-                    <x-table.cell class="font-medium text-gray-400">
-                        {{ ($users->currentPage() - 1) * $users->perPage() + $index + 1 }}
-                    </x-table.cell>
-
-
-                    <x-table.cell>
-                        <div class="font-medium text-gray-200">{{ $user->name }}</div>
-                    </x-table.cell>
-
-
-                    <x-table.cell>
-                        <span class="px-2 py-1 bg-gray-700 text-gray-300 rounded-full text-xs">
-                            {{ ucfirst($user->role) }}
-                        </span>
-                    </x-table.cell>
-
-                    <x-table.cell class="flex gap-2 justify-end">
-                        <a href="{{ route('users.edit', $user) }}"
-                           class="px-2 py-1 text-sm rounded bg-white text-gray-800 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600">
-                            Edit
-                        </a>
-                        <button type="button" aria-label="Delete user {{ $user->name }}" wire:click="delete({{ $user->id }})"
-                                class="px-2 py-1 text-sm rounded bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-red-600 dark:hover:bg-red-700">
-                            Delete
-                        </button>
-                    </x-table.cell>
-                </x-table.row>
-
-            @empty
-                <x-table.row>
-                    <x-table.cell colspan="6" class="text-center py-12 text-gray-400">
-                        No users found. Try adjusting your search or add a new user.
-                    </x-table.cell>
-                </x-table.row>
-            @endforelse
-        </x-slot:body>
-    </x-table>
-
-    @if($users->hasPages())
-        <div class="mt-6">
-            {{ $users->links() }}
+                                    <flux:button 
+                                        variant="danger" 
+                                        icon="trash" 
+                                        wire:click="delete({{ $user->id }})" 
+                                        wire:confirm="Anda yakin ingin menghapus pengguna ini?" 
+                                        size="sm">
+                                        Hapus
+                                    </flux:button>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="px-4 py-8 text-center text-gray-500 dark:text-zinc-500">
+                                <div class="flex flex-col items-center justify-center gap-2">
+                                    <svg class="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                    </svg>
+                                    <span>Belum ada pengguna. Cobalah menambahkan pengguna baru.</span>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-    @endif
-</section>
+
+        <!-- Pagination -->
+        @if($users->hasPages())
+            <div class="p-4 bg-gray-50 dark:bg-zinc-800 border-t border-gray-200 dark:border-zinc-700 transition-colors duration-200">
+                {{ $users->links() }}
+            </div>
+        @endif
+    </div>
+</div>

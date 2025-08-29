@@ -18,18 +18,33 @@ class History extends Component
 
     protected $paginationTheme = 'tailwind';
 
+    /**
+     * Reset pagination saat pencarian berubah
+     */
     public function updatingSearch()
     {
         $this->resetPage();
     }
 
+    /**
+     * Buka modal konfirmasi pembayaran
+     */
     public function confirmPayment($orderId)
     {
-        $this->selectedOrder = Order::find($orderId);
-        $this->uangDibayar = '';
+        $this->selectedOrder = Order::with('items.product', 'user')->find($orderId);
+
+        if (!$this->selectedOrder) {
+            session()->flash('message', 'Order tidak ditemukan.');
+            return;
+        }
+
+        $this->uangDibayar = 0; // 👈 Harus angka, bukan string
         $this->showPaymentModal = true;
     }
 
+    /**
+     * Proses pembayaran dan cetak struk otomatis
+     */
     public function processPayment()
     {
         $this->validate([
@@ -40,25 +55,28 @@ class History extends Component
             'uangDibayar.min' => 'Jumlah uang tidak boleh kurang dari total pesanan',
         ]);
 
-        $kembalian = $this->uangDibayar - $this->selectedOrder->total;
+        $uangDibayar = (float) $this->uangDibayar;
+        $total = (float) $this->selectedOrder->total;
 
         $this->selectedOrder->update([
-            'uang_dibayar' => $this->uangDibayar,
-            'kembalian' => $kembalian,
+            'uang_dibayar' => $uangDibayar,
+            'kembalian' => $uangDibayar - $total,
             'status' => 'paid',
-            'user_id' => auth()->id(), // Set kasir yang konfirmasi
+            'user_id' => auth()->id(),
         ]);
 
         $this->showPaymentModal = false;
         $this->selectedOrder = null;
-        $this->uangDibayar = '';
+        $this->uangDibayar = 0;
 
-        session()->flash('message', 'Pembayaran berhasil dikonfirmasi!');
-        
-        // Refresh the page data to show updated status
+        session()->flash('message', 'Pembayaran berhasil! Struk akan dicetak.');
+        $this->dispatch('printReceipt');
         $this->resetPage();
     }
 
+    /**
+     * Tutup modal dan reset data
+     */
     public function closeModal()
     {
         $this->showPaymentModal = false;
@@ -67,13 +85,16 @@ class History extends Component
         $this->resetErrorBag();
     }
 
+    /**
+     * Render view dengan data order
+     */
     public function render()
     {
         $orders = Order::with('user')
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('no_order', 'like', '%' . $this->search . '%')
-                      ->orWhere('customer_name', 'like', '%' . $this->search . '%');
+                        ->orWhere('customer_name', 'like', '%' . $this->search . '%');
                 });
             })
             ->orderByDesc('created_at')
@@ -81,8 +102,6 @@ class History extends Component
 
         return view('livewire.pos.history', [
             'orders' => $orders,
-        ]);
+        ])->title('Riwayat Transaksi');
     }
 }
-
-

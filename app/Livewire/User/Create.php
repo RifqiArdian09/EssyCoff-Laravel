@@ -13,6 +13,8 @@ class Create extends Component
     public string $role = '';
     public string $password = '';
     public string $password_confirmation = '';
+    public bool $showPassword = false;
+    public bool $showPasswordConfirmation = false;
 
     public function render()
     {

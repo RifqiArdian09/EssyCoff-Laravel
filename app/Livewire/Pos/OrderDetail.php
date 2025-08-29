@@ -14,6 +14,11 @@ class OrderDetail extends Component
         $this->order = $order->load('items.product', 'user');
     }
 
+    public function printReceipt()
+    {
+        $this->dispatch('printReceipt');
+    }
+
     public function render()
     {
         return view('livewire.pos.detail');
