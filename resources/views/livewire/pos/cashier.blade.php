@@ -111,17 +111,16 @@
                         @endif
                     </h2>
 
-                    <!-- Tombol langsung tanpa modal -->
+                    <!-- Tombol dengan SweetAlert Confirmation -->
                     @if(!empty($cart))
-                    <flux:button 
-                        variant="danger" 
-                        size="sm" 
-                        icon="trash"
-                        wire:click="clearCart"
-                        wire:confirm="Yakin ingin mengosongkan keranjang?"
-                    >
-                        Kosongkan
-                    </flux:button>
+                        <flux:button 
+                            variant="danger" 
+                            size="sm" 
+                            icon="trash"
+                            wire:click="openClearCartModal"
+                        >
+                            Kosongkan
+                        </flux:button>
                     @endif
                 </div>
 
@@ -148,36 +147,48 @@
                             @foreach($cart as $id => $item)
                                 <div class="bg-gray-50 dark:bg-zinc-800 p-3 rounded-lg border border-gray-200 dark:border-zinc-700">
                                     <div class="flex justify-between items-start">
-                                        <div class="flex-1">
-                                            <h3 class="font-medium text-gray-900 dark:text-white truncate">
-                                                {{ $item['name'] }}
-                                            </h3>
+                                        <!-- Gambar + Detail -->
+                                        <div class="flex items-start space-x-3 flex-1">
+                                            @if($item['image'])
+                                                <img src="{{ $item['image'] }}" alt="{{ $item['name'] }}" class="w-12 h-12 object-cover rounded-full bg-gray-100 dark:bg-zinc-700">
+                                            @else
+                                                <div class="w-12 h-12 bg-gray-200 dark:bg-zinc-700 flex items-center justify-center rounded-full">
+                                                    <span class="text-gray-500 dark:text-zinc-400 text-xs">No</span>
+                                                </div>
+                                            @endif
 
-                                            <div class="flex items-center space-x-2 mt-2">
-                                                <button 
-                                                    wire:click="updateQuantity({{ $id }}, {{ $item['qty'] - 1 }})" 
-                                                    class="px-2 py-1 bg-gray-200 dark:bg-zinc-700 rounded hover:bg-gray-300 dark:hover:bg-zinc-600 transition text-sm"
-                                                    {{ $item['qty'] <= 1 ? 'disabled' : '' }}
-                                                >-</button>
-                                                
-                                                <span class="px-2 text-sm font-medium text-gray-900 dark:text-white min-w-[30px] text-center">
-                                                    {{ $item['qty'] }}
-                                                </span>
-                                                
-                                                <button 
-                                                    wire:click="updateQuantity({{ $id }}, {{ $item['qty'] + 1 }})" 
-                                                    class="px-2 py-1 bg-gray-200 dark:bg-zinc-700 rounded hover:bg-gray-300 dark:hover:bg-zinc-600 transition text-sm"
-                                                    {{ $item['qty'] >= $item['stock'] ? 'disabled' : '' }}
-                                                >+</button>
+                                            <div>
+                                                <h3 class="font-medium text-gray-900 dark:text-white truncate max-w-[140px]">
+                                                    {{ $item['name'] }}
+                                                </h3>
+
+                                                <div class="flex items-center space-x-2 mt-2">
+                                                    <button 
+                                                        wire:click="updateQuantity({{ $id }}, {{ $item['qty'] - 1 }})" 
+                                                        class="px-2 py-1 bg-gray-200 dark:bg-zinc-700 rounded hover:bg-gray-300 dark:hover:bg-zinc-600 transition text-sm"
+                                                        {{ $item['qty'] <= 1 ? 'disabled' : '' }}
+                                                    >-</button>
+                                                    
+                                                    <span class="px-2 text-sm font-medium text-gray-900 dark:text-white min-w-[30px] text-center">
+                                                        {{ $item['qty'] }}
+                                                    </span>
+                                                    
+                                                    <button 
+                                                        wire:click="updateQuantity({{ $id }}, {{ $item['qty'] + 1 }})" 
+                                                        class="px-2 py-1 bg-gray-200 dark:bg-zinc-700 rounded hover:bg-gray-300 dark:hover:bg-zinc-600 transition text-sm"
+                                                        {{ $item['qty'] >= $item['stock'] ? 'disabled' : '' }}
+                                                    >+</button>
+                                                </div>
+
+                                                <p class="text-sm text-gray-600 dark:text-zinc-300 mt-1">
+                                                    Rp {{ number_format($item['price'], 0, ',', '.') }} x {{ $item['qty'] }}
+                                                </p>
                                             </div>
-
-                                            <p class="text-sm text-gray-600 dark:text-zinc-300 mt-1">
-                                                Rp {{ number_format($item['price'], 0, ',', '.') }} x {{ $item['qty'] }}
-                                            </p>
                                         </div>
 
+                                        <!-- Harga Total & Hapus -->
                                         <div class="flex items-center space-x-2 ml-4">
-                                            <span class="font-bold text-blue-600 dark:text-blue-400">
+                                            <span class="font-bold text-blue-600 dark:text-blue-400 text-right">
                                                 Rp {{ number_format($item['price'] * $item['qty'], 0, ',', '.') }}
                                             </span>
                                             <button 
@@ -279,5 +290,66 @@
         </section>
     </div>
 
-    <!-- Tidak perlu script untuk modal karena modal dihapus -->
+    <!-- Modal Konfirmasi Hapus -->
+    @if($showClearCartModal)
+    <div
+        class="fixed inset-0 z-[60] overflow-y-auto"
+        aria-labelledby="modal-title"
+        role="dialog"
+        aria-modal="true"
+    >
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <!-- Background overlay -->
+            <div class="fixed inset-0 bg-black/50"></div>
+
+            <!-- Modal panel -->
+            <div class="relative bg-white dark:bg-zinc-800 rounded-lg p-6 w-full max-w-sm z-[70]">
+                <div class="text-center">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                        Konfirmasi Hapus
+                    </h3>
+                    <p class="text-gray-500 dark:text-zinc-400 mb-6">
+                        Apakah Anda yakin ingin mengosongkan keranjang?
+                    </p>
+                    <div class="flex justify-center gap-3">
+                        <flux:button
+                            variant="outline"
+                            wire:click="closeClearCartModal"
+                        >
+                            Batal
+                        </flux:button>
+                        <flux:button
+                            variant="danger"
+                            wire:click="clearCart"
+                        >
+                            Ya, Kosongkan
+                        </flux:button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- SweetAlert2 Script -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('livewire:initialized', () => {
+            @this.on('swal:confirm', (e) => {
+                Swal.fire({
+                    title: e.title,
+                    text: e.text,
+                    icon: e.icon,
+                    showCancelButton: true,
+                    confirmButtonText: e.accept.label,
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        @this.call(e.accept.method);
+                    }
+                });
+            });
+        });
+    </script>
 </div>

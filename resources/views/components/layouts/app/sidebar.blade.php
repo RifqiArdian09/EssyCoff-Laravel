@@ -18,44 +18,117 @@
 
         <flux:navlist variant="outline">
             @php
-            $isManager = auth()->user() && auth()->user()->role === 'manager';
-            $isCashier = auth()->user() && auth()->user()->role === 'cashier';
+            $user = auth()->user();
+            $isManager = $user && $user->role === 'manager';
+            $isCashier = $user && $user->role === 'cashier';
+            
+            // Ambil data dari AppServiceProvider
+            $pendingCount = $pendingCount ?? 0;
+            $lowStockCount = $lowStockCount ?? 0;
+            $outOfStockCount = $outOfStockCount ?? 0;
+            
+            // Badge counts untuk menu
+            $pendingBadge = $pendingCount > 0 ? $pendingCount : null;
+            $stockBadge = ($lowStockCount + $outOfStockCount) > 0 ? ($lowStockCount + $outOfStockCount) : null;
             @endphp
 
             @if($isManager)
-
             <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Dashboard') }}
             </flux:navlist.item>
-
 
             <flux:navlist.group :heading="__('Master Data')">
                 <flux:navlist.item icon="squares-2x2" :href="route('categories.index')" :current="request()->routeIs('categories.*')" wire:navigate>
                     {{ __('Categories') }}
                 </flux:navlist.item>
+                
+                <!-- Products dengan stock alert -->
+                @if($stockBadge)
+                <flux:navlist.item 
+                    icon="archive-box" 
+                    :href="route('products.index')" 
+                    :current="request()->routeIs('products.*')" 
+                    wire:navigate
+                    badge="{{ $stockBadge }}"
+                    class="relative">
+                    {{ __('Products') }}
+                </flux:navlist.item>
+                @else
                 <flux:navlist.item icon="archive-box" :href="route('products.index')" :current="request()->routeIs('products.*')" wire:navigate>
                     {{ __('Products') }}
                 </flux:navlist.item>
+                @endif
+                
                 <flux:navlist.item icon="users" :href="route('users.index')" :current="request()->routeIs('users.*')" wire:navigate>
                     {{ __('Users') }}
                 </flux:navlist.item>
             </flux:navlist.group>
+
+            <!-- Stock Alerts Section (Khusus Manager) -->
+            @if(($lowStockCount > 0 || $outOfStockCount > 0))
+            <flux:navlist.group :heading="__('Stock Alerts')">
+                @if($outOfStockCount > 0)
+                <flux:navlist.item 
+                    icon="exclamation-triangle" 
+                    :href="route('products.index', ['filter' => 'out_of_stock'])" 
+                    wire:navigate
+                    badge="{{ $outOfStockCount }}"
+                    class="text-red-600 dark:text-red-400">
+                    <span class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+                        {{ __('Out of Stock') }}
+                    </span>
+                </flux:navlist.item>
+                @endif
+                
+                @if($lowStockCount > 0)
+                <flux:navlist.item 
+                    icon="exclamation-circle" 
+                    :href="route('products.index', ['filter' => 'low_stock'])" 
+                    wire:navigate
+                    badge="{{ $lowStockCount }}"
+                    class="text-yellow-600 dark:text-yellow-400">
+                    <span class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                        {{ __('Low Stock') }}
+                    </span>
+                </flux:navlist.item>
+                @endif
+            </flux:navlist.group>
+            @endif
             @endif
 
-            @if($isCashier)
-            @endif
-
+            @if($isCashier || $isManager)
             <flux:navlist.group :heading="__('Transaksi')">
                 <flux:navlist.item icon="shopping-cart" :href="route('pos.cashier')" :current="request()->routeIs('pos.cashier')" wire:navigate>
                     {{ __('POS') }}
                 </flux:navlist.item>
-                <flux:navlist.item icon="clock" :href="route('pos.history')" :current="request()->routeIs('pos.history')" wire:navigate>
+
+                <!-- Transaction History dengan pending badge -->
+                @if($pendingBadge)
+                <flux:navlist.item
+                    icon="clock"
+                    :href="route('pos.history')"
+                    :current="request()->routeIs('pos.history')"
+                    wire:navigate
+                    badge="{{ $pendingBadge }}">
                     {{ __('Transaction History') }}
                 </flux:navlist.item>
+                @else
+                <flux:navlist.item
+                    icon="clock"
+                    :href="route('pos.history')"
+                    :current="request()->routeIs('pos.history')"
+                    wire:navigate>
+                    {{ __('Transaction History') }}
+                </flux:navlist.item>
+                @endif
+
                 <flux:navlist.item icon="document-text" :href="route('report.index')" :current="request()->routeIs('report.*')" wire:navigate>
                     {{ __('Report') }}
                 </flux:navlist.item>
             </flux:navlist.group>
+            @endif
         </flux:navlist>
 
         <flux:spacer />
@@ -88,7 +161,6 @@
     </flux:sidebar>
     @endif
 
-
     @if(auth()->check())
     <!-- Mobile Header -->
     <flux:header class="lg:hidden">
@@ -116,14 +188,12 @@
 
                 <flux:menu.separator />
 
-                <!-- Settings -->
                 <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>
                     {{ __('Settings') }}
                 </flux:menu.item>
 
                 <flux:menu.separator />
 
-                <!-- Logout -->
                 <form method="POST" action="{{ route('logout') }}" class="w-full">
                     @csrf
                     <flux:menu.item as="button" type="submit" class="w-full">
@@ -135,7 +205,7 @@
     </flux:header>
     @endif
 
-    <!-- Main Content Slot -->
+    <!-- Main Content -->
     {{ $slot }}
 
     @fluxScripts

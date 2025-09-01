@@ -86,6 +86,8 @@ class History extends Component
         $this->resetErrorBag();
     }
 
+    
+
     /**
      * Render view dengan data order
      */

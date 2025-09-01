@@ -12,28 +12,40 @@ class DashboardController extends Controller
 {
     public function index()
     {
-
         $today = Carbon::today();
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+        $previousDay = Carbon::yesterday();
 
-        // 📊 Statistik Hari Ini
-        $totalOrdersToday = Order::whereDate('created_at', $today)->count();
+        // Calculate previous values first
+        $previousRevenue = Order::whereDate('created_at', $previousDay)->sum('total') ?: 1; // Avoid division by zero
+        $previousOrders = Order::whereDate('created_at', $previousDay)->count() ?: 1;
+        $previousProducts = OrderItem::whereHas('order', function ($query) use ($previousDay) {
+            $query->whereDate('created_at', $previousDay);
+        })->sum('qty') ?: 1;
+
+        // Get today's stats
         $totalRevenueToday = Order::whereDate('created_at', $today)->sum('total');
-
-        // 🔢 Total produk terjual hari ini
+        $totalOrdersToday = Order::whereDate('created_at', $today)->count();
         $totalProductsSold = OrderItem::whereHas('order', function ($query) use ($today) {
             $query->whereDate('created_at', $today);
         })->sum('qty');
 
-        // 🏆 Produk terlaris (top 5)
+        // Calculate growth percentages
+        $revenueGrowth = (($totalRevenueToday - $previousRevenue) / $previousRevenue) * 100;
+        $ordersGrowth = (($totalOrdersToday - $previousOrders) / $previousOrders) * 100;
+        $productsGrowth = (($totalProductsSold - $previousProducts) / $previousProducts) * 100;
+
+        // 🏆 Produk terlaris bulan ini (top 5)
         $topProducts = OrderItem::selectRaw('product_id, SUM(qty) as total_sold')
-            ->whereHas('order', function ($query) use ($today) {
-                $query->whereDate('created_at', $today);
+            ->whereHas('order', function ($query) use ($startOfMonth, $endOfMonth) {
+                $query->whereBetween('created_at', [$startOfMonth, $endOfMonth]);
             })
             ->with('product')
             ->groupBy('product_id')
             ->orderByDesc('total_sold')
             ->take(5)
-            ->get(); // Ambil 5 produk terlaris
+            ->get();
 
         // 📈 Grafik Omzet 7 Hari Terakhir
         $last7Days = collect(range(6, 0))->map(function ($day) {
@@ -43,6 +55,15 @@ class DashboardController extends Controller
                 'total' => Order::whereDate('created_at', $date)->sum('total'),
             ];
         });
+
+        // 📈 Data pendapatan harian bulan ini
+        $currentMonthDays = collect();
+        for ($date = $startOfMonth->copy(); $date->lte($endOfMonth); $date->addDay()) {
+            $currentMonthDays->push([
+                'date' => $date->format('d M'),
+                'total' => Order::whereDate('created_at', $date)->sum('total')
+            ]);
+        }
 
         // 📋 5 Transaksi Terakhir
         $recentOrders = Order::with('user') // Agar nama kasir muncul
@@ -60,7 +81,11 @@ class DashboardController extends Controller
             'totalOrdersToday',
             'totalRevenueToday',
             'totalProductsSold',
+            'revenueGrowth',
+            'ordersGrowth',
+            'productsGrowth',
             'topProducts',
+            'currentMonthDays',
             'last7Days',
             'recentOrders',
             'statusCounts'

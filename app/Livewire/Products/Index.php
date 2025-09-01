@@ -13,12 +13,33 @@ class Index extends Component
     public $search = '';
     public $perPage = 10;
     public $isDarkMode = false;
+    public $filter = ''; // Tambah filter property
+    public $showAlerts = false; // Tambah property untuk show alerts
 
-    protected $updatesQueryString = ['search'];
+    protected $updatesQueryString = ['search', 'filter', 'showAlerts'];
 
-    // Reset halaman saat search berubah
+    public function mount()
+    {
+        // Ambil filter dari query parameter
+        $this->filter = request('filter', '');
+        $this->showAlerts = request('show_alerts') === 'true';
+    }
+
+    // Reset halaman saat search atau filter berubah
     public function updatingSearch()
     {
+        $this->resetPage();
+    }
+
+    public function updatingFilter()
+    {
+        $this->resetPage();
+    }
+
+    // Clear filter
+    public function clearFilter()
+    {
+        $this->filter = '';
         $this->resetPage();
     }
 
@@ -43,6 +64,8 @@ class Index extends Component
 
     public function render()
     {
+        $lowStockThreshold = 10; // Batas stock sedikit
+
         $products = Product::with('category')
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
@@ -52,11 +75,27 @@ class Index extends Component
                       });
                 });
             })
+            ->when($this->filter === 'out_of_stock', function ($query) {
+                $query->where('stock', 0);
+            })
+            ->when($this->filter === 'low_stock', function ($query) use ($lowStockThreshold) {
+                $query->where('stock', '>', 0)
+                      ->where('stock', '<=', $lowStockThreshold);
+            })
             ->latest()
             ->paginate($this->perPage);
 
+        // Hitung stock alerts untuk info
+        $stockAlerts = [
+            'out_of_stock' => Product::where('stock', 0)->count(),
+            'low_stock' => Product::where('stock', '>', 0)
+                ->where('stock', '<=', $lowStockThreshold)
+                ->count(),
+        ];
+
         return view('livewire.products.index', [
             'products' => $products,
+            'stockAlerts' => $stockAlerts,
         ]);
     }
 }

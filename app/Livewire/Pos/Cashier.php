@@ -21,6 +21,7 @@ class Cashier extends Component
     public $kembalian = 0;
     public $categoryId = null;
     public $customerName = '';
+    public $showClearCartModal = false;
 
     protected $paginationTheme = 'tailwind';
     protected $updatesQueryString = ['search'];
@@ -63,6 +64,32 @@ class Cashier extends Component
         $this->calculateTotal();
     }
 
+    public function openClearCartModal()
+    {
+        $this->showClearCartModal = true;
+    }
+
+    public function closeClearCartModal()
+    {
+        $this->showClearCartModal = false;
+    }
+
+    public function clearCartWithConfirm()
+    {
+        $this->dispatch('swal:confirm', [
+            'title' => 'Kosongkan Keranjang?',
+            'text' => 'Anda yakin ingin menghapus semua item di keranjang?',
+            'icon' => 'warning',
+            'accept' => [
+                'label' => 'Ya, Kosongkan',
+                'method' => 'clearCart',
+            ],
+            'cancel' => [
+                'label' => 'Batal',
+            ]
+        ]);
+    }
+
     public function clearCart()
     {
         $this->cart = [];
@@ -70,12 +97,9 @@ class Cashier extends Component
         $this->kembalian = 0;
         $this->uangCustomer = '';
         $this->customerName = '';
+        $this->showClearCartModal = false;
 
-        // Flash message sukses
         session()->flash('success', 'Keranjang berhasil dikosongkan!');
-        
-        // Dispatch event untuk menutup modal
-        $this->dispatch('cart-cleared');
     }
 
     public function updateQuantity($productId, $qty)
@@ -170,13 +194,11 @@ class Cashier extends Component
                 }
             }
 
-            // Reset keranjang
             $this->reset(['cart', 'total', 'kembalian', 'customerName']);
             $this->uangCustomer = '';
 
             session()->flash('success', 'Transaksi berhasil dibuat!');
 
-            // Redirect ke struk
             return redirect()->route('pos.receipt.index', $orderId);
 
         } catch (\Exception $e) {

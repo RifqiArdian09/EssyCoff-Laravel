@@ -1,7 +1,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>{{ $title ?? config('app.name') }}</title>
+<title>EssyCoff</title>
 
 <link rel="icon" href="{{ asset('images/logo.png') }}" sizes="any">
 <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/svg+xml">
