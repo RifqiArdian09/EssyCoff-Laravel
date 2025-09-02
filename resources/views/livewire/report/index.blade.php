@@ -64,7 +64,7 @@
                     <tr>
                         <th class="px-4 py-3">No</th>
                         <th class="px-4 py-3">No Order</th>
-                        <th class="px-4 py-3">TanggaI</th>
+                        <th class="px-4 py-3">Tanggal</th>
                         <th class="px-4 py-3">Kasir</th>
                         <th class="px-4 py-3 text-right">Total</th>
                         <th class="px-4 py-3 text-right">Bayar</th>
