@@ -5,7 +5,7 @@
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Produk</h1>
             <p class="text-gray-600 dark:text-zinc-300">Kelola semua produk dalam sistem</p>
         </div>
-
+        @if(!in_array($filter, ['out_of_stock', 'low_stock']))
         <flux:button
             variant="primary"
             color="sky"
@@ -14,6 +14,7 @@
             size="sm">
             Tambah Produk
         </flux:button>
+        @endif
     </div>
 
     <!-- Flash Message -->

@@ -18,14 +18,18 @@ class DashboardController extends Controller
         $previousDay = Carbon::yesterday();
 
         // Calculate previous values first
-        $previousRevenue = Order::whereDate('created_at', $previousDay)->sum('total') ?: 1; // Avoid division by zero
+        $previousRevenue = Order::where('status', 'paid')
+            ->whereDate('created_at', $previousDay)
+            ->sum('total') ?: 1; // Avoid division by zero
         $previousOrders = Order::whereDate('created_at', $previousDay)->count() ?: 1;
         $previousProducts = OrderItem::whereHas('order', function ($query) use ($previousDay) {
             $query->whereDate('created_at', $previousDay);
         })->sum('qty') ?: 1;
 
         // Get today's stats
-        $totalRevenueToday = Order::whereDate('created_at', $today)->sum('total');
+        $totalRevenueToday = Order::where('status', 'paid')
+            ->whereDate('created_at', $today)
+            ->sum('total');
         $totalOrdersToday = Order::whereDate('created_at', $today)->count();
         $totalProductsSold = OrderItem::whereHas('order', function ($query) use ($today) {
             $query->whereDate('created_at', $today);
@@ -52,7 +56,9 @@ class DashboardController extends Controller
             $date = Carbon::today()->subDays($day);
             return [
                 'date' => $date->format('d M'),
-                'total' => Order::whereDate('created_at', $date)->sum('total'),
+                'total' => Order::where('status', 'paid')
+                    ->whereDate('created_at', $date)
+                    ->sum('total'),
             ];
         });
 
@@ -61,7 +67,9 @@ class DashboardController extends Controller
         for ($date = $startOfMonth->copy(); $date->lte($endOfMonth); $date->addDay()) {
             $currentMonthDays->push([
                 'date' => $date->format('d M'),
-                'total' => Order::whereDate('created_at', $date)->sum('total')
+                'total' => Order::where('status', 'paid')
+                    ->whereDate('created_at', $date)
+                    ->sum('total')
             ]);
         }
 

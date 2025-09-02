@@ -12,16 +12,18 @@
     <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
         <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
-        <a href="{{ route('dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
+        @php
+        $user = auth()->user();
+        $isManager = $user && $user->role === 'manager';
+        $isCashier = $user && $user->role === 'cashier';
+        @endphp
+
+        <a href="{{ $isCashier ? route('pos.cashier') : route('dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
             <x-app-logo />
         </a>
 
         <flux:navlist variant="outline">
             @php
-            $user = auth()->user();
-            $isManager = $user && $user->role === 'manager';
-            $isCashier = $user && $user->role === 'cashier';
-            
             // Ambil data dari AppServiceProvider
             $pendingCount = $pendingCount ?? 0;
             $lowStockCount = $lowStockCount ?? 0;
@@ -99,7 +101,7 @@
             @endif
 
             @if($isCashier || $isManager)
-            <flux:navlist.group :heading="__('Transaksi')">
+            <flux:navlist.group :heading="__('Transaksi')" class="{{ $isCashier ? 'mt-0' : '' }}">
                 <flux:navlist.item icon="shopping-cart" :href="route('pos.cashier')" :current="request()->routeIs('pos.cashier')" wire:navigate>
                     {{ __('POS') }}
                 </flux:navlist.item>

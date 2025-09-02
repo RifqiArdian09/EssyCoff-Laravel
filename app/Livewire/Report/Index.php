@@ -39,7 +39,12 @@ class Index extends Component
             ->get();
 
         // Hitung total berdasarkan filter
-        $totalFiltered = $orders->sum('total');
+        $totalFiltered = Order::whereBetween('created_at', [
+                $fromDate . ' 00:00:00',
+                $toDate . ' 23:59:59'
+            ])
+            ->where('status', 'paid')
+            ->sum('total');
 
         $pdf = \PDF::loadView('livewire.report.pdf', compact('orders', 'fromDate', 'toDate', 'totalFiltered'));
 
@@ -60,8 +65,11 @@ class Index extends Component
             ->paginate($this->perPage);
 
         // Hitung pendapatan sesuai filter
-        $dailyTotal = Order::whereDate('created_at', today())->sum('total');
-        $monthlyTotal = Order::whereMonth('created_at', now()->month)
+        $dailyTotal = Order::where('status', 'paid')
+                           ->whereDate('created_at', today())
+                           ->sum('total');
+        $monthlyTotal = Order::where('status', 'paid')
+                             ->whereMonth('created_at', now()->month)
                              ->whereYear('created_at', now()->year)
                              ->sum('total');
 
