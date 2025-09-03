@@ -460,7 +460,7 @@
 
 
                    <flux:button
-                        wire:click="printReceipt()"
+                        onclick="window.print(); return false;"
                         variant="primary"
                         icon="printer"
                         class="w-1/2 text-xs">
