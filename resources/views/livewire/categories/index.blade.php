@@ -86,7 +86,21 @@
         <!-- Pagination (jika menggunakan paginate) -->
         @if(method_exists($categories, 'hasPages') && $categories->hasPages())
             <div class="p-4 bg-gray-50 dark:bg-zinc-800 border-t border-gray-200 dark:border-zinc-700 transition-colors duration-200">
-                {{ $categories->links() }}
+                <div class="flex flex-col md:flex-row items-center justify-between gap-3">
+                    <p class="text-sm text-gray-600 dark:text-zinc-400">
+                        Menampilkan
+                        <span class="font-medium text-gray-900 dark:text-white">{{ $categories->firstItem() }}</span>
+                        –
+                        <span class="font-medium text-gray-900 dark:text-white">{{ $categories->lastItem() }}</span>
+                        dari
+                        <span class="font-semibold text-emerald-600 dark:text-emerald-400">{{ $categories->total() }}</span>
+                        data
+                    </p>
+
+                    <div class="[&>nav]:flex [&>nav]:items-center [&>nav]:gap-1">
+                        {{ $categories->links('components.pagination.simple-arrows') }}
+                    </div>
+                </div>
             </div>
         @endif
     </div>

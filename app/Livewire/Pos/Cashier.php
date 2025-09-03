@@ -22,9 +22,20 @@ class Cashier extends Component
     public $categoryId = null;
     public $customerName = '';
     public $showClearCartModal = false;
+    public $showOutOfStockModal = false;
+    public $outOfStockName = '';
+    public $showReceiptModal = false;
+    public $lastOrder = null;
 
     protected $paginationTheme = 'tailwind';
     protected $updatesQueryString = ['search'];
+
+    public function mount()
+    {
+        // Inisialisasi cart dari session jika ada
+        $this->cart = session()->get('pos_cart', []);
+        $this->calculateTotal();
+    }
 
     public function updatingSearch()
     {
@@ -33,18 +44,30 @@ class Cashier extends Component
 
     public function filterCategory($categoryId)
     {
-        $this->categoryId = $categoryId;
+        if ($this->categoryId == $categoryId) {
+            // Jika kategori yang sama diklik, reset filter
+            $this->categoryId = null;
+        } else {
+            $this->categoryId = $categoryId;
+        }
         $this->resetPage();
     }
 
     public function addToCart($productId)
     {
         $product = Product::find($productId);
-        if (!$product || $product->stock <= 0) return;
+        if (!$product || $product->stock <= 0) {
+            $this->openOutOfStockModal($product->name ?? '');
+            return;
+        }
 
         if (isset($this->cart[$productId])) {
             if ($this->cart[$productId]['qty'] < $product->stock) {
                 $this->cart[$productId]['qty']++;
+                $this->dispatch('item-added', message: $product->name . ' ditambahkan ke keranjang');
+            } else {
+                $this->openOutOfStockModal($product->name);
+                return;
             }
         } else {
             $this->cart[$productId] = [
@@ -54,14 +77,22 @@ class Cashier extends Component
                 'qty' => 1,
                 'stock' => $product->stock
             ];
+            $this->dispatch('item-added', message: $product->name . ' ditambahkan ke keranjang');
         }
+        
+        // Simpan cart ke session
+        session()->put('pos_cart', $this->cart);
         $this->calculateTotal();
     }
 
     public function removeFromCart($productId)
     {
-        unset($this->cart[$productId]);
-        $this->calculateTotal();
+        if (isset($this->cart[$productId])) {
+            unset($this->cart[$productId]);
+            // Update session
+            session()->put('pos_cart', $this->cart);
+            $this->calculateTotal();
+        }
     }
 
     public function openClearCartModal()
@@ -76,23 +107,13 @@ class Cashier extends Component
 
     public function clearCartWithConfirm()
     {
-        $this->dispatch('swal:confirm', [
-            'title' => 'Kosongkan Keranjang?',
-            'text' => 'Anda yakin ingin menghapus semua item di keranjang?',
-            'icon' => 'warning',
-            'accept' => [
-                'label' => 'Ya, Kosongkan',
-                'method' => 'clearCart',
-            ],
-            'cancel' => [
-                'label' => 'Batal',
-            ]
-        ]);
+        $this->showClearCartModal = true;
     }
 
     public function clearCart()
     {
         $this->cart = [];
+        session()->forget('pos_cart');
         $this->total = 0;
         $this->kembalian = 0;
         $this->uangCustomer = '';
@@ -100,6 +121,18 @@ class Cashier extends Component
         $this->showClearCartModal = false;
 
         session()->flash('success', 'Keranjang berhasil dikosongkan!');
+    }
+
+    public function openOutOfStockModal($name = '')
+    {
+        $this->outOfStockName = $name;
+        $this->showOutOfStockModal = true;
+    }
+
+    public function closeOutOfStockModal()
+    {
+        $this->showOutOfStockModal = false;
+        $this->outOfStockName = '';
     }
 
     public function updateQuantity($productId, $qty)
@@ -116,6 +149,8 @@ class Cashier extends Component
 
         if (isset($this->cart[$productId])) {
             $this->cart[$productId]['qty'] = $qty;
+            // Update session
+            session()->put('pos_cart', $this->cart);
             $this->calculateTotal();
         }
     }
@@ -131,6 +166,8 @@ class Cashier extends Component
 
     public function updatedUangCustomer($value)
     {
+        // Hanya terima angka
+        $value = preg_replace('/[^0-9]/', '', $value);
         $this->uangCustomer = $value;
         $this->calculateKembalian();
     }
@@ -167,7 +204,7 @@ class Cashier extends Component
 
         try {
             $order = Order::create([
-                'no_order' => 'ORD-' . date('Ymd') . '-' . str_pad(Order::whereDate('created_at', today())->count() + 1, 4, '0', STR_PAD_LEFT),
+                'no_order' => 'ORD-' . date('YmdHis') . '-' . str_pad(Order::whereDate('created_at', today())->count() + 1, 3, '0', STR_PAD_LEFT),
                 'user_id' => Auth::id(),
                 'customer_name' => $this->customerName,
                 'total' => $this->total,
@@ -194,27 +231,45 @@ class Cashier extends Component
                 }
             }
 
-            $this->reset(['cart', 'total', 'kembalian', 'customerName']);
+            // Simpan order terakhir dan tampilkan modal struk
+            $this->lastOrder = Order::with('items.product')->find($orderId);
+            $this->showReceiptModal = true;
+
+            // Reset cart setelah checkout berhasil
+            $this->cart = [];
+            session()->forget('pos_cart');
+            $this->total = 0;
+            $this->kembalian = 0;
+            $this->customerName = '';
             $this->uangCustomer = '';
-
-            session()->flash('success', 'Transaksi berhasil dibuat!');
-
-            return redirect()->route('pos.receipt.index', $orderId);
 
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
+    public function closeReceiptModal()
+    {
+        $this->showReceiptModal = false;
+        $this->lastOrder = null;
+    }
+
+    public function printReceipt()
+    {
+        $this->js('window.print()');
+    }
+
     public function render()
     {
-        $query = Product::with('category')->where('name', 'like', '%' . $this->search . '%');
-        if ($this->categoryId) {
+        $query = Product::with('category')
+            ->where('name', 'like', '%' . $this->search . '%');
+            
+        if (!empty($this->categoryId)) {
             $query->where('category_id', $this->categoryId);
         }
 
-        $products = $query->paginate(12);
-        $categories = Category::all();
+        $products = $query->orderBy('name')->paginate(12);
+        $categories = Category::orderBy('name')->get();
 
         return view('livewire.pos.cashier', [
             'products' => $products,
