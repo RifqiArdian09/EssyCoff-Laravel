@@ -47,7 +47,7 @@
                 <!-- Products dengan stock alert -->
                 @if($stockBadge)
                 <flux:navlist.item 
-                    icon="archive-box" 
+                    icon="cube" 
                     :href="route('products.index')" 
                     :current="request()->routeIs('products.*')" 
                     wire:navigate
@@ -56,7 +56,7 @@
                     {{ __('Products') }}
                 </flux:navlist.item>
                 @else
-                <flux:navlist.item icon="archive-box" :href="route('products.index')" :current="request()->routeIs('products.*')" wire:navigate>
+                <flux:navlist.item icon="cube" :href="route('products.index')" :current="request()->routeIs('products.*')" wire:navigate>
                     {{ __('Products') }}
                 </flux:navlist.item>
                 @endif

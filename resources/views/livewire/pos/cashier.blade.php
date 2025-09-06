@@ -148,127 +148,151 @@
         <!-- Right Panel - Cart & Payment -->
         <section class="lg:w-2/5 space-y-6">
 
-            <!-- Cart -->
-            <div class="bg-white dark:bg-zinc-900 p-5 rounded-lg shadow-lg border border-gray-200 dark:border-zinc-700">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                        Keranjang
-                        @if(count($cart) > 0)
-                        <span class="text-sm bg-red-500 text-white px-2 py-1 rounded-full ml-2">{{ count($cart) }}</span>
-                        @endif
-                    </h2>
-
-                    <!-- Tombol dengan SweetAlert Confirmation -->
-                    @if(!empty($cart))
-                    <flux:button
-                        wire:click="clearCartWithConfirm"
-                        variant="danger"
-                        size="sm"
-                        icon="trash"
-                        class="flex items-center gap-1">
-                        Kosongkan
-                    </flux:button>
+        <div class="bg-white dark:bg-zinc-900 p-5 rounded-lg shadow-lg border border-gray-200 dark:border-zinc-700">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0L17 21"></path>
+                    </svg>
+                    Keranjang
+                    @if(count($cart) > 0)
+                    <span class="text-xs bg-red-500 text-white px-2 py-1 rounded-full ml-2">{{ count($cart) }}</span>
                     @endif
-                </div>
+                </h2>
 
-                <!-- Error Message -->
-                @if(session()->has('error'))
-                <div class="bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg text-sm mb-4">
-                    {{ session('error') }}
-                </div>
+                @if(!empty($cart))
+                <flux:button
+                    wire:click="clearCartWithConfirm"
+                    variant="danger"
+                    size="sm"
+                    icon="trash"
+                    class="flex items-center gap-1">
+                    Kosongkan
+                </flux:button>
                 @endif
+            </div>
 
-                <div class="max-h-80 overflow-y-auto">
-                    @if(empty($cart))
-                    <div class="text-center py-8 text-gray-500 dark:text-zinc-400">
-                        <div class="w-16 h-16 mx-auto mb-4 bg-gray-200 dark:bg-zinc-700 rounded-full flex items-center justify-center">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0L17 21"></path>
-                            </svg>
-                        </div>
-                        <p class="font-medium">Keranjang masih kosong</p>
-                        <p class="mt-1 text-sm">Klik produk untuk menambah ke keranjang</p>
+            <!-- Error Message -->
+            @if(session()->has('error'))
+            <div class="bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg text-sm mb-4">
+                {{ session('error') }}
+            </div>
+            @endif
+
+            <div class="max-h-80 overflow-y-auto pr-2">
+                @if(empty($cart))
+                <div class="text-center py-8 text-gray-500 dark:text-zinc-400">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-zinc-700 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                        </svg>
                     </div>
-                    @else
-                    <div class="space-y-3">
-                        @foreach($cart as $id => $item)
-                        <div class="bg-gray-50 dark:bg-zinc-800 p-3 rounded-lg border border-gray-200 dark:border-zinc-700">
-                            <div class="flex justify-between items-start">
-                                <!-- Gambar + Detail -->
-                                <div class="flex items-start space-x-3 flex-1">
+                    <p class="font-medium">Keranjang masih kosong</p>
+                    <p class="mt-1 text-sm">Klik produk untuk menambah ke keranjang</p>
+                </div>
+                @else
+                <div class="space-y-3">
+                    @foreach($cart as $id => $item)
+                    <div class="bg-gray-50 dark:bg-zinc-800 p-4 rounded-lg border border-gray-200 dark:border-zinc-700 transition-all duration-200 hover:shadow-md">
+                        <div class="flex justify-between items-start">
+                            <!-- Gambar + Detail -->
+                            <div class="flex items-start space-x-3 flex-1">
+                                <div class="relative">
                                     @if($item['image'])
-                                    <img src="{{ $item['image'] }}" alt="{{ $item['name'] }}" class="w-12 h-12 object-cover rounded-full bg-gray-100 dark:bg-zinc-700">
+                                    <img src="{{ $item['image'] }}" alt="{{ $item['name'] }}" class="w-14 h-14 object-cover rounded-lg bg-gray-100 dark:bg-zinc-700">
                                     @else
-                                    <div class="w-12 h-12 bg-gray-200 dark:bg-zinc-700 flex items-center justify-center rounded-full">
-                                        <span class="text-gray-500 dark:text-zinc-400 text-xs">No</span>
+                                    <div class="w-14 h-14 bg-gray-200 dark:bg-zinc-700 flex items-center justify-center rounded-lg">
+                                        <span class="text-gray-500 dark:text-zinc-400 text-xs">No Image</span>
                                     </div>
                                     @endif
-
-                                    <div>
-                                        <h3 class="font-medium text-gray-900 dark:text-white truncate max-w-[140px]">
-                                            {{ $item['name'] }}
-                                        </h3>
-
-                                        <div class="flex items-center space-x-2 mt-2">
-                                            <button
-                                                wire:click="updateQuantity({{ $id }}, {{ $item['qty'] - 1 }})"
-                                                class="px-2 py-1 bg-gray-200 dark:bg-zinc-700 rounded hover:bg-gray-300 dark:hover:bg-zinc-600 transition text-sm"
-                                                {{ $item['qty'] <= 1 ? 'disabled' : '' }}>-</button>
-
-                                            <span class="px-2 text-sm font-medium text-gray-900 dark:text-white min-w-[30px] text-center">
-                                                {{ $item['qty'] }}
-                                            </span>
-
-                                            <button
-                                                wire:click="updateQuantity({{ $id }}, {{ $item['qty'] + 1 }})"
-                                                class="px-2 py-1 bg-gray-200 dark:bg-zinc-700 rounded hover:bg-gray-300 dark:hover:bg-zinc-600 transition text-sm"
-                                                {{ $item['qty'] >= $item['stock'] ? 'disabled' : '' }}>+</button>
-                                        </div>
-
-                                        <p class="text-sm text-gray-600 dark:text-zinc-300 mt-1">
-                                            Rp {{ number_format($item['price'], 0, ',', '.') }} x {{ $item['qty'] }}
-                                        </p>
+                                    <div class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                                        {{ $item['qty'] }}
                                     </div>
                                 </div>
 
-                                <!-- Harga Total & Hapus -->
-                                <div class="flex items-center space-x-2 ml-4">
-                                    <span class="font-bold text-blue-600 dark:text-blue-400 text-right">
-                                        Rp {{ number_format($item['price'] * $item['qty'], 0, ',', '.') }}
-                                    </span>
-                                    <button
-                                        wire:click="removeFromCart({{ $id }})"
-                                        class="text-red-500 hover:text-red-700 dark:hover:text-red-400 text-lg transition p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded"
-                                        title="Hapus item">×</button>
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="font-medium text-gray-900 dark:text-white truncate">
+                                        {{ $item['name'] }}
+                                    </h3>
+                                    
+                                    <p class="text-sm text-gray-600 dark:text-zinc-300 mt-1">
+                                        Rp {{ number_format($item['price'], 0, ',', '.') }}
+                                    </p>
+                                    
+                                    <div class="flex items-center mt-2">
+                                        <button
+                                            wire:click="updateQuantity({{ $id }}, {{ $item['qty'] - 1 }})"
+                                            class="p-1 bg-gray-200 dark:bg-zinc-700 rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-600 transition text-sm w-6 h-6 flex items-center justify-center"
+                                            {{ $item['qty'] <= 1 ? 'disabled' : '' }}>
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                            </svg>
+                                        </button>
+
+                                        <span class="px-2 text-sm font-medium text-gray-900 dark:text-white min-w-[30px] text-center">
+                                            {{ $item['qty'] }}
+                                        </span>
+
+                                        <button
+                                            wire:click="updateQuantity({{ $id }}, {{ $item['qty'] + 1 }})"
+                                            class="p-1 bg-gray-200 dark:bg-zinc-700 rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-600 transition text-sm w-6 h-6 flex items-center justify-center"
+                                            {{ $item['qty'] >= $item['stock'] ? 'disabled' : '' }}>
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                            </svg>
+                                        </button>
+                                        
+                                        @if($item['qty'] >= $item['stock'])
+                                        <span class="text-xs text-red-500 ml-2">Stok terbatas</span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
+
+                            <!-- Harga Total & Hapus -->
+                            <div class="flex flex-col items-end justify-between h-full ml-4">
+                                <button
+                                    wire:click="removeFromCart({{ $id }})"
+                                    class="text-red-500 hover:text-red-700 dark:hover:text-red-400 transition p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-md mb-2"
+                                    title="Hapus item">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                                
+                                <span class="font-bold text-blue-600 dark:text-blue-400 text-sm">
+                                    Rp {{ number_format($item['price'] * $item['qty'], 0, ',', '.') }}
+                                </span>
+                            </div>
                         </div>
-                        @endforeach
                     </div>
-                    @endif
+                    @endforeach
+                </div>
+                @endif
+            </div>
+            
+            <!-- Cart Summary -->
+            @if(!empty($cart))
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-zinc-700">
+                <div class="flex justify-between items-center text-sm text-gray-600 dark:text-zinc-400 mb-1">
+                    <span>Total Item:</span>
+                    <span>{{ array_sum(array_column($cart, 'qty')) }} item</span>
+                </div>
+                <div class="flex justify-between items-center font-semibold">
+                    <span class="text-gray-900 dark:text-white">Subtotal:</span>
+                    <span class="text-blue-600 dark:text-blue-400">
+                        Rp {{ number_format($total, 0, ',', '.') }}
+                    </span>
                 </div>
             </div>
+            @endif
+        </div>
 
             <!-- Payment -->
             <div class="bg-white dark:bg-zinc-900 p-5 rounded-lg shadow-lg border border-gray-200 dark:border-zinc-700">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Pembayaran</h2>
 
                 <div class="space-y-4">
-                    <!-- Total Items -->
-                    @if(count($cart) > 0)
-                    <div class="flex justify-between items-center text-sm text-gray-600 dark:text-zinc-400 border-b border-gray-200 dark:border-zinc-700 pb-2">
-                        <span>Total Item:</span>
-                        <span>{{ array_sum(array_column($cart, 'qty')) }} item</span>
-                    </div>
-                    @endif
-
-                    <div class="flex justify-between items-center text-lg font-semibold">
-                        <span class="text-gray-900 dark:text-white">Total:</span>
-                        <span class="text-blue-600 dark:text-blue-400">
-                            Rp {{ number_format($total, 0, ',', '.') }}
-                        </span>
-                    </div>
-
                     <flux:input
                         wire:model.live="customerName"
                         type="text"

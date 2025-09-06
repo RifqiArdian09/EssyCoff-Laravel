@@ -7,12 +7,27 @@ use App\Models\Order;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\OrdersExport;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 
 class Index extends Component
 {
     public $from;
     public $to;
     public $perPage = 10;
+    public $page = 1;
+    
+    protected $queryString = [
+        'from' => ['except' => ''],
+        'to' => ['except' => ''],
+        'page' => ['except' => 1, 'as' => 'p'],
+        'perPage' => ['except' => 10]
+    ];
+    
+    protected $listeners = [
+        'refreshComponent' => '$refresh'
+    ];
+    
+    protected $paginationTheme = 'bootstrap';
 
     public function mount()
     {
@@ -46,9 +61,11 @@ class Index extends Component
             ->where('status', 'paid')
             ->sum('total');
 
-        $pdf = \PDF::loadView('livewire.report.pdf', compact('orders', 'fromDate', 'toDate', 'totalFiltered'));
-
-        return response()->streamDownload(fn() => print($pdf->output()), 'report_transaksi_' . now()->format('Y-m-d') . '.pdf');
+        $pdf = PDF::loadView('livewire.report.pdf', compact('orders', 'fromDate', 'toDate', 'totalFiltered'));
+        
+        return response()->streamDownload(function() use ($pdf) {
+            echo $pdf->output();
+        }, 'laporan_transaksi_'.now()->format('Y-m-d').'.pdf');
     }
 
     public function render()
@@ -62,7 +79,8 @@ class Index extends Component
                 $toDate . ' 23:59:59'
             ])
             ->orderByDesc('created_at')
-            ->paginate($this->perPage);
+            ->paginate($this->perPage)
+            ->withQueryString(); // This ensures pagination works with query strings
 
         // Hitung pendapatan sesuai filter
         $dailyTotal = Order::where('status', 'paid')

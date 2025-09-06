@@ -4,37 +4,124 @@
     <title>Laporan Transaksi POS</title>
     <meta charset="UTF-8">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .info { margin-bottom: 15px; font-size: 14px; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #f4f4f4; }
-        h1 { color: #333; margin: 0; }
-        .summary { margin-top: 30px; font-size: 16px; }
-        .summary p { margin: 5px 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 30px;
+            color: #333;
+            font-size: 12px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 15px;
+        }
+
+        .header h1 {
+            color: #1e3a8a;
+            font-size: 24px;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .info {
+            font-size: 14px;
+            color: #4b5563;
+            margin: 10px 0;
+        }
+
+        .logo-placeholder {
+            width: 80px;
+            height: 80px;
+            background-color: #e5e7eb;
+            border-radius: 50%;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 12px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px 10px;
+            text-align: left;
+            border: 1px solid #e5e7eb;
+        }
+
+        thead th {
+            background-color: #2563eb;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 11px;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+
+        tbody tr:hover {
+            background-color: #eff6ff;
+        }
+
+        .summary-box {
+            background-color: #dbeafe;
+            border-left: 4px solid #2563eb;
+            padding: 15px;
+            margin-top: 30px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #1e40af;
+        }
+
+        .footer {
+            margin-top: 50px;
+            text-align: right;
+            font-style: italic;
+            color: #6b7280;
+            font-size: 11px;
+        }
+
+        @media print {
+            body {
+                margin: 15px;
+            }
+        }
     </style>
 </head>
 <body>
+
     <div class="header">
-        <h1>Report Transaksi POS</h1>
+        <!-- Opsional: Logo Perusahaan -->
+        <!-- <div class="logo-placeholder"></div> -->
+        <h1>LAPORAN TRANSAKSI POS</h1>
         <div class="info">
             <strong>Periode:</strong> 
-            {{ \Carbon\Carbon::parse($fromDate)->format('d M Y') }} - 
-            {{ \Carbon\Carbon::parse($toDate)->format('d M Y') }}
+            {{ \Carbon\Carbon::parse($fromDate)->translatedFormat('d F Y') }} - 
+            {{ \Carbon\Carbon::parse($toDate)->translatedFormat('d F Y') }}
         </div>
     </div>
 
     <table>
         <thead>
             <tr>
-                <th>No</th>
-                <th>No Order</th>
-                <th>Tanggal</th>
-                <th>Kasir</th>
-                <th>Total</th>
-                <th>Bayar</th>
-                <th>Kembali</th>
+                <th style="width: 5%;">No</th>
+                <th style="width: 15%;">No Order</th>
+                <th style="width: 20%;">Tanggal</th>
+                <th style="width: 20%;">Kasir</th>
+                <th style="width: 13%; text-align: right;">Total</th>
+                <th style="width: 13%; text-align: right;">Bayar</th>
+                <th style="width: 14%; text-align: right;">Kembali</th>
             </tr>
         </thead>
         <tbody>
@@ -44,17 +131,21 @@
                 <td>{{ $order->no_order }}</td>
                 <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
                 <td>{{ $order->user?->name ?? 'Sistem' }}</td>
-                <td>Rp {{ number_format($order->total, 0, ',', '.') }}</td>
-                <td>Rp {{ number_format($order->uang_dibayar, 0, ',', '.') }}</td>
-                <td>Rp {{ number_format($order->kembalian, 0, ',', '.') }}</td>
+                <td style="text-align: right;">Rp {{ number_format($order->total, 0, ',', '.') }}</td>
+                <td style="text-align: right;">Rp {{ number_format($order->uang_dibayar, 0, ',', '.') }}</td>
+                <td style="text-align: right;">Rp {{ number_format($order->kembalian, 0, ',', '.') }}</td>
             </tr>
             @endforeach
         </tbody>
     </table>
 
-    <!-- Tambahkan ringkasan -->
-    <div class="summary">
-        <p><strong>Total Pendapatan :</strong> Rp {{ number_format($totalFiltered ?? 0, 0, ',', '.') }}</p>
+    <!-- Ringkasan Total -->
+    <div class="summary-box">
+        <p>📊 <strong>TOTAL PENDAPATAN PERIODE INI:</strong> Rp {{ number_format($totalFiltered ?? 0, 0, ',', '.') }}</p>
+    </div>
+
+    <div class="footer">
+        Dicetak pada: {{ now()->translatedFormat('d F Y H:i') }} • Sistem POS v1.0
     </div>
 
 </body>

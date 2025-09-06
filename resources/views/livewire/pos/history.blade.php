@@ -58,7 +58,7 @@
                             </span>
                         </td>
                         <td class="px-4 py-3 text-sm text-gray-600 dark:text-zinc-400">
-                            {{ $order->created_at->format('d/m/Y H:i') }}
+                            {{ $order->created_at->format('d M, H:i') }}
                         </td>
                         <td class="px-4 py-3 text-sm text-gray-600 dark:text-zinc-400">
                             {{ $order->user?->name ?? '-' }}
@@ -255,6 +255,7 @@
                 <p><strong>No.:</strong> {{ $selectedOrder?->no_order }}</p>
                 <p><strong>Kasir:</strong> {{ $selectedOrder?->user?->name ?? '-' }}</p>
                 <p><strong>Tanggal:</strong> {{ $selectedOrder?->created_at?->format('d M, H:i') }}</p>
+                
             </div>
 
             <hr class="my-2 border-dashed border-gray-400">
