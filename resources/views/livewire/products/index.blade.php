@@ -141,8 +141,7 @@
                                 <flux:button
                                     variant="danger"
                                     icon="trash"
-                                    wire:click="delete({{ $product->id }})"
-                                    wire:confirm="Anda yakin ingin menghapus produk ini?"
+                                    wire:click="confirmDelete({{ $product->id }})"
                                     size="sm">
                                     Hapus
                                 </flux:button>
@@ -186,4 +185,49 @@
         </div>
         @endif
     </div>
+
+    <!-- Modal Konfirmasi Hapus Produk -->
+    @if($confirmingProductDeletion)
+    <div
+        class="fixed inset-0 z-[60] overflow-y-auto"
+        aria-labelledby="modal-title"
+        role="dialog"
+        aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <!-- Background overlay -->
+            <div class="fixed inset-0 bg-black/50" wire:click="$set('confirmingProductDeletion', false)"></div>
+
+            <!-- Modal panel -->
+            <div class="relative bg-white dark:bg-zinc-800 rounded-lg p-6 w-full max-w-sm z-[70]">
+                <div class="text-center">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
+                        <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                        Hapus Produk
+                    </h3>
+                    <p class="text-gray-500 dark:text-zinc-400 mb-6">
+                        Apakah Anda yakin ingin menghapus produk ini? Tindakan ini tidak dapat dibatalkan.
+                    </p>
+                    <div class="flex justify-center gap-3">
+                        <flux:button
+                            wire:click="$set('confirmingProductDeletion', false)"
+                            variant="primary"
+                            class="px-4">
+                            Batal
+                        </flux:button>
+                        <flux:button
+                            wire:click="delete({{ $productIdToDelete }})"
+                            variant="danger"
+                            class="px-4">
+                            Ya, Hapus
+                        </flux:button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>

@@ -103,7 +103,6 @@ Route::middleware(['auth'])->prefix('users')->name('users.')->group(function() {
 Route::middleware(['auth'])->prefix('pos')->group(function() {
     Volt::route('cashier', Cashier::class)->name('pos.cashier');
     Volt::route('history', History::class)->name('pos.history');
-    Volt::route('receipt/{order}', ReceiptIndex::class)->name('pos.receipt.index');
     Volt::route('transaction/{order}', OrderDetail::class)
     ->name('pos.detail');
 });

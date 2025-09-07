@@ -5,6 +5,7 @@ namespace App\Livewire\Products;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Product;
+use Illuminate\Support\Facades\Storage;
 
 class Index extends Component
 {
@@ -15,6 +16,8 @@ class Index extends Component
     public $isDarkMode = false;
     public $filter = ''; // Tambah filter property
     public $showAlerts = false; // Tambah property untuk show alerts
+    public $confirmingProductDeletion = false;
+    public $productIdToDelete = null;
 
     protected $updatesQueryString = ['search', 'filter', 'showAlerts'];
 
@@ -49,8 +52,15 @@ class Index extends Component
         $this->isDarkMode = !$this->isDarkMode;
     }
 
+    // Show delete confirmation modal
+    public function confirmDelete($productId)
+    {
+        $this->confirmingProductDeletion = true;
+        $this->productIdToDelete = $productId;
+    }
+
     // Delete product
-    public function delete($id)
+    public function delete($id = null)
     {
         $product = Product::findOrFail($id);
         
@@ -60,6 +70,10 @@ class Index extends Component
         
         $product->delete();
         session()->flash('message', 'Product deleted successfully.');
+        
+        // Close the modal after successful deletion
+        $this->confirmingProductDeletion = false;
+        $this->productIdToDelete = null;
     }
 
     public function render()

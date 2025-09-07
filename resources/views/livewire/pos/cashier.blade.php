@@ -148,145 +148,145 @@
         <!-- Right Panel - Cart & Payment -->
         <section class="lg:w-2/5 space-y-6">
 
-        <div class="bg-white dark:bg-zinc-900 p-5 rounded-lg shadow-lg border border-gray-200 dark:border-zinc-700">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0L17 21"></path>
-                    </svg>
-                    Keranjang
-                    @if(count($cart) > 0)
-                    <span class="text-xs bg-red-500 text-white px-2 py-1 rounded-full ml-2">{{ count($cart) }}</span>
-                    @endif
-                </h2>
-
-                @if(!empty($cart))
-                <flux:button
-                    wire:click="clearCartWithConfirm"
-                    variant="danger"
-                    size="sm"
-                    icon="trash"
-                    class="flex items-center gap-1">
-                    Kosongkan
-                </flux:button>
-                @endif
-            </div>
-
-            <!-- Error Message -->
-            @if(session()->has('error'))
-            <div class="bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg text-sm mb-4">
-                {{ session('error') }}
-            </div>
-            @endif
-
-            <div class="max-h-80 overflow-y-auto pr-2">
-                @if(empty($cart))
-                <div class="text-center py-8 text-gray-500 dark:text-zinc-400">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-zinc-700 rounded-full flex items-center justify-center">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+            <div class="bg-white dark:bg-zinc-900 p-5 rounded-lg shadow-lg border border-gray-200 dark:border-zinc-700">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0L17 21"></path>
                         </svg>
-                    </div>
-                    <p class="font-medium">Keranjang masih kosong</p>
-                    <p class="mt-1 text-sm">Klik produk untuk menambah ke keranjang</p>
+                        Keranjang
+                        @if(count($cart) > 0)
+                        <span class="text-xs bg-red-500 text-white px-2 py-1 rounded-full ml-2">{{ count($cart) }}</span>
+                        @endif
+                    </h2>
+
+                    @if(!empty($cart))
+                    <flux:button
+                        wire:click="clearCartWithConfirm"
+                        variant="danger"
+                        size="sm"
+                        icon="trash"
+                        class="flex items-center gap-1">
+                        Kosongkan
+                    </flux:button>
+                    @endif
                 </div>
-                @else
-                <div class="space-y-3">
-                    @foreach($cart as $id => $item)
-                    <div class="bg-gray-50 dark:bg-zinc-800 p-4 rounded-lg border border-gray-200 dark:border-zinc-700 transition-all duration-200 hover:shadow-md">
-                        <div class="flex justify-between items-start">
-                            <!-- Gambar + Detail -->
-                            <div class="flex items-start space-x-3 flex-1">
-                                <div class="relative">
-                                    @if($item['image'])
-                                    <img src="{{ $item['image'] }}" alt="{{ $item['name'] }}" class="w-14 h-14 object-cover rounded-lg bg-gray-100 dark:bg-zinc-700">
-                                    @else
-                                    <div class="w-14 h-14 bg-gray-200 dark:bg-zinc-700 flex items-center justify-center rounded-lg">
-                                        <span class="text-gray-500 dark:text-zinc-400 text-xs">No Image</span>
-                                    </div>
-                                    @endif
-                                    <div class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                                        {{ $item['qty'] }}
-                                    </div>
-                                </div>
 
-                                <div class="flex-1 min-w-0">
-                                    <h3 class="font-medium text-gray-900 dark:text-white truncate">
-                                        {{ $item['name'] }}
-                                    </h3>
-                                    
-                                    <p class="text-sm text-gray-600 dark:text-zinc-300 mt-1">
-                                        Rp {{ number_format($item['price'], 0, ',', '.') }}
-                                    </p>
-                                    
-                                    <div class="flex items-center mt-2">
-                                        <button
-                                            wire:click="updateQuantity({{ $id }}, {{ $item['qty'] - 1 }})"
-                                            class="p-1 bg-gray-200 dark:bg-zinc-700 rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-600 transition text-sm w-6 h-6 flex items-center justify-center"
-                                            {{ $item['qty'] <= 1 ? 'disabled' : '' }}>
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
-                                            </svg>
-                                        </button>
+                <!-- Error Message -->
+                @if(session()->has('error'))
+                <div class="bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg text-sm mb-4">
+                    {{ session('error') }}
+                </div>
+                @endif
 
-                                        <span class="px-2 text-sm font-medium text-gray-900 dark:text-white min-w-[30px] text-center">
-                                            {{ $item['qty'] }}
-                                        </span>
-
-                                        <button
-                                            wire:click="updateQuantity({{ $id }}, {{ $item['qty'] + 1 }})"
-                                            class="p-1 bg-gray-200 dark:bg-zinc-700 rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-600 transition text-sm w-6 h-6 flex items-center justify-center"
-                                            {{ $item['qty'] >= $item['stock'] ? 'disabled' : '' }}>
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                            </svg>
-                                        </button>
-                                        
-                                        @if($item['qty'] >= $item['stock'])
-                                        <span class="text-xs text-red-500 ml-2">Stok terbatas</span>
+                <div class="max-h-80 overflow-y-auto pr-2">
+                    @if(empty($cart))
+                    <div class="text-center py-8 text-gray-500 dark:text-zinc-400">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-zinc-700 rounded-full flex items-center justify-center">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                            </svg>
+                        </div>
+                        <p class="font-medium">Keranjang masih kosong</p>
+                        <p class="mt-1 text-sm">Klik produk untuk menambah ke keranjang</p>
+                    </div>
+                    @else
+                    <div class="space-y-3">
+                        @foreach($cart as $id => $item)
+                        <div class="bg-gray-50 dark:bg-zinc-800 p-4 rounded-lg border border-gray-200 dark:border-zinc-700 transition-all duration-200 hover:shadow-md">
+                            <div class="flex justify-between items-start">
+                                <!-- Gambar + Detail -->
+                                <div class="flex items-start space-x-3 flex-1">
+                                    <div class="relative">
+                                        @if($item['image'])
+                                        <img src="{{ $item['image'] }}" alt="{{ $item['name'] }}" class="w-14 h-14 object-cover rounded-lg bg-gray-100 dark:bg-zinc-700">
+                                        @else
+                                        <div class="w-14 h-14 bg-gray-200 dark:bg-zinc-700 flex items-center justify-center rounded-lg">
+                                            <span class="text-gray-500 dark:text-zinc-400 text-xs">No Image</span>
+                                        </div>
                                         @endif
+                                        <div class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                                            {{ $item['qty'] }}
+                                        </div>
+                                    </div>
+
+                                    <div class="flex-1 min-w-0">
+                                        <h3 class="font-medium text-gray-900 dark:text-white truncate">
+                                            {{ $item['name'] }}
+                                        </h3>
+
+                                        <p class="text-sm text-gray-600 dark:text-zinc-300 mt-1">
+                                            Rp {{ number_format($item['price'], 0, ',', '.') }}
+                                        </p>
+
+                                        <div class="flex items-center mt-2">
+                                            <button
+                                                wire:click="updateQuantity({{ $id }}, {{ $item['qty'] - 1 }})"
+                                                class="p-1 bg-gray-200 dark:bg-zinc-700 rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-600 transition text-sm w-6 h-6 flex items-center justify-center"
+                                                {{ $item['qty'] <= 1 ? 'disabled' : '' }}>
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                                </svg>
+                                            </button>
+
+                                            <span class="px-2 text-sm font-medium text-gray-900 dark:text-white min-w-[30px] text-center">
+                                                {{ $item['qty'] }}
+                                            </span>
+
+                                            <button
+                                                wire:click="updateQuantity({{ $id }}, {{ $item['qty'] + 1 }})"
+                                                class="p-1 bg-gray-200 dark:bg-zinc-700 rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-600 transition text-sm w-6 h-6 flex items-center justify-center"
+                                                {{ $item['qty'] >= $item['stock'] ? 'disabled' : '' }}>
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                                </svg>
+                                            </button>
+
+                                            @if($item['qty'] >= $item['stock'])
+                                            <span class="text-xs text-red-500 ml-2">Stok terbatas</span>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Harga Total & Hapus -->
-                            <div class="flex flex-col items-end justify-between h-full ml-4">
-                                <button
-                                    wire:click="removeFromCart({{ $id }})"
-                                    class="text-red-500 hover:text-red-700 dark:hover:text-red-400 transition p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-md mb-2"
-                                    title="Hapus item">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                    </svg>
-                                </button>
-                                
-                                <span class="font-bold text-blue-600 dark:text-blue-400 text-sm">
-                                    Rp {{ number_format($item['price'] * $item['qty'], 0, ',', '.') }}
-                                </span>
+                                <!-- Harga Total & Hapus -->
+                                <div class="flex flex-col items-end justify-between h-full ml-4">
+                                    <button
+                                        wire:click="removeFromCart({{ $id }})"
+                                        class="text-red-500 hover:text-red-700 dark:hover:text-red-400 transition p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-md mb-2"
+                                        title="Hapus item">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+
+                                    <span class="font-bold text-blue-600 dark:text-blue-400 text-sm">
+                                        Rp {{ number_format($item['price'] * $item['qty'], 0, ',', '.') }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
+                        @endforeach
                     </div>
-                    @endforeach
+                    @endif
+                </div>
+
+                <!-- Cart Summary -->
+                @if(!empty($cart))
+                <div class="mt-4 pt-4 border-t border-gray-200 dark:border-zinc-700">
+                    <div class="flex justify-between items-center text-sm text-gray-600 dark:text-zinc-400 mb-1">
+                        <span>Total Item:</span>
+                        <span>{{ array_sum(array_column($cart, 'qty')) }} item</span>
+                    </div>
+                    <div class="flex justify-between items-center font-semibold">
+                        <span class="text-gray-900 dark:text-white">Subtotal:</span>
+                        <span class="text-blue-600 dark:text-blue-400">
+                            Rp {{ number_format($total, 0, ',', '.') }}
+                        </span>
+                    </div>
                 </div>
                 @endif
             </div>
-            
-            <!-- Cart Summary -->
-            @if(!empty($cart))
-            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-zinc-700">
-                <div class="flex justify-between items-center text-sm text-gray-600 dark:text-zinc-400 mb-1">
-                    <span>Total Item:</span>
-                    <span>{{ array_sum(array_column($cart, 'qty')) }} item</span>
-                </div>
-                <div class="flex justify-between items-center font-semibold">
-                    <span class="text-gray-900 dark:text-white">Subtotal:</span>
-                    <span class="text-blue-600 dark:text-blue-400">
-                        Rp {{ number_format($total, 0, ',', '.') }}
-                    </span>
-                </div>
-            </div>
-            @endif
-        </div>
 
             <!-- Payment -->
             <div class="bg-white dark:bg-zinc-900 p-5 rounded-lg shadow-lg border border-gray-200 dark:border-zinc-700">
@@ -361,28 +361,36 @@
         aria-modal="true">
         <div class="flex items-center justify-center min-h-screen p-4">
             <!-- Background overlay -->
-            <div class="fixed inset-0 bg-black/50"></div>
+            <div class="fixed inset-0 bg-black/50" wire:click="closeClearCartModal"></div>
 
             <!-- Modal panel -->
-            <div class="relative bg-white dark:bg-zinc-800 rounded-lg p-6 w-full max-w-sm z-[70]">
+            <div class="relative bg-white dark:bg-zinc-800 rounded-xl p-6 w-full max-w-sm z-[70]">
                 <div class="text-center">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                        Konfirmasi Hapus
+                    <!-- Warning Icon -->
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
+                        <svg class="h-8 w-8 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                        Kosongkan Keranjang
                     </h3>
-                    <p class="text-gray-500 dark:text-zinc-400 mb-6">
-                        Apakah Anda yakin ingin mengosongkan keranjang?
+                    <p class="text-gray-500 dark:text-zinc-400 mb-6 text-sm">
+                        Apakah Anda yakin ingin mengosongkan keranjang? Tindakan ini tidak dapat dibatalkan.
                     </p>
+
                     <div class="flex justify-center gap-3">
                         <flux:button
                             wire:click="closeClearCartModal"
-                            variant="primary"
+                            variant="outline"
                             class="px-4">
                             Batal
                         </flux:button>
                         <flux:button
                             wire:click="clearCart"
                             variant="danger"
-                            class="px-4">
+                            class="px-4 flex items-center gap-1">
                             Ya, Kosongkan
                         </flux:button>
                     </div>
@@ -404,10 +412,17 @@
             <div class="fixed inset-0 bg-black/50"></div>
 
             <!-- Modal panel -->
-            <div class="relative bg-white dark:bg-zinc-800 rounded-lg p-6 w-full max-w-md z-[80]">
-                <div class="text-center mb-4">
-                    <h3 id="receipt-modal-title" class="text-lg font-bold text-gray-900 dark:text-white">
-                        Struk Pembayaran
+            <div class="relative bg-white dark:bg-zinc-800 rounded-xl p-6 w-full max-w-sm z-[80]">
+                <div class="text-center mb-6">
+                    <!-- Success Icon -->
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 mb-3">
+                        <svg class="h-6 w-6 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                    
+                    <h3 id="receipt-modal-title" class="text-lg font-bold text-gray-900 dark:text-white mb-1">
+                        Pembayaran Berhasil
                     </h3>
                     <p class="text-sm text-gray-500 dark:text-zinc-400">
                         {{ \Carbon\Carbon::now()->format('d/m/Y H:i') }}
@@ -416,155 +431,185 @@
 
                 <!-- Struk Content -->
                 <div class="bg-white dark:bg-zinc-800 p-4 rounded border border-gray-200 dark:border-zinc-700" id="receipt-content">
-                    <div class="text-center mb-4">
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white">EasyCoff</h2>
-                        <p class="text-sm text-gray-600 dark:text-zinc-400">Jl. Contoh No. 123</p>
-                        <p class="text-sm text-gray-600 dark:text-zinc-400">Telp: (021) 123-4567</p>
-                    </div>
-
-                    <div class="border-t border-b border-gray-300 py-2 mb-3">
-                        <p class="text-sm">
-                            <strong>No. Order:</strong> {{ $lastOrder->no_order }}<br>
-                            <strong>Kasir:</strong> {{ Auth::user()->name }}<br>
-                            <strong>Customer:</strong> {{ $lastOrder->customer_name }}<br>
-                            <strong>Tanggal:</strong> {{ $lastOrder->created_at->format('d/m/Y H:i') }}
-                        </p>
-                    </div>
-
-                    <div class="mb-3">
-                        <table class="w-full text-sm text-gray-900 dark:text-white">
-                            <thead>
-                                <tr class="border-b border-gray-300 dark:border-zinc-600">
-                                    <th class="text-left pb-1 text-gray-700 dark:text-zinc-300">Item</th>
-                                    <th class="text-center pb-1 text-gray-700 dark:text-zinc-300">Qty</th>
-                                    <th class="text-right pb-1 text-gray-700 dark:text-zinc-300">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($lastOrder->items as $item)
-                                <tr class="border-b border-gray-200 dark:border-zinc-700">
-                                    <td class="py-1">{{ $item->product->name }}</td>
-                                    <td class="text-center py-1">{{ $item->qty }}</td>
-                                    <td class="text-right py-1">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="border-t border-b border-gray-300 dark:border-zinc-600 py-2 mb-3">
-                        <div class="flex justify-between text-sm text-gray-700 dark:text-zinc-300">
-                            <span>Subtotal:</span>
-                            <span>Rp {{ number_format($lastOrder->total, 0, ',', '.') }}</span>
+                    <div class="receipt-layout">
+                        <div class="text-center mb-3">
+                            <h2 class="text-xl font-bold">EssyCoff</h2>
+                            <p class="text-xs text-gray-600">Jl. Jati No.41, Padang Jati, Kota Bengkulu</p>
                         </div>
-                        <div class="flex justify-between text-sm text-gray-700 dark:text-zinc-300">
-                            <span>Pembayaran:</span>
-                            <span>Rp {{ number_format($lastOrder->uang_dibayar, 0, ',', '.') }}</span>
-                        </div>
-                        <div class="flex justify-between text-sm font-bold text-gray-900 dark:text-white">
-                            <span>Kembalian:</span>
-                            <span>Rp {{ number_format($lastOrder->kembalian, 0, ',', '.') }}</span>
-                        </div>
-                    </div>
 
-                    <div class="text-center text-xs text-gray-500 dark:text-zinc-400 mt-4">
-                        <p>Terima kasih atas kunjungan Anda</p>
-                        <p class="mt-1">*** Barang yang sudah dibeli tidak dapat ditukar ***</p>
+                        <hr class="my-2 border-dashed border-gray-400">
+
+                        <div class="space-y-1.5 mb-3 text-xs">
+                            <p><strong>No.:</strong> {{ $lastOrder->no_order }}</p>
+                            <p><strong>Kasir:</strong> {{ $lastOrder->user?->name ?? '-' }}</p>
+                            <p><strong>Tanggal:</strong> {{ $lastOrder->created_at->format('d M, H:i') }}</p>
+                        </div>
+
+                        <hr class="my-2 border-dashed border-gray-400">
+
+                        <div class="space-y-1 text-sm">
+                            @foreach($lastOrder->items as $item)
+                                <div class="flex justify-between">
+                                    <span>{{ Str::limit($item->product?->name, 15) }} × {{ $item->qty }}</span>
+                                    <span>Rp {{ number_format($item->subtotal, 0, ',', '.') }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <hr class="my-2 border-dashed border-gray-400">
+
+                        <div class="space-y-1 font-semibold text-sm">
+                            <div class="flex justify-between">
+                                <span>Total</span>
+                                <span>Rp {{ number_format($lastOrder->total, 0, ',', '.') }}</span>
+                            </div>
+                            @if($lastOrder->uang_dibayar)
+                            <div class="flex justify-between">
+                                <span>Tunai</span>
+                                <span>Rp {{ number_format($lastOrder->uang_dibayar, 0, ',', '.') }}</span>
+                            </div>
+                            @endif
+                            @if($lastOrder->kembalian !== null)
+                            <div class="flex justify-between">
+                                <span>Kembali</span>
+                                <span>Rp {{ number_format($lastOrder->kembalian, 0, ',', '.') }}</span>
+                            </div>
+                            @endif
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <p class="font-medium">Terima Kasih!</p>
+                            <p class="text-gray-600">~ EssyCoff ~</p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex justify-center gap-3 mt-6">
+                <div class="flex justify-center gap-3 mt-4">
                     <flux:button
                         wire:click="closeReceiptModal"
                         variant="outline"
                         icon="arrow-left"
-                        class="w-1/2 text-xs">
+                        class="flex-1 text-sm">
                         Tutup
-                        </flux:button>
+                    </flux:button>
 
-
-                   <flux:button
-                        onclick="window.print(); return false;"
+                    <flux:button
+                        onclick="printReceipt()"
                         variant="primary"
                         icon="printer"
-                        class="w-1/2 text-xs">
-                        Cetak struk
-                        </flux:button>
+                        class="flex-1 text-sm">
+                        Cetak
+                    </flux:button>
                 </div>
             </div>
         </div>
     </div>
     @endif
 
-    <!-- SweetAlert2 Script -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- CSS untuk cetak -->
     <style>
         @media print {
-            @page {
-                size: 80mm auto;
-                /* Fixed width of 80mm, auto height */
-                margin: 0;
-                /* Remove default margins */
-                padding: 0;
-            }
-
-            body {
-                margin: 0;
-                padding: 0;
-                width: 80mm;
-                font-family: 'Courier New', monospace;
-            }
-
+            /* Hide everything */
             body * {
                 visibility: hidden;
-                margin: 0;
-                padding: 0;
             }
-
-            #receipt-content,
-            #receipt-content * {
+            
+            /* Show only receipt */
+            #receipt-content, #receipt-content * {
                 visibility: visible;
             }
-
+            
             #receipt-content {
-                width: 100%;
-                max-width: 80mm;
+                position: absolute !important;
+                top: 0 !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                width: 80mm !important;
+                max-width: 80mm !important;
+                margin: 0 !important;
+                padding: 10mm !important;
+                background: white !important;
+                color: black !important;
+                font-family: 'Courier New', monospace !important;
+                font-size: 12px !important;
+                line-height: 1.4 !important;
+                z-index: 9999 !important;
+                box-shadow: none !important;
+                border: none !important;
+                border-radius: 0 !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                break-after: avoid !important;
+            }
+            
+            .receipt-layout .text-xl {
+                font-size: 16px !important;
+            }
+            
+            .receipt-layout .text-xs {
+                font-size: 10px !important;
+            }
+            
+            .receipt-layout hr {
+                border: none !important;
+                border-top: 1px dashed #000 !important;
+                margin: 8px 0 !important;
+            }
+            
+            .receipt-layout .flex {
+                display: flex !important;
+            }
+            
+            .receipt-layout .justify-between {
+                justify-content: space-between !important;
+            }
+            
+            .receipt-layout .text-center {
+                text-align: center !important;
+            }
+            
+            .receipt-layout .font-bold {
+                font-weight: bold !important;
+            }
+            
+            .receipt-layout .font-medium {
+                font-weight: 500 !important;
+            }
+            
+            .receipt-layout .font-semibold {
+                font-weight: 600 !important;
+            }
+            
+            /* Compact spacing */
+            .receipt-layout .space-y-1 > * + * {
+                margin-top: 2px !important;
+            }
+            
+            .receipt-layout .space-y-1\.5 > * + * {
+                margin-top: 3px !important;
+            }
+            
+            .receipt-layout .mb-3 {
+                margin-bottom: 6px !important;
+            }
+            
+            .receipt-layout .mt-4 {
+                margin-top: 8px !important;
+            }
+            
+            .receipt-layout .my-2 {
+                margin-top: 4px !important;
+                margin-bottom: 4px !important;
+            }
+            
+            @page {
+                size: 80mm auto;
                 margin: 0;
-                padding: 3mm;
-                box-sizing: border-box;
-                font-size: 10px;
-                line-height: 1.2;
-            }
-
-            #receipt-content .text-sm {
-                font-size: 9px !important;
-                line-height: 1.1;
-            }
-
-            #receipt-content table {
-                width: 100%;
-                border-collapse: collapse;
-                margin: 2mm 0;
-            }
-
-            #receipt-content th,
-            #receipt-content td {
-                padding: 1mm 0;
-            }
-
-            #receipt-content .text-center {
-                text-align: center;
-            }
-
-            #receipt-content .text-xs {
-                font-size: 9px !important;
-            }
-
-            .no-print {
-                display: none !important;
             }
         }
     </style>
+
+    <!-- SweetAlert2 Script -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('livewire:initialized', () => {
