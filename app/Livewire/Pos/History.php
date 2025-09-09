@@ -12,6 +12,7 @@ class History extends Component
 
     public int $perPage = 10;
     public string $search = '';
+    public string $selectedMonth = '';
     public bool $showPaymentModal = false;
     public $selectedOrder = null;
     public $uangDibayar = '';
@@ -24,6 +25,22 @@ class History extends Component
     public function updatingSearch()
     {
         $this->resetPage();
+    }
+
+    /**
+     * Reset pagination saat filter bulan berubah
+     */
+    public function updatingSelectedMonth()
+    {
+        $this->resetPage();
+    }
+
+    /**
+     * Mount method untuk set default bulan
+     */
+    public function mount()
+    {
+        $this->selectedMonth = now()->format('Y-m');
     }
 
     /**
@@ -89,6 +106,23 @@ class History extends Component
     
 
     /**
+     * Get available months for filter
+     */
+    public function getAvailableMonths()
+    {
+        return Order::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month')
+            ->distinct()
+            ->orderByDesc('month')
+            ->pluck('month')
+            ->map(function ($month) {
+                return [
+                    'value' => $month,
+                    'label' => \Carbon\Carbon::createFromFormat('Y-m', $month)->locale('id')->translatedFormat('F Y')
+                ];
+            });
+    }
+
+    /**
      * Render view dengan data order
      */
     public function render()
@@ -100,11 +134,17 @@ class History extends Component
                         ->orWhere('customer_name', 'like', '%' . $this->search . '%');
                 });
             })
+            ->when($this->selectedMonth, function ($query) {
+                $query->whereRaw('DATE_FORMAT(created_at, "%Y-%m") = ?', [$this->selectedMonth]);
+            })
             ->orderByDesc('created_at')
             ->paginate($this->perPage);
 
+        $availableMonths = $this->getAvailableMonths();
+
         return view('livewire.pos.history', [
             'orders' => $orders,
-        ])->title('Riwayat Transaksi');
+            'availableMonths' => $availableMonths,
+        ]);
     }
 }

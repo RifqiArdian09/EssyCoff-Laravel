@@ -9,7 +9,15 @@
                     </h1>
                     <p class="text-gray-600 dark:text-zinc-300 mt-1">
                         Selamat datang kembali {{ Auth::user()->name }} !
-                    </p> 
+                    </p>
+                    <div class="flex items-center gap-2 mt-2">
+                        <svg class="w-4 h-4 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {{ now()->locale('id')->translatedFormat('l, d F Y') }}
+                        </span>
+                    </div> 
                 </div>
             
         </div>

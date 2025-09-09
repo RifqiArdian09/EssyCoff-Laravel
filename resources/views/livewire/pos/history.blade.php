@@ -17,14 +17,44 @@
     </div>
     @endif
 
-    <!-- Search Bar -->
+    <!-- Filter Bar -->
     <div class="bg-white dark:bg-zinc-800 p-5 rounded-lg shadow-lg border border-gray-200 dark:border-zinc-700 space-y-4 transition-colors duration-200">
-        <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Cari Transaksi</label>
-        <flux:input
-            wire:model.live.debounce.300ms="search"
-            placeholder="Cari no. order, customer..."
-            class="w-full"
-            icon="magnifying-glass" />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Search Input -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Cari Transaksi</label>
+                <flux:input
+                    wire:model.live.debounce.300ms="search"
+                    placeholder="Cari no. order, customer..."
+                    class="w-full"
+                    icon="magnifying-glass" />
+            </div>
+            
+            <!-- Month Filter -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Filter Bulan</label>
+                <flux:select wire:model.live="selectedMonth" class="w-full">
+                    <option value="">Semua Bulan</option>
+                    @foreach($availableMonths as $month)
+                        <option value="{{ $month['value'] }}">{{ $month['label'] }}</option>
+                    @endforeach
+                </flux:select>
+            </div>
+        </div>
+        
+        <!-- Summary Info -->
+        @if($selectedMonth)
+        <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
+            <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <span class="text-sm font-medium text-blue-700 dark:text-blue-300">
+                    Menampilkan transaksi bulan {{ \Carbon\Carbon::createFromFormat('Y-m', $selectedMonth)->locale('id')->translatedFormat('F Y') }}
+                </span>
+            </div>
+        </div>
+        @endif
     </div>
 
     <!-- Tabel Transaksi -->

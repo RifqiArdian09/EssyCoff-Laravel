@@ -8,42 +8,90 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\OrdersExport;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use Livewire\WithPagination;
 
 class Index extends Component
 {
+    use WithPagination;
+    
     public $from;
     public $to;
+    public $selectedMonth = '';
     public $perPage = 10;
-    public $page = 1;
     
     protected $queryString = [
         'from' => ['except' => ''],
         'to' => ['except' => ''],
-        'page' => ['except' => 1, 'as' => 'p'],
+        'selectedMonth' => ['except' => ''],
         'perPage' => ['except' => 10]
     ];
     
-    protected $listeners = [
-        'refreshComponent' => '$refresh'
-    ];
-    
-    protected $paginationTheme = 'bootstrap';
-
     public function mount()
     {
-        $this->from = now()->startOfMonth()->format('Y-m-d');
-        $this->to = now()->endOfMonth()->format('Y-m-d');
+        // Set default values jika tidak ada di query string
+        if (!$this->from && !$this->to && !$this->selectedMonth) {
+            $this->selectedMonth = now()->format('Y-m');
+        }
+    }
+
+    /**
+     * Reset pagination dan filter lainnya ketika mengubah bulan
+     */
+    public function updatedSelectedMonth($value)
+    {
+        if ($value) {
+            // Reset filter tanggal ketika memilih bulan
+            $this->from = null;
+            $this->to = null;
+        }
+        $this->resetPage();
+    }
+
+    /**
+     * Reset pagination dan filter bulan ketika mengubah tanggal
+     */
+    public function updatedFrom()
+    {
+        $this->selectedMonth = '';
+        $this->resetPage();
+    }
+
+    public function updatedTo()
+    {
+        $this->selectedMonth = '';
+        $this->resetPage();
+    }
+
+    /**
+     * Get available months for filter
+     */
+    public function getAvailableMonths()
+    {
+        return Order::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month')
+            ->distinct()
+            ->orderByDesc('month')
+            ->pluck('month')
+            ->map(function ($month) {
+                return [
+                    'value' => $month,
+                    'label' => \Carbon\Carbon::createFromFormat('Y-m', $month)->locale('id')->translatedFormat('F Y')
+                ];
+            });
     }
 
     public function exportExcel()
     {
-        return Excel::download(new OrdersExport($this->from, $this->to), 'report_transaksi_' . now()->format('Y-m-d') . '.xlsx');
+        list($fromDate, $toDate) = $this->getFilterDates();
+        
+        return Excel::download(
+            new OrdersExport($fromDate, $toDate), 
+            'report_transaksi_' . now()->format('Y-m-d') . '.xlsx'
+        );
     }
 
     public function exportPDF()
     {
-        $fromDate = $this->from ?: now()->startOfMonth()->format('Y-m-d');
-        $toDate = $this->to ?: now()->endOfMonth()->format('Y-m-d');
+        list($fromDate, $toDate) = $this->getFilterDates();
 
         $orders = Order::with('items.product', 'user')
             ->whereBetween('created_at', [
@@ -68,33 +116,69 @@ class Index extends Component
         }, 'laporan_transaksi_'.now()->format('Y-m-d').'.pdf');
     }
 
+    /**
+     * Helper method untuk mendapatkan tanggal filter yang konsisten
+     */
+    private function getFilterDates()
+    {
+        if ($this->selectedMonth) {
+            $fromDate = Carbon::createFromFormat('Y-m', $this->selectedMonth)->startOfMonth()->format('Y-m-d');
+            $toDate = Carbon::createFromFormat('Y-m', $this->selectedMonth)->endOfMonth()->format('Y-m-d');
+        } else {
+            $fromDate = $this->from ?: now()->startOfMonth()->format('Y-m-d');
+            $toDate = $this->to ?: now()->endOfMonth()->format('Y-m-d');
+        }
+        
+        return [$fromDate, $toDate];
+    }
+
     public function render()
     {
-        $fromDate = $this->from ?: now()->startOfMonth()->format('Y-m-d');
-        $toDate = $this->to ?: now()->endOfMonth()->format('Y-m-d');
+        $query = Order::with('items.product', 'user')->where('status', 'paid');
 
-        $orders = Order::with('items.product', 'user')
+        // Terapkan filter berdasarkan pilihan pengguna
+        if ($this->selectedMonth) {
+            // Filter by bulan terpilih
+            $query->whereRaw('DATE_FORMAT(created_at, "%Y-%m") = ?', [$this->selectedMonth]);
+        } elseif ($this->from || $this->to) {
+            // Filter by tanggal
+            $fromDate = $this->from ?: now()->startOfMonth()->format('Y-m-d');
+            $toDate = $this->to ?: now()->endOfMonth()->format('Y-m-d');
+            
+            $query->whereBetween('created_at', [
+                $fromDate . ' 00:00:00',
+                $toDate . ' 23:59:59'
+            ]);
+        } else {
+            // Default ke bulan ini jika tidak ada filter
+            $query->whereMonth('created_at', now()->month)
+                  ->whereYear('created_at', now()->year);
+        }
+
+        $orders = $query->orderByDesc('created_at')
+            ->paginate($this->perPage);
+
+        // Hitung pendapatan sesuai filter
+        list($fromDate, $toDate) = $this->getFilterDates();
+        
+        $dailyTotal = Order::where('status', 'paid')
+                           ->whereDate('created_at', today())
+                           ->sum('total');
+                           
+        $monthlyTotal = Order::where('status', 'paid')
             ->whereBetween('created_at', [
                 $fromDate . ' 00:00:00',
                 $toDate . ' 23:59:59'
             ])
-            ->orderByDesc('created_at')
-            ->paginate($this->perPage)
-            ->withQueryString(); // This ensures pagination works with query strings
+            ->sum('total');
 
-        // Hitung pendapatan sesuai filter
-        $dailyTotal = Order::where('status', 'paid')
-                           ->whereDate('created_at', today())
-                           ->sum('total');
-        $monthlyTotal = Order::where('status', 'paid')
-                             ->whereMonth('created_at', now()->month)
-                             ->whereYear('created_at', now()->year)
-                             ->sum('total');
+        $availableMonths = $this->getAvailableMonths();
 
         return view('livewire.report.index', [
             'orders' => $orders,
             'dailyTotal' => $dailyTotal,
             'monthlyTotal' => $monthlyTotal,
+            'availableMonths' => $availableMonths,
         ]);
     }
 }
