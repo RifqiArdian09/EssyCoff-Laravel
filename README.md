@@ -101,7 +101,7 @@ Edit file `.env` dengan kredensial database Anda:
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=essycoff_pos
+DB_DATABASE=pos
 DB_USERNAME=root
 DB_PASSWORD=
 ```
