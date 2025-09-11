@@ -69,9 +69,9 @@
         </div>
 
         <div>
-            <button class="w-full max-w-sm py-4 bg-gradient-to-r from-coffee-gold to-amber-700 text-coffee-dark font-bold text-base rounded-lg shadow-md hover:scale-105 transition-all">
+            <a href="{{ route('customer') }}" class="inline-block w-full max-w-sm mx-auto px-8 py-4 bg-gradient-to-r from-coffee-gold to-amber-700 text-coffee-dark font-bold text-lg text-center rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transform transition-all duration-300 ease-in-out">
                 Mulai Pesanan <i class="fas fa-arrow-right ml-2"></i>
-            </button>
+            </a>
             <p class="text-xs text-coffee-gold mt-6 opacity-70">
                 Dengan melanjutkan, Anda menyetujui Syarat & Ketentuan kami
             </p>

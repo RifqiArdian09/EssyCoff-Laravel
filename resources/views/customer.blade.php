@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,10 +13,11 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#6f4e37',
-                        secondary: '#c0a080',
-                        accent: '#e7c9a9',
-                        dark: '#4a3c2d',
+                        'coffee-dark': '#2A1A0A',
+                        'coffee-medium': '#3E2813',
+                        'coffee-light': '#523728',
+                        'coffee-gold': '#D4A76A',
+                        'coffee-cream': '#F5F5F5',
                     }
                 }
             }
@@ -23,316 +25,288 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8f7f5;
         }
-        
-        .menu-card {
-            transition: all 0.3s ease;
+
+        /* Success Modal Animations */
+        .success-modal {
+            animation: modalFadeIn 0.3s ease-out;
         }
-        
-        .menu-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+
+        .checkmark-circle {
+            animation: scaleIn 0.3s ease-out 0.2s both;
         }
-        
-        .category-btn.active {
-            background-color: #6f4e37;
-            color: white;
+
+        .checkmark {
+            animation: drawCheckmark 0.5s ease-out 0.5s both;
         }
-        
-        /* Chat bubble styles */
-        .chat-bubble {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: #6f4e37;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            cursor: pointer;
-            z-index: 100;
-            transition: all 0.3s ease;
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
-        
-        .chat-bubble:hover {
-            transform: scale(1.05);
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+
+            to {
+                transform: scale(1);
+            }
         }
-        
-        .chat-bubble .badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: #ef4444;
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
+
+        @keyframes drawCheckmark {
+            from {
+                stroke-dashoffset: 100;
+            }
+
+            to {
+                stroke-dashoffset: 0;
+            }
         }
-        
-        .chat-container {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            width: 350px;
-            height: 450px;
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-            z-index: 99;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            opacity: 0;
-            transform: translateY(20px);
-            pointer-events: none;
-        }
-        
-        .chat-container.open {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
-        }
-        
-        .chat-header {
-            background-color: #6f4e37;
-            color: white;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .chat-body {
-            flex: 1;
-            overflow-y: auto;
-            padding: 15px;
-        }
-        
-        .chat-footer {
-            padding: 15px;
-            border-top: 1px solid #e5e5e5;
-        }
-        
-        .order-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        
-        .order-item:last-child {
-            border-bottom: none;
-        }
-        
-        .history-panel {
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 350px;
-            height: 100%;
-            background-color: white;
-            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
-            z-index: 101;
-            overflow-y: auto;
-            padding: 20px;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-        }
-        
-        .history-panel.open {
-            transform: translateX(0);
-        }
-        
-        .tab-container {
-            display: flex;
-            border-bottom: 1px solid #e5e5e5;
-            margin-bottom: 20px;
-        }
-        
-        .tab {
-            padding: 10px 15px;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-        }
-        
-        .tab.active {
-            border-bottom-color: #6f4e37;
-            color: #6f4e37;
-            font-weight: 500;
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .history-item {
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #f8f8f8;
-            margin-bottom: 10px;
+
+        .checkmark-path {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
         }
     </style>
 </head>
-<body class="min-h-screen bg-gray-50">
-    <!-- Header Minimal -->
-    <header class="bg-primary text-white shadow-md">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="w-16 h-16 flex items-center justify-center rounded-full bg-white shadow-md">
-                    <img src="{{ asset('images/logo.png') }}" alt="EssyCoff Logo" class="w-16 h-16 animate-pulse-slow">
+
+<body class="min-h-screen bg-coffee-cream">
+    <!-- Modern Header -->
+    <header class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-coffee-gold to-coffee-medium rounded-xl flex items-center justify-center shadow-lg">
+                        <img src="{{ asset('images/logo2.png') }}" alt="EssyCoff" class="w-8 h-8 rounded-lg">
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">EssyCoff</h1>
+                    </div>
                 </div>
-                <h1 class="text-2xl font-bold">EssyCoff</h1>
+                <div class="flex items-center space-x-4">
+                    <button id="history-btn" class="flex items-center px-4 py-2 text-gray-700 hover:text-coffee-medium hover:bg-coffee-cream rounded-lg transition-all duration-200">
+                        <i class="fas fa-heart mr-2"></i>
+                        <span class="hidden sm:inline">Favorit</span>
+                    </button>
+                </div>
             </div>
-            <button id="history-btn" class="px-4 py-2 bg-white bg-opacity-20 rounded-lg hover:bg-opacity-30 transition">
-                <i class="fas fa-history mr-2"></i>Riwayat
-            </button>
         </div>
     </header>
 
-    <main class="container mx-auto px-4 py-8">
-        <div class="mb-8 text-center">
-            <h2 class="text-3xl font-bold text-gray-800">Selamat Datang di EssyCoff</h2>
-            <p class="text-gray-600 mt-2">Pesan makanan dan minuman favorit Anda dengan mudah</p>
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Hero Section -->
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center px-4 py-2 bg-coffee-gold bg-opacity-20 text-coffee-dark rounded-full text-sm font-medium mb-4">
+                <i class="fas fa-fire mr-2"></i>
+                Menu Terbaru & Terlezat
+            </div>
+            <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+                Selamat Datang di <span class="text-coffee-gold">EssyCoff</span>
+            </h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                Nikmati pengalaman kuliner terbaik dengan menu pilihan berkualitas premium
+            </p>
         </div>
 
-        <!-- Category Filter -->
-        <div class="flex flex-wrap gap-2 mb-6 justify-center">
-            <a href="{{ route('customer', ['search' => $search ?? '', 'category' => 'all']) }}" 
-               class="category-btn px-4 py-2 rounded-full text-sm font-medium transition {{ ($category ?? 'all') === 'all' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                Semua
-            </a>
-            @foreach($categories as $cat)
-            <a href="{{ route('customer', ['search' => $search ?? '', 'category' => strtolower($cat->name)]) }}" 
-               class="category-btn px-4 py-2 rounded-full text-sm font-medium transition {{ ($category ?? 'all') === strtolower($cat->name) ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                {{ $cat->name }}
-            </a>
-            @endforeach
+        <!-- Search & Filter Section -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+            <!-- Search Box -->
+            <form method="GET" action="{{ route('customer') }}" class="mb-6">
+                <div class="relative max-w-2xl mx-auto">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" name="search" value="{{ $search ?? '' }}"
+                        placeholder="Cari menu favorit Anda..."
+                        class="block w-full pl-12 pr-20 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coffee-gold focus:border-coffee-gold text-lg placeholder-gray-400">
+                    <input type="hidden" name="category" value="{{ $category ?? 'all' }}">
+                    <button type="submit" class="absolute inset-y-0 right-0 flex items-center px-6 bg-coffee-medium hover:bg-coffee-dark text-white rounded-r-xl transition-colors">
+                        Cari
+                    </button>
+                </div>
+            </form>
+
+            <!-- Category Filter -->
+            <div class="flex flex-wrap gap-2 justify-center">
+                <a href="{{ route('customer', ['search' => $search ?? '', 'category' => 'all']) }}"
+                    class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all {{ ($category ?? 'all') === 'all' ? 'bg-coffee-medium text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                    <i class="fas fa-th-large mr-2"></i>Semua
+                </a>
+                @foreach($categories as $cat)
+                <a href="{{ route('customer', ['search' => $search ?? '', 'category' => strtolower($cat->name)]) }}"
+                    class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all {{ ($category ?? 'all') === strtolower($cat->name) ? 'bg-coffee-medium text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                    @php
+                    $categoryName = strtolower($cat->name);
+                    $icon = 'fa-utensils'; // default icon
+
+                    
+
+                    // Mapping kategori ke ikon yang sesuai
+                    if (strpos($categoryName, 'kopi') !== false || strpos($categoryName, 'coffee') !== false) {
+                    $icon = 'fa-mug-saucer';
+                    } elseif (strpos($categoryName, 'teh') !== false || strpos($categoryName, 'tea') !== false) {
+                    $icon = 'fa-mug-hot';
+                    } elseif (strpos($categoryName, 'minuman') !== false || strpos($categoryName, 'drink') !== false || strpos($categoryName, 'beverage') !== false) {
+                    $icon = 'fa-wine-glass';
+                    } elseif (strpos($categoryName, 'makanan') !== false || strpos($categoryName, 'food') !== false) {
+                    $icon = 'fa-plate-utensils';
+                    } elseif (strpos($categoryName, 'snack') !== false || strpos($categoryName, 'cemilan') !== false) {
+                    $icon = 'fa-cookie';
+                    } elseif (strpos($categoryName, 'dessert') !== false || strpos($categoryName, 'manis') !== false) {
+                    $icon = 'fa-ice-cream';
+                    } elseif (strpos($categoryName, 'sarapan') !== false || strpos($categoryName, 'breakfast') !== false) {
+                    $icon = 'fa-egg';
+                    } else {
+                    $icon = 'fa-utensils'; // fallback
+                    }
+                    @endphp
+                    <i class="fas {{ $icon }} mr-2"></i>{{ $cat->name }}
+                </a>
+                @endforeach
+            </div>
         </div>
-        
-        <!-- Search Box -->
-        <form method="GET" action="{{ route('customer') }}" class="relative mb-8 max-w-md mx-auto">
-            <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Cari menu..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-            <input type="hidden" name="category" value="{{ $category ?? 'all' }}">
-            <button type="submit" class="absolute right-3 top-3.5 text-gray-400 hover:text-primary">
-                <i class="fas fa-search"></i>
-            </button>
-        </form>
-        
+
+
         <!-- Menu Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="menu-container">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="menu-container">
             @forelse($products as $product)
-            <div class="menu-card bg-white border border-gray-200 rounded-xl overflow-hidden" data-category="{{ strtolower($product->category->name ?? 'uncategorized') }}">
+            <div class="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-200 {{ $product->stock <= 0 ? 'opacity-60' : '' }}" data-category="{{ strtolower($product->category->name ?? 'uncategorized') }}">
                 <div class="relative">
                     @if($product->image_url)
-                        <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-48 object-cover">
+                    <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-48 object-cover">
                     @else
-                        <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
-                            <i class="fas fa-image text-gray-400 text-3xl"></i>
-                        </div>
-                    @endif
-                    <span class="absolute top-2 right-2 bg-white rounded-full px-2 py-1 text-xs font-semibold text-gray-700">Stok: {{ $product->stock }}</span>
-                </div>
-                <div class="p-4">
-                    <h3 class="font-bold text-gray-800 text-lg">{{ $product->name }}</h3>
-                    <p class="text-gray-600 text-sm mt-1">{{ $product->category->name ?? 'Kategori tidak tersedia' }}</p>
-                    <div class="flex justify-between items-center mt-3">
-                        <span class="text-primary font-bold text-xl">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                        <button class="add-to-cart bg-primary text-white px-4 py-2 rounded-lg text-sm hover:bg-dark transition" 
-                                data-id="{{ $product->id }}" 
-                                data-name="{{ $product->name }}" 
-                                data-price="{{ $product->price }}"
-                                @if($product->stock <= 0) disabled @endif>
-                            <i class="fas fa-plus mr-1"></i> 
-                            @if($product->stock <= 0) Habis @else Tambah @endif
-                        </button>
+                    <div class="w-full h-48 bg-gradient-to-br from-coffee-cream to-coffee-gold bg-opacity-30 flex items-center justify-center">
+                        <i class="fas fa-utensils text-coffee-gold text-3xl"></i>
                     </div>
+                    @endif
+
+                    @if($product->stock <= 0)
+                        <div class="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+                        <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                            Habis
+                        </span>
+                </div>
+                @else
+                <div class="absolute top-2 right-2 bg-green-500 text-white rounded-lg px-2 py-1 text-xs font-semibold">
+                    Stok: {{ $product->stock }}
+                </div>
+                @endif
+            </div>
+
+            <div class="p-4">
+                <div class="mb-3">
+                    <h3 class="font-semibold text-gray-900 text-lg mb-1">{{ $product->name }}</h3>
+                    <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-coffee-gold bg-opacity-20 text-coffee-dark">
+                        {{ $product->category->name ?? 'Kategori tidak tersedia' }}
+                    </span>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="text-lg font-bold text-gray-900">
+                        Rp {{ number_format($product->price, 0, ',', '.') }}
+                    </div>
+
+                    @if($product->stock > 0)
+                    <button class="add-to-cart bg-coffee-medium hover:bg-coffee-dark text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                        data-id="{{ $product->id }}"
+                        data-name="{{ $product->name }}"
+                        data-price="{{ $product->price }}">
+                        <i class="fas fa-plus mr-1"></i>Tambah
+                    </button>
+                    @else
+                    <span class="text-gray-400 text-sm font-medium">
+                        Tidak Tersedia
+                    </span>
+                    @endif
                 </div>
             </div>
-            @empty
-            <div class="col-span-full text-center py-12">
-                <i class="fas fa-coffee text-6xl text-gray-300 mb-4"></i>
-                <h3 class="text-xl font-semibold text-gray-600 mb-2">Belum Ada Produk</h3>
-                <p class="text-gray-500">Produk akan segera tersedia</p>
+        </div>
+        @empty
+        <div class="col-span-full text-center py-12">
+            <div class="bg-white rounded-xl shadow-sm p-8 max-w-md mx-auto">
+                <i class="fas fa-coffee text-4xl text-gray-300 mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">Belum Ada Produk</h3>
+                <p class="text-gray-500">Menu akan segera tersedia</p>
             </div>
-            @endforelse
+        </div>
+        @endforelse
         </div>
     </main>
 
-    <!-- Chat Bubble -->
-    <div class="chat-bubble" id="chat-bubble">
-        <i class="fas fa-shopping-cart text-xl"></i>
-        <div class="badge" id="cart-count">0</div>
+    <!-- Floating Cart Button -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <button id="chat-bubble" class="bg-coffee-medium hover:bg-coffee-dark text-white w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center">
+            <i class="fas fa-shopping-cart text-lg"></i>
+            <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">0</span>
+        </button>
     </div>
 
-    <!-- Chat Container -->
-    <div class="chat-container" id="chat-container">
-        <div class="chat-header">
-            <h3 class="font-bold">Keranjang Pesanan</h3>
-            <button id="close-chat" class="text-white">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="chat-body" id="chat-body">
-            <div class="text-center py-8 text-gray-500">
-                <i class="fas fa-shopping-cart text-3xl mb-3"></i>
-                <p class="font-medium">Keranjang masih kosong</p>
-                <p class="text-sm mt-1">Klik produk untuk menambah ke keranjang</p>
-            </div>
-        </div>
-        <div class="chat-footer">
-            <div class="flex justify-between mb-3">
-                <span class="font-medium">Total:</span>
-                <span class="font-bold text-primary">Rp <span id="cart-total">0</span></span>
-            </div>
-            <button id="checkout-btn" class="w-full bg-primary hover:bg-dark text-white font-medium py-2 px-4 rounded-lg transition" disabled>
-                Pesan Sekarang
-            </button>
-        </div>
-    </div>
-
-    <!-- History Panel -->
-    <div class="history-panel" id="history-panel">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold">Riwayat Pesanan</h2>
-            <button id="close-history" class="text-gray-500 hover:text-gray-700">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-        </div>
-        
-        <div class="tab-container">
-            <div class="tab active" data-tab="favorites">Favorit</div>
-        </div>
-        
-        <div class="tab-content active" id="favorites-tab">
-            <div class="mb-4">
-                <button id="load-favorites" class="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-dark transition">
-                    <i class="fas fa-heart mr-2"></i>Lihat Item Favorit
+    <!-- Cart Sidebar -->
+    <div class="fixed inset-y-0 right-0 w-96 bg-white shadow-xl z-40 transform translate-x-full transition-transform duration-300 ease-in-out" id="chat-container">
+        <div class="flex flex-col h-full">
+            <!-- Cart Header -->
+            <div class="bg-coffee-medium text-white p-4 flex items-center justify-between">
+                <h3 class="text-lg font-semibold">Keranjang Belanja</h3>
+                <button id="close-chat" class="text-white hover:bg-coffee-dark p-2 rounded-lg transition-colors">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
+
+            <!-- Cart Items -->
+            <div class="flex-1 overflow-y-auto p-4" id="chat-body">
+                <div class="text-center py-16 text-gray-500">
+                    <i class="fas fa-shopping-cart text-5xl mb-4 text-gray-300"></i>
+                    <p class="text-lg font-medium mb-2">Keranjang Kosong</p>
+                    <p class="text-sm text-gray-400">Tambahkan produk untuk mulai berbelanja</p>
+                </div>
+            </div>
+
+            <!-- Cart Footer -->
+            <div class="border-t border-gray-200 p-4 bg-gray-50">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-gray-700 font-medium">Total:</span>
+                    <span class="text-2xl font-bold text-gray-900">Rp <span id="cart-total">0</span></span>
+                </div>
+                <button id="checkout-btn" class="w-full bg-coffee-medium hover:bg-coffee-dark text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    Checkout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Sidebar -->
+    <div class="fixed inset-y-0 right-0 w-96 bg-white shadow-xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto" id="history-panel">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-gray-900">Menu Favorit</h2>
+                <button id="close-history" class="text-gray-500 hover:text-gray-700 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="mb-6">
+                <button id="load-favorites" class="w-full bg-coffee-medium hover:bg-coffee-dark text-white px-4 py-3 rounded-lg font-medium transition-colors">
+                    <i class="fas fa-star mr-2"></i>Muat Menu Favorit
+                </button>
+            </div>
+
             <div id="favorites-content">
-                <div class="text-center py-10 text-gray-500">
-                    <i class="fas fa-heart text-3xl mb-3"></i>
-                    <p class="font-medium">Klik tombol untuk melihat favorit</p>
-                    <p class="text-sm mt-1">Favorit berdasarkan semua riwayat pesanan</p>
+                <div class="text-center py-12 text-gray-500">
+                    <i class="fas fa-star text-4xl mb-4 text-gray-300"></i>
+                    <p class="font-medium mb-2">Belum ada menu favorit</p>
+                    <p class="text-sm text-gray-400">Klik tombol di atas untuk melihat menu favorit Anda</p>
                 </div>
             </div>
         </div>
@@ -340,31 +314,76 @@
 
     <!-- Order Modal -->
     <div id="order-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4">
-            <h3 class="text-xl font-bold text-gray-800 mb-4">Lengkapi Pesanan</h3>
-            
+        <div class="bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4">
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-coffee-medium rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-receipt text-white"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Konfirmasi Pesanan</h3>
+                <p class="text-gray-600 text-sm mt-1">Lengkapi data untuk melanjutkan</p>
+            </div>
+
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pemesan</label>
-                    <input type="text" id="customer-name" placeholder="Masukkan nama Anda" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Pemesan</label>
+                    <input type="text" id="customer-name" placeholder="Masukkan nama Anda" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coffee-gold focus:border-coffee-gold">
                 </div>
-                
-                <div class="bg-gray-100 p-4 rounded-lg">
-                    <div class="flex justify-between">
-                        <span class="font-medium">Total Pesanan:</span>
-                        <span class="font-bold text-primary">Rp <span id="modal-total">0</span></span>
+
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-700">Total:</span>
+                        <span class="font-bold text-xl text-gray-900">Rp <span id="modal-total">0</span></span>
                     </div>
                 </div>
             </div>
-            
+
             <div class="flex space-x-3 mt-6">
-                <button id="cancel-order" class="flex-1 bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg hover:bg-gray-300 transition">
+                <button id="cancel-order" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors">
                     Batal
                 </button>
-                <button id="confirm-order" class="flex-1 bg-primary hover:bg-dark text-white font-medium py-2 px-4 rounded-lg transition">
-                    Konfirmasi Pesanan
+                <button id="confirm-order" class="flex-1 bg-coffee-medium hover:bg-coffee-dark text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Konfirmasi
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="success-modal bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center">
+            <!-- Animated Checkmark -->
+            <div class="checkmark-circle w-20 h-20 mx-auto mb-6 relative">
+                <svg class="w-20 h-20" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="#10B981" class="checkmark-circle" />
+                    <path class="checkmark checkmark-path" d="M25 50 L40 65 L75 30"
+                        stroke="white" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </div>
+
+            <!-- Success Message -->
+            <h3 class="text-2xl font-bold text-gray-900 mb-3">Pesanan Berhasil!</h3>
+            <p class="text-gray-600 mb-2">Pesanan Anda telah dikirim</p>
+            <div class="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium mb-6">
+                <i class="fas fa-clock mr-2"></i>
+                Status: Pending Payment
+            </div>
+
+            <!-- Order Details -->
+            <div class="bg-gray-50 rounded-lg p-4 mb-6 text-left">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm text-gray-600">Nama Pemesan:</span>
+                    <span class="font-medium text-gray-900" id="success-customer-name">-</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600">Total Pembayaran:</span>
+                    <span class="font-bold text-lg text-coffee-medium">Rp <span id="success-total">0</span></span>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <button id="close-success-modal" class="w-full bg-coffee-medium hover:bg-coffee-dark text-white font-semibold py-3 rounded-lg transition-colors">
+                <i class="fas fa-check mr-2"></i>Selesai
+            </button>
         </div>
     </div>
 
@@ -388,17 +407,19 @@
             const confirmOrder = document.getElementById('confirm-order');
             const categoryBtns = document.querySelectorAll('.category-btn');
             const menuCards = document.querySelectorAll('.menu-card');
-            
+            const successModal = document.getElementById('success-modal');
+            const closeSuccessModal = document.getElementById('close-success-modal');
+
             // Add to cart functionality
             document.querySelectorAll('.add-to-cart').forEach(button => {
                 button.addEventListener('click', function() {
                     const id = this.dataset.id;
                     const name = this.dataset.name;
                     const price = parseInt(this.dataset.price);
-                    
+
                     // Check if item already in cart
                     const existingItem = cart.find(item => item.id === id);
-                    
+
                     if (existingItem) {
                         existingItem.quantity += 1;
                     } else {
@@ -409,32 +430,31 @@
                             quantity: 1
                         });
                     }
-                    
+
                     updateCart();
                     showNotification(`${name} ditambahkan ke keranjang`);
-                    
-                    // Open chat if closed
-                    if (!chatContainer.classList.contains('open')) {
-                        chatContainer.classList.add('open');
-                    }
+
+                    // Always open cart when item is added
+                    chatContainer.classList.remove('translate-x-full');
+                    chatContainer.classList.add('translate-x-0');
                 });
             });
-            
+
             // Update cart display
             function updateCart() {
                 const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
                 const totalAmount = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-                
+
                 // Update cart count
                 cartCount.textContent = totalItems;
-                
+
                 // Update cart total
                 cartTotal.textContent = parseInt(totalAmount).toLocaleString('id-ID');
                 if (modalTotal) modalTotal.textContent = parseInt(totalAmount).toLocaleString('id-ID');
-                
+
                 // Enable/disable checkout button
                 checkoutBtn.disabled = cart.length === 0;
-                
+
                 // Update cart items
                 if (cart.length === 0) {
                     chatBody.innerHTML = `
@@ -449,42 +469,42 @@
                     cart.forEach(item => {
                         const itemTotal = item.price * item.quantity;
                         const orderItem = document.createElement('div');
-                        orderItem.className = 'order-item';
+                        orderItem.className = 'flex justify-between items-center py-3 border-b border-gray-100 last:border-b-0';
                         orderItem.innerHTML = `
                             <div>
                                 <h4 class="font-medium">${item.name}</h4>
                                 <p class="text-sm text-gray-600">Rp ${parseInt(item.price).toLocaleString('id-ID')} x ${item.quantity}</p>
                             </div>
                             <div class="flex items-center space-x-2">
-                                <span class="font-bold text-primary">Rp ${parseInt(itemTotal).toLocaleString('id-ID')}</span>
+                                <span class="font-bold text-gray-900">Rp ${parseInt(itemTotal).toLocaleString('id-ID')}</span>
                                 <div class="flex items-center space-x-1">
-                                    <button class="decrease-item w-6 h-6 bg-gray-200 rounded text-sm hover:bg-gray-300" data-id="${item.id}">-</button>
-                                    <button class="increase-item w-6 h-6 bg-gray-200 rounded text-sm hover:bg-gray-300" data-id="${item.id}">+</button>
-                                    <button class="remove-item text-red-500 hover:text-red-700" data-id="${item.id}">
-                                        <i class="fas fa-trash"></i>
+                                    <button class="decrease-item w-7 h-7 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium transition-colors" data-id="${item.id}">-</button>
+                                    <button class="increase-item w-7 h-7 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium transition-colors" data-id="${item.id}">+</button>
+                                    <button class="remove-item text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded transition-colors" data-id="${item.id}">
+                                        <i class="fas fa-trash text-sm"></i>
                                     </button>
                                 </div>
                             </div>
                         `;
                         chatBody.appendChild(orderItem);
                     });
-                    
+
                     // Add event listeners to cart item buttons
                     document.querySelectorAll('.decrease-item').forEach(button => {
                         button.addEventListener('click', function() {
                             const id = this.dataset.id;
                             const item = cart.find(item => item.id === id);
-                            
+
                             if (item.quantity > 1) {
                                 item.quantity -= 1;
                             } else {
                                 cart = cart.filter(item => item.id !== id);
                             }
-                            
+
                             updateCart();
                         });
                     });
-                    
+
                     document.querySelectorAll('.increase-item').forEach(button => {
                         button.addEventListener('click', function() {
                             const id = this.dataset.id;
@@ -493,7 +513,7 @@
                             updateCart();
                         });
                     });
-                    
+
                     document.querySelectorAll('.remove-item').forEach(button => {
                         button.addEventListener('click', function() {
                             const id = this.dataset.id;
@@ -504,36 +524,50 @@
                     });
                 }
             }
-            
-            // Toggle chat container
+
+            // Toggle cart sidebar
             chatBubble.addEventListener('click', function() {
-                chatContainer.classList.toggle('open');
+                if (chatContainer.classList.contains('translate-x-full')) {
+                    chatContainer.classList.remove('translate-x-full');
+                    chatContainer.classList.add('translate-x-0');
+                } else {
+                    chatContainer.classList.add('translate-x-full');
+                    chatContainer.classList.remove('translate-x-0');
+                }
             });
-            
-            // Close chat container
+
+            // Close cart sidebar
             closeChat.addEventListener('click', function() {
-                chatContainer.classList.remove('open');
+                chatContainer.classList.add('translate-x-full');
+                chatContainer.classList.remove('translate-x-0');
             });
-            
+
             // Toggle history panel
             historyBtn.addEventListener('click', function() {
-                historyPanel.classList.toggle('open');
+                if (historyPanel.classList.contains('translate-x-full')) {
+                    historyPanel.classList.remove('translate-x-full');
+                    historyPanel.classList.add('translate-x-0');
+                } else {
+                    historyPanel.classList.add('translate-x-full');
+                    historyPanel.classList.remove('translate-x-0');
+                }
             });
-            
+
             // Close history panel
             closeHistory.addEventListener('click', function() {
-                historyPanel.classList.remove('open');
+                historyPanel.classList.add('translate-x-full');
+                historyPanel.classList.remove('translate-x-0');
             });
-            
+
             // Tab functionality
             tabs.forEach(tab => {
                 tab.addEventListener('click', function() {
                     const tabName = this.dataset.tab;
-                    
+
                     // Update active tab
                     tabs.forEach(t => t.classList.remove('active'));
                     this.classList.add('active');
-                    
+
                     // Show corresponding content
                     document.querySelectorAll('.tab-content').forEach(content => {
                         content.classList.remove('active');
@@ -541,17 +575,17 @@
                     document.getElementById(`${tabName}-tab`).classList.add('active');
                 });
             });
-            
+
             // Checkout button
             checkoutBtn.addEventListener('click', function() {
                 orderModal.classList.remove('hidden');
             });
-            
+
             // Cancel order
             cancelOrder.addEventListener('click', function() {
                 orderModal.classList.add('hidden');
             });
-            
+
             // Confirm order
             confirmOrder.addEventListener('click', function() {
                 const customerName = document.getElementById('customer-name').value;
@@ -559,27 +593,32 @@
                     showNotification('Harap masukkan nama pemesan', 'error');
                     return;
                 }
-                
+
                 // Prepare order data
                 const orderData = {
                     customer_name: customerName,
                     items: cart,
                     total: cart.reduce((total, item) => total + (parseInt(item.price) * item.quantity), 0)
                 };
-                
+
                 // Send order to server
                 sendOrderToServer(orderData);
             });
-            
+
+            // Close success modal
+            closeSuccessModal.addEventListener('click', function() {
+                successModal.classList.add('hidden');
+            });
+
             // Category filter functionality
             categoryBtns.forEach(btn => {
                 btn.addEventListener('click', function() {
                     const category = this.dataset.category;
-                    
+
                     // Update active button
                     categoryBtns.forEach(b => b.classList.remove('active', 'bg-primary', 'text-white'));
                     this.classList.add('active', 'bg-primary', 'text-white');
-                    
+
                     // Filter menu items
                     menuCards.forEach(card => {
                         if (category === 'all' || card.dataset.category === category) {
@@ -590,94 +629,104 @@
                     });
                 });
             });
-            
+
             // Function to send order to server
             function sendOrderToServer(orderData) {
                 // Add CSRF token
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                
+
                 fetch('{{ route("customer.order") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken || '',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(orderData)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        orderModal.classList.add('hidden');
-                        showNotification('Pesanan berhasil dikirim! Status: Pending Payment', 'success');
-                        
-                        // Clear cart
-                        cart = [];
-                        updateCart();
-                        
-                        // Close chat
-                        chatContainer.classList.remove('open');
-                        
-                        // Reset form
-                        document.getElementById('customer-name').value = '';
-                        
-                        // Re-enable checkout button for future orders
-                        checkoutBtn.disabled = true;
-                    } else {
-                        showNotification('Gagal mengirim pesanan: ' + (data.message || 'Unknown error'), 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('Terjadi kesalahan saat mengirim pesanan', 'error');
-                });
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken || '',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(orderData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Hide order modal
+                            orderModal.classList.add('hidden');
+
+                            // Show success modal with order details
+                            const customerName = document.getElementById('customer-name').value;
+                            const totalAmount = cart.reduce((total, item) => total + (parseInt(item.price) * item.quantity), 0);
+
+                            document.getElementById('success-customer-name').textContent = customerName;
+                            document.getElementById('success-total').textContent = parseInt(totalAmount).toLocaleString('id-ID');
+
+                            successModal.classList.remove('hidden');
+
+                            // Clear cart
+                            cart = [];
+                            updateCart();
+
+                            // Close cart
+                            chatContainer.classList.add('translate-x-full');
+                            chatContainer.classList.remove('translate-x-0');
+
+                            // Reset form
+                            document.getElementById('customer-name').value = '';
+
+                            // Re-enable checkout button for future orders
+                            checkoutBtn.disabled = true;
+                        } else {
+                            showNotification('Gagal mengirim pesanan: ' + (data.message || 'Unknown error'), 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('Terjadi kesalahan saat mengirim pesanan', 'error');
+                    });
             }
-            
+
             // Load favorites functionality
             document.getElementById('load-favorites').addEventListener('click', function() {
                 loadFavorites();
             });
-            
+
             // Load favorites from server
             function loadFavorites() {
                 const favoritesContent = document.getElementById('favorites-content');
                 favoritesContent.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i><p class="mt-2 text-gray-500">Memuat favorit...</p></div>';
-                
+
                 fetch(`{{ route('customer.history') }}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.favorites.length > 0) {
-                        displayFavorites(data.favorites);
-                    } else {
-                        favoritesContent.innerHTML = `
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.favorites.length > 0) {
+                            displayFavorites(data.favorites);
+                        } else {
+                            favoritesContent.innerHTML = `
                             <div class="text-center py-10 text-gray-500">
                                 <i class="fas fa-heart-broken text-3xl mb-3"></i>
                                 <p class="font-medium">Belum ada item favorit</p>
                                 <p class="text-sm mt-1">Lakukan pemesanan untuk membuat daftar favorit</p>
                             </div>
                         `;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    favoritesContent.innerHTML = `
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        favoritesContent.innerHTML = `
                         <div class="text-center py-10 text-red-500">
                             <i class="fas fa-exclamation-triangle text-3xl mb-3"></i>
                             <p class="font-medium">Gagal memuat favorit</p>
                             <p class="text-sm mt-1">Silakan coba lagi</p>
                         </div>
                     `;
-                });
+                    });
             }
-            
+
             // Display favorites
             function displayFavorites(favorites) {
                 const favoritesContent = document.getElementById('favorites-content');
                 favoritesContent.innerHTML = '';
-                
+
                 favorites.forEach((item, index) => {
                     const favoriteItem = document.createElement('div');
-                    favoriteItem.className = 'bg-gray-50 rounded-lg p-4 mb-3';
+                    favoriteItem.className = 'bg-gray-50 rounded-lg p-4 mb-3 border border-gray-200 hover:bg-gray-100 transition-colors';
                     favoriteItem.innerHTML = `
                         <div class="flex items-center justify-between">
                             <div class="flex-1">
@@ -688,29 +737,33 @@
                                     Dipesan ${item.total_ordered}x dalam ${item.order_count} pesanan
                                 </p>
                             </div>
-                            <button class="add-favorite-to-cart bg-primary text-white px-3 py-2 rounded-lg text-sm hover:bg-dark transition" 
-                                    data-id="${item.product.id}" 
-                                    data-name="${item.product.name}" 
-                                    data-price="${item.product.price}"
-                                    ${item.product.stock <= 0 ? 'disabled' : ''}>
-                                <i class="fas fa-plus mr-1"></i> 
-                                ${item.product.stock <= 0 ? 'Habis' : 'Tambah'}
-                            </button>
+                            ${item.product.stock > 0 ? `
+                                <button class="add-favorite-to-cart bg-coffee-medium hover:bg-coffee-dark text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors" 
+                                        data-id="${item.product.id}" 
+                                        data-name="${item.product.name}" 
+                                        data-price="${item.product.price}">
+                                    <i class="fas fa-plus mr-1"></i>Tambah
+                                </button>
+                            ` : `
+                                <span class="text-gray-400 text-sm font-medium">
+                                    Habis
+                                </span>
+                            `}
                         </div>
                     `;
                     favoritesContent.appendChild(favoriteItem);
                 });
-                
+
                 // Add event listeners to favorite buttons
                 document.querySelectorAll('.add-favorite-to-cart').forEach(button => {
                     button.addEventListener('click', function() {
                         const id = this.dataset.id;
                         const name = this.dataset.name;
                         const price = parseInt(this.dataset.price);
-                        
+
                         // Check if item already in cart
                         const existingItem = cart.find(item => item.id === id);
-                        
+
                         if (existingItem) {
                             existingItem.quantity += 1;
                         } else {
@@ -721,18 +774,17 @@
                                 quantity: 1
                             });
                         }
-                        
+
                         updateCart();
                         showNotification(`${name} ditambahkan ke keranjang dari favorit`);
-                        
-                        // Open chat if closed
-                        if (!chatContainer.classList.contains('open')) {
-                            chatContainer.classList.add('open');
-                        }
+
+                        // Always open cart when item is added from favorites
+                        chatContainer.classList.remove('translate-x-full');
+                        chatContainer.classList.add('translate-x-0');
                     });
                 });
             }
-            
+
             // Show notification
             function showNotification(message, type = 'success') {
                 // Remove existing notification if any
@@ -740,21 +792,21 @@
                 if (existingNotification) {
                     existingNotification.remove();
                 }
-                
+
                 const notification = document.createElement('div');
                 notification.className = `fixed-notification fixed top-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50 transform transition-transform duration-300 ${
                     type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
                 }`;
                 notification.textContent = message;
-                
+
                 document.body.appendChild(notification);
-                
+
                 // Animate in
                 setTimeout(() => {
                     notification.classList.remove('translate-y-[-100px]');
                     notification.classList.add('translate-y-0');
                 }, 10);
-                
+
                 // Remove after 3 seconds
                 setTimeout(() => {
                     notification.classList.remove('translate-y-0');
@@ -767,4 +819,5 @@
         });
     </script>
 </body>
+
 </html>

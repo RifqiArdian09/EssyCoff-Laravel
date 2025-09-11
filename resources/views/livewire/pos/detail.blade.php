@@ -107,151 +107,191 @@
         </flux:button>
     </div>
 
-    <!-- STRUK (Hanya muncul saat dicetak, tidak terlihat di layar) -->
-    <div id="struk" class="print-only">
-        <div class="receipt-content">
-            <div class="text-center mb-3">
-                <h2 class="text-xl font-bold">EssyCoff</h2>
-                <p class="text-xs text-gray-600">Jl. Jati No.41, Padang Jati, Kota Bengkulu</p>
+    @php
+    $width = $receiptWidth ?? '80mm'; // Default 80mm, bisa diubah jadi '58mm'
+    $fontSize = $width === '58mm' ? '10px' : '12px';
+    $padding = $width === '58mm' ? '8px' : '10px';
+    @endphp
+
+    <div
+        id="receipt-content"
+        class="hidden print:block bg-white text-black absolute left-0 top-0"
+        style="width: {{ $width }}; padding: {{ $padding }}; font-family: 'Courier New', monospace; font-size: {{ $fontSize }}; line-height: 1.3;">
+        <div class="receipt-layout space-y-1">
+            <!-- Header -->
+            <div class="text-center mb-2">
+                <h2 class="font-bold text-lg" style="font-size: {{ $width === '58mm' ? '14px' : '16px' }}; margin-bottom: 4px;">
+                    EssyCoff
+                </h2>
+                <p class="text-[9px] leading-tight">Jl. Jati No.41, Padang Jati, Kota Bengkulu</p>
+                <p class="text-[9px]">Telp: (0736) 1234567</p>
             </div>
 
-            <hr class="my-2 border-dashed border-gray-400">
+            <hr class="my-1 border-dashed border-black" style="border-top: 1px dashed #000; margin: 4px 0;">
 
-            <div class="space-y-1.5 mb-3 text-xs">
-                <p><strong>No.:</strong> {{ $order->no_order }}</p>
-                <p><strong>Kasir:</strong> {{ $order->user?->name ?? '-' }}</p>
-                <p><strong>Tanggal:</strong> {{ $order->created_at->format('d M, H:i') }}</p>
+            <!-- Order Info -->
+            <div class="space-y-0.5 mb-2 text-[9px]">
+                <div class="flex justify-between">
+                    <span class="font-medium">No. order:</span>
+                    <span>{{ $order->no_order }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-medium">Kasir:</span>
+                    <span>{{ $order->user?->name ?? 'System' }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-medium">Tanggal:</span>
+                    <span>{{ $order->created_at->format('d/m/Y H:i') }}</span>
+                </div>
             </div>
 
-            <hr class="my-2 border-dashed border-gray-400">
+            <hr class="my-1 border-dashed border-black" style="border-top: 1px dashed #000; margin: 4px 0;">
 
-            <div class="space-y-1">
+            <!-- Items -->
+            <div class="space-y-1 mb-2">
                 @foreach($order->items as $item)
-                    <div class="flex justify-between">
-                        <span>{{ Str::limit($item->product?->name, 15) }} × {{ $item->qty }}</span>
-                        <span>Rp {{ number_format($item->subtotal, 0, ',', '.') }}</span>
+                <div class="flex justify-between text-[9px]" style="font-size: {{ $width === '58mm' ? '8px' : '10px' }};">
+                    <div>
+                        <span class="font-medium">{{ $item->product?->name ?? 'Produk dihapus' }}</span>
+                        <div class="text-[8px] text-gray-600">
+                            {{ $item->quantity ?? $item->qty }} × Rp {{ number_format($item->harga ?? $item->price, 0, ',', '.') }}
+                        </div>
                     </div>
+                    <div class="text-right">
+                        <div>Rp {{ number_format($item->subtotal, 0, ',', '.') }}</div>
+                        @if($item->note)
+                        <div class="text-[7px] italic">Catatan: {{ $item->note }}</div>
+                        @endif
+                    </div>
+                </div>
                 @endforeach
             </div>
 
-            <hr class="my-2 border-dashed border-gray-400">
+            <hr class="my-1 border-dashed border-black" style="border-top: 1px dashed #000; margin: 4px 0;">
 
-            <div class="space-y-1 font-semibold">
+            <!-- Summary -->
+            <div class="space-y-0.5 font-semibold text-[9px]">
                 <div class="flex justify-between">
-                    <span>Total</span>
+                    <span>Subtotal</span>
                     <span>Rp {{ number_format($order->total, 0, ',', '.') }}</span>
                 </div>
-                @if($order->uang_dibayar)
+                @if($order->discount > 0)
                 <div class="flex justify-between">
+                    <span>Diskon</span>
+                    <span class="text-red-600">- Rp {{ number_format($order->discount, 0, ',', '.') }}</span>
+                </div>
+                @endif
+                @if($order->tax > 0)
+                <div class="flex justify-between">
+                    <span>Pajak ({{ $order->tax }}%)</span>
+                    <span>Rp {{ number_format(($order->total * $order->tax) / 100, 0, ',', '.') }}</span>
+                </div>
+                @endif
+                @if($order->service_charge > 0)
+                <div class="flex justify-between">
+                    <span>Service Charge ({{ $order->service_charge }}%)</span>
+                    <span>Rp {{ number_format(($order->total * $order->service_charge) / 100, 0, ',', '.') }}</span>
+                </div>
+                @endif
+                <div class="flex justify-between font-bold pt-1 mt-1 border-t border-black" style="font-size: {{ $width === '58mm' ? '10px' : '12px' }};">
+                    <span>Total</span>
+                    <span>Rp {{ number_format($order->grand_total ?? $order->total, 0, ',', '.') }}</span>
+                </div>
+
+                @if($order->uang_dibayar !== null)
+                <div class="flex justify-between pt-1 border-t border-black mt-1">
                     <span>Tunai</span>
                     <span>Rp {{ number_format($order->uang_dibayar, 0, ',', '.') }}</span>
                 </div>
                 @endif
-                @if($order->kembalian !== null)
+
+                {{-- Selalu tampilkan kembalian, meskipun 0 --}}
                 <div class="flex justify-between">
                     <span>Kembali</span>
-                    <span>Rp {{ number_format($order->kembalian, 0, ',', '.') }}</span>
+                    <span>Rp {{ number_format($order->kembalian ?? 0, 0, ',', '.') }}</span>
                 </div>
-                @endif
             </div>
 
-            <div class="text-center mt-4">
-                <p class="font-medium">Terima Kasih!</p>
-                <p class="text-gray-600">~ EssyCoff ~</p>
+            <!-- Footer -->
+            <div class="text-center mt-3 text-[8px] text-gray-600">
+                <p>Terima kasih atas kunjungan Anda</p>
+                <p class="mt-0.5">~ EssyCoff ~</p>
+                <p class="mt-1 text-[7px]">*Struk ini sebagai bukti pembayaran yang sah</p>
             </div>
         </div>
     </div>
 
-    <!-- CSS untuk cetak -->
+    <!-- ✅ CSS Print untuk 58mm & 80mm -->
     <style>
-        .print-only {
-            display: none;
-        }
-        
         @media print {
-            /* Hide everything */
+            @page {
+                margin: 0;
+                padding: 0;
+            }
+
+            /* Sembunyikan semua elemen */
             body * {
                 visibility: hidden;
             }
-            
-            /* Show only receipt */
-            .print-only, .print-only * {
+
+            /* Tampilkan hanya struk */
+            #receipt-content,
+            #receipt-content * {
                 visibility: visible;
             }
-            
-            .print-only {
-                display: block !important;
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: white;
-                z-index: 9999;
+
+            /* Atur ukuran dan gaya struk */
+            #receipt-content {
+                position: absolute !important;
+                top: 0 !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                /* biar rata tengah */
+                margin: 0 auto !important;
+                box-shadow: none !important;
+                border: none !important;
+                border-radius: 0 !important;
+                background: white !important;
+                color: black !important;
+                page-break-after: always;
+                width: 58mm !important;
+                /* ubah jadi 58mm biar kecil */
+                padding: 6px !important;
+                /* padding lebih kecil */
+                font-size: 10px !important;
+                /* font ikut kecil */
             }
-            
-            .receipt-content {
-                width: 80mm;
-                max-width: 80mm;
-                margin: 0 auto;
-                padding: 10mm;
-                font-family: 'Courier New', monospace;
-                font-size: 12px;
-                line-height: 1.4;
-                color: black;
-                background: white;
-            }
-            
-            .receipt-content .text-xl {
-                font-size: 16px;
-            }
-            
-            .receipt-content .text-xs {
-                font-size: 10px;
-            }
-            
-            .receipt-content hr {
-                border: none;
-                border-top: 1px dashed #000;
-                margin: 8px 0;
-            }
-            
-            .receipt-content .flex {
-                display: flex;
-            }
-            
-            .receipt-content .justify-between {
-                justify-content: space-between;
-            }
-            
-            .receipt-content .text-center {
-                text-align: center;
-            }
-            
-            .receipt-content .font-bold {
-                font-weight: bold;
-            }
-            
-            .receipt-content .font-medium {
-                font-weight: 500;
-            }
-            
-            .receipt-content .font-semibold {
-                font-weight: 600;
-            }
-            
-            @page {
-                size: 80mm auto;
+
+
+            /* Reset gaya dalam struk */
+            #receipt-content * {
+                box-sizing: border-box;
                 margin: 0;
+                padding: 0;
+                border: none;
+                background: transparent;
+                color: black !important;
+                text-decoration: none;
+                float: none;
+                page-break-inside: avoid;
+            }
+
+            /* Gaya khusus untuk print */
+            .receipt-layout hr {
+                border: none !important;
+                border-top: 1px dashed #000 !important;
             }
         }
     </style>
 
-    <!-- Script: Trigger print saat event -->
+    <!-- ✅ Script Print dengan Delay -->
     <script>
         document.addEventListener('livewire:init', () => {
             Livewire.on('printReceipt', () => {
-                window.print();
+                window.scrollTo(0, 0);
+                setTimeout(() => {
+                    window.print();
+                }, 500); // Delay agar Livewire selesai render
             });
         });
     </script>

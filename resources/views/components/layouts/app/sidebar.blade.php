@@ -52,7 +52,6 @@
                     :href="route('products.index')" 
                     :current="request()->routeIs('products.*')" 
                     wire:navigate
-                    badge="{{ $stockBadge }}"
                     class="relative">
                     {{ __('Products') }}
                 </flux:navlist.item>
