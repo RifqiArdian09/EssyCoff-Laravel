@@ -197,7 +197,9 @@
     <header class="bg-primary text-white shadow-md">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-3">
-                <i class="fas fa-coffee text-3xl"></i>
+                <div class="w-16 h-16 flex items-center justify-center rounded-full bg-white shadow-md">
+                    <img src="{{ asset('images/logo.png') }}" alt="EssyCoff Logo" class="w-16 h-16 animate-pulse-slow">
+                </div>
                 <h1 class="text-2xl font-bold">EssyCoff</h1>
             </div>
             <button id="history-btn" class="px-4 py-2 bg-white bg-opacity-20 rounded-lg hover:bg-opacity-30 transition">

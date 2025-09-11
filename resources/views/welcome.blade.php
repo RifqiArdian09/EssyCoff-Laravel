@@ -1,92 +1,81 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EssyCoff - Selamat Datang</title>
+    <title>EssyCoff - Home</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#6f4e37',
-                        secondary: '#c0a080',
-                        accent: '#e7c9a9',
-                        dark: '#4a3c2d',
-                    },
-                    fontFamily: {
-                        'inter': ['Inter', 'sans-serif'],
-                    },
-                    animation: {
-                        'fade-in-up': 'fadeInUp 1s ease-out',
-                        'fade-in-up-delay-1': 'fadeInUp 1s ease-out 0.3s both',
-                        'fade-in-up-delay-2': 'fadeInUp 1s ease-out 0.6s both',
-                        'bounce-slow': 'bounce 3s infinite',
-                        'pulse-slow': 'pulse 4s infinite',
-                    },
-                    keyframes: {
-                        fadeInUp: {
-                            '0%': {
-                                opacity: '0',
-                                transform: 'translateY(30px)',
-                            },
-                            '100%': {
-                                opacity: '1',
-                                transform: 'translateY(0)',
-                            },
-                        }
+                        'coffee-dark': '#2A1A0A',
+                        'coffee-medium': '#3E2813',
+                        'coffee-light': '#523728',
+                        'coffee-gold': '#D4A76A',
+                        'coffee-cream': '#F5F5F5',
                     }
                 }
             }
         }
     </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #2A1A0A;
+        }
+        .logo-text {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            background: linear-gradient(135deg, #D4A76A 0%, #BF8B45 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
 </head>
-<body class="font-inter bg-gradient-to-br from-primary to-secondary min-h-screen flex items-center justify-center">
-    <div class="text-center max-w-md mx-auto px-6">
-        <!-- Logo Container -->
-        <div class="animate-fade-in-up mb-8">
-            <div class="relative inline-block">
-                <img src="{{ asset('images/logo.png') }}" alt="EssyCoff Logo" class="w-32 h-32 mx-auto mb-4 animate-pulse-slow">
-                <!-- Coffee Steam Animation -->
-                <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-4">
-                    <div class="w-0.5 h-5 bg-white bg-opacity-30 rounded-full animate-bounce-slow absolute left-2"></div>
-                    <div class="w-0.5 h-5 bg-white bg-opacity-30 rounded-full animate-bounce-slow absolute left-1/2 transform -translate-x-1/2" style="animation-delay: 0.5s;"></div>
-                    <div class="w-0.5 h-5 bg-white bg-opacity-30 rounded-full animate-bounce-slow absolute right-2" style="animation-delay: 1s;"></div>
+<body class="min-h-screen flex items-center justify-center pt-6">
+    <div class="w-full max-w-4xl mx-auto text-center flex flex-col justify-between min-h-[90vh] py-8">
+        <div>
+            <div class="mb-6 animate-bounce">
+                <i class="fas fa-mug-hot text-7xl text-coffee-gold"></i>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-coffee-cream mb-6 leading-tight">
+                Selamat Datang di <span class="logo-text">EssyCoff</span>
+            </h1>
+
+            <p class="text-lg md:text-xl text-coffee-gold mb-10 max-w-2xl mx-auto">
+                Temukan kenikmatan kopi terbaik dengan cara yang mudah.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div class="bg-coffee-light p-6 rounded-xl shadow-lg">
+                    <i class="fas fa-coffee text-coffee-gold text-2xl mb-3"></i>
+                    <h3 class="text-coffee-gold font-semibold text-lg mb-2">Kopi Premium</h3>
+                    <p class="text-coffee-cream text-sm opacity-80">Biji pilihan terbaik dengan racikan khusus barista kami</p>
+                </div>
+                <div class="bg-coffee-light p-6 rounded-xl shadow-lg">
+                    <i class="fas fa-bolt text-coffee-gold text-2xl mb-3"></i>
+                    <h3 class="text-coffee-gold font-semibold text-lg mb-2">Pesan Cepat</h3>
+                    <p class="text-coffee-cream text-sm opacity-80">Tanpa antri, cukup pesan dari genggaman tangan</p>
+                </div>
+                <div class="bg-coffee-light p-6 rounded-xl shadow-lg">
+                    <i class="fas fa-tag text-coffee-gold text-2xl mb-3"></i>
+                    <h3 class="text-coffee-gold font-semibold text-lg mb-2">Promo Spesial</h3>
+                    <p class="text-coffee-cream text-sm opacity-80">Penawaran menarik setiap hari untuk pelanggan setia</p>
                 </div>
             </div>
-            <h1 class="text-4xl font-bold text-white mb-2">EssyCoff</h1>
-            <p class="text-white text-opacity-90 text-lg">Kopi Berkualitas untuk Hari yang Sempurna</p>
         </div>
-        
-        <!-- Welcome Text -->
-        <div class="animate-fade-in-up-delay-1 mb-8">
-            <h2 class="text-2xl font-semibold text-white mb-4">Selamat Datang!</h2>
-            <p class="text-white text-opacity-80 leading-relaxed">
-                Nikmati pengalaman kopi terbaik dengan berbagai pilihan menu yang menggugah selera. 
-                Bergabunglah dengan kami untuk memulai perjalanan rasa yang tak terlupakan.
+
+        <div>
+            <button class="w-full max-w-sm py-4 bg-gradient-to-r from-coffee-gold to-amber-700 text-coffee-dark font-bold text-base rounded-lg shadow-md hover:scale-105 transition-all">
+                Mulai Pesanan <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+            <p class="text-xs text-coffee-gold mt-6 opacity-70">
+                Dengan melanjutkan, Anda menyetujui Syarat & Ketentuan kami
             </p>
         </div>
-        
-        <!-- Login Button -->
-        <div class="animate-fade-in-up-delay-2">
-            <a href="{{ route('login') }}" class="inline-flex items-center justify-center w-full bg-white text-primary font-semibold py-4 px-8 rounded-xl shadow-lg hover:bg-gray-50 hover:-translate-y-0.5 hover:shadow-2xl transition-all duration-300 transform">
-                <i class="fas fa-sign-in-alt mr-3"></i>
-                Masuk ke Akun Anda
-            </a>
-        </div>
-    </div>
-    
-    <!-- Background Decoration -->
-    <div class="fixed inset-0 pointer-events-none overflow-hidden">
-        <div class="absolute top-10 left-10 w-20 h-20 bg-white bg-opacity-10 rounded-full animate-pulse"></div>
-        <div class="absolute top-1/4 right-16 w-16 h-16 bg-white bg-opacity-5 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
-        <div class="absolute bottom-1/4 left-1/4 w-12 h-12 bg-white bg-opacity-10 rounded-full animate-pulse" style="animation-delay: 2s;"></div>
-        <div class="absolute bottom-16 right-1/3 w-8 h-8 bg-white bg-opacity-5 rounded-full animate-pulse" style="animation-delay: 3s;"></div>
-        <div class="absolute top-1/2 left-8 w-6 h-6 bg-white bg-opacity-5 rounded-full animate-bounce" style="animation-delay: 1.5s;"></div>
-        <div class="absolute top-3/4 right-8 w-10 h-10 bg-white bg-opacity-10 rounded-full animate-bounce" style="animation-delay: 2.5s;"></div>
     </div>
 </body>
 </html>
