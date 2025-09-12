@@ -78,15 +78,12 @@
                 </div>
                
             </div>
-        </div>
-
-        <div>
-            <a href="{{ route('customer') }}" class="inline-block w-full max-w-sm mx-auto px-8 py-4 bg-gradient-to-r from-coffee-gold to-amber-700 text-coffee-dark font-bold text-lg text-center rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transform transition-all duration-300 ease-in-out" data-aos="fade-up" data-aos-delay="1000" data-aos-duration="800">
-                Mulai Pesanan <i class="fas fa-arrow-right ml-2"></i>
-            </a>
-            <p class="text-xs text-coffee-gold mt-6 opacity-70" data-aos="fade-in" data-aos-delay="1200" data-aos-duration="600">
-                Dengan melanjutkan, Anda menyetujui Syarat & Ketentuan kami
-            </p>
+            
+            <div class="text-center mt-8">
+                <a href="{{ route('customer') }}" class="inline-block w-full max-w-sm mx-auto px-8 py-4 bg-gradient-to-r from-coffee-gold to-amber-700 text-coffee-dark font-bold text-lg text-center rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transform transition-all duration-300 ease-in-out" data-aos="fade-up" data-aos-delay="1000" data-aos-duration="800">
+                    Mulai Pesanan <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
         </div>
     </div>
 
