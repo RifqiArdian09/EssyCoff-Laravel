@@ -156,7 +156,7 @@
                         <i class="fas fa-search text-gray-400"></i>
                     </div>
                     <input type="text" name="search" value="{{ $search ?? '' }}"
-                        placeholder="Cari menu favorit Anda..."
+                        placeholder="Cari menu ..."
                         class="block w-full pl-12 pr-20 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-coffee-gold focus:border-coffee-gold text-lg placeholder-gray-400 shadow-md focus:shadow-lg transition-shadow">
                     <input type="hidden" name="category" value="{{ $category ?? 'all' }}">
                     <button type="submit" class="absolute inset-y-0 right-0 flex items-center px-6 bg-coffee-medium hover:bg-coffee-dark text-white rounded-r-xl transition-colors">
