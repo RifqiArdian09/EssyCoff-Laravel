@@ -178,18 +178,6 @@ new #[Layout('components.layouts.auth')] class extends Component {
         </button>
     </form>
 
-    <!-- Register Link -->
-    @if (Route::has('register'))
-        <div class="text-center pt-4 border-t border-secondary">
-
-            <a href="{{ route('register') }}" 
-               wire:navigate>
-                <i class="fas fa-user-plus mr-2"></i>
-                Daftar Sekarang
-            </a>
-        </div>
-    @endif
-
     <!-- Back to Home -->
     <div class="text-center">
         <a href="{{ url('/') }}" 
