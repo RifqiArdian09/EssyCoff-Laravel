@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Auth\Events\Lockout;
@@ -81,15 +82,12 @@ new #[Layout('components.layouts.auth')] class extends Component {
     }
 }; ?>
 
+
 <div class="flex flex-col gap-6">
-    <!-- Header -->
-    <div class="text-center mb-6">
-        <h1 class="text-3xl font-bold text-primary mb-2">
-            <i class="fas fa-sign-in-alt mr-2"></i>
-            Masuk ke Akun Anda
-        </h1>
-        <p class="text-gray-600">Masukkan email dan password untuk melanjutkan</p>
-    </div>
+        <div class="flex flex-col items-center gap-2">
+            <img src="{{ asset('images/tanpajudul.png') }}" alt="EssyCoff Logo" class="w-30 h-30 sm:w-28 sm:h-28">
+
+        </div>
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />
@@ -109,9 +107,9 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 autofocus
                 autocomplete="email"
                 placeholder="contoh@email.com"
-                class="w-full px-4 py-3 border border-secondary rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 bg-accent bg-opacity-30 hover:bg-white"
-            />
-            @error('email')
+ class="w-full px-4 py-3 border border-secondary rounded-xl transition-all duration-200 
+           bg-accent bg-opacity-30 text-dark hover:bg-black focus:bg-black focus:text-white focus:ring-2 focus:ring-primary focus:border-primary">
+                       @error('email')
                 <p class="text-red-600 text-sm mt-1">
                     <i class="fas fa-exclamation-circle mr-1"></i>
                     {{ $message }}
@@ -142,9 +140,8 @@ new #[Layout('components.layouts.auth')] class extends Component {
                     required
                     autocomplete="current-password"
                     placeholder="Masukkan password"
-                    class="w-full px-4 py-3 border border-secondary rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 bg-accent bg-opacity-30 hover:bg-white pr-12"
-                />
-                <button type="button" 
+ class="w-full px-4 py-3 border border-secondary rounded-xl transition-all duration-200 
+           bg-accent bg-opacity-30 text-dark hover:bg-black focus:bg-black focus:text-white focus:ring-2 focus:ring-primary focus:border-primary"                <button type="button" 
                         onclick="togglePassword()"
                         class="absolute right-3 top-1/2 transform -translate-y-1/2 text-secondary hover:text-primary transition-colors">
                     <i class="fas fa-eye" id="toggleIcon"></i>
@@ -184,9 +181,8 @@ new #[Layout('components.layouts.auth')] class extends Component {
     <!-- Register Link -->
     @if (Route::has('register'))
         <div class="text-center pt-4 border-t border-secondary">
-            <p class="text-dark mb-3">Belum punya akun?</p>
+
             <a href="{{ route('register') }}" 
-               class="inline-flex items-center justify-center w-full bg-transparent border-2 border-primary text-primary font-medium py-3 px-6 rounded-xl hover:bg-primary hover:text-white transition-all duration-300"
                wire:navigate>
                 <i class="fas fa-user-plus mr-2"></i>
                 Daftar Sekarang
