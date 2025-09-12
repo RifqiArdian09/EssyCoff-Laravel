@@ -6,6 +6,7 @@
     <title>EssyCoff - Home</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -54,23 +55,23 @@
 <body class="min-h-screen flex items-center justify-center pt-6">
     <div class="w-full max-w-4xl mx-auto text-center flex flex-col justify-between min-h-[90vh] py-8">
         <div>
-            <div class="mb-6 animate-bounce">
+            <div class="mb-6" data-aos="zoom-in" data-aos-duration="1000">
                 <i class="fas fa-mug-hot text-7xl text-coffee-gold"></i>
             </div>
-            <h1 class="text-4xl md:text-5xl font-bold text-coffee-cream mb-6 leading-tight">
+            <h1 class="text-4xl md:text-5xl font-bold text-coffee-cream mb-6 leading-tight" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1000">
                 Selamat Datang di <span class="logo-text">EssyCoff</span>
             </h1>
 
-            <p class="text-lg md:text-xl text-coffee-gold mb-10 max-w-2xl mx-auto">
+            <p class="text-lg md:text-xl text-coffee-gold mb-10 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="400" data-aos-duration="1000">
                 Temukan kenikmatan kopi terbaik dengan cara yang mudah.
             </p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                <div class="feature-card p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                <div class="feature-card p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105" data-aos="fade-right" data-aos-delay="600" data-aos-duration="800">
                     <i class="fas fa-coffee text-coffee-gold text-2xl mb-3"></i>
                     <h3 class="text-coffee-gold font-semibold text-lg mb-2">Kopi Premium</h3>
                     <p class="text-coffee-cream text-sm opacity-90">Biji pilihan terbaik dengan racikan khusus barista kami</p>
                 </div>
-                <div class="feature-card p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                <div class="feature-card p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105" data-aos="fade-left" data-aos-delay="800" data-aos-duration="800">
                     <i class="fas fa-bolt text-coffee-gold text-2xl mb-3"></i>
                     <h3 class="text-coffee-gold font-semibold text-lg mb-2">Pesan Cepat</h3>
                     <p class="text-coffee-cream text-sm opacity-90">Tanpa antri, cukup pesan dari genggaman tangan</p>
@@ -80,13 +81,24 @@
         </div>
 
         <div>
-            <a href="{{ route('customer') }}" class="inline-block w-full max-w-sm mx-auto px-8 py-4 bg-gradient-to-r from-coffee-gold to-amber-700 text-coffee-dark font-bold text-lg text-center rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transform transition-all duration-300 ease-in-out">
+            <a href="{{ route('customer') }}" class="inline-block w-full max-w-sm mx-auto px-8 py-4 bg-gradient-to-r from-coffee-gold to-amber-700 text-coffee-dark font-bold text-lg text-center rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transform transition-all duration-300 ease-in-out" data-aos="fade-up" data-aos-delay="1000" data-aos-duration="800">
                 Mulai Pesanan <i class="fas fa-arrow-right ml-2"></i>
             </a>
-            <p class="text-xs text-coffee-gold mt-6 opacity-70">
+            <p class="text-xs text-coffee-gold mt-6 opacity-70" data-aos="fade-in" data-aos-delay="1200" data-aos-duration="600">
                 Dengan melanjutkan, Anda menyetujui Syarat & Ketentuan kami
             </p>
         </div>
     </div>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true,
+            mirror: false,
+            offset: 100
+        });
+    </script>
 </body>
 </html>

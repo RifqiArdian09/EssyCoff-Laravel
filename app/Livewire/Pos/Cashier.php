@@ -29,7 +29,44 @@ class Cashier extends Component
     {
         // Inisialisasi cart dari session jika ada
         $this->cart = session()->get('pos_cart', []);
+        $this->validateCartItems();
         $this->calculateTotal();
+    }
+
+    public function validateCartItems()
+    {
+        $validCart = [];
+        $removedItems = [];
+        
+        foreach ($this->cart as $productId => $item) {
+            $product = Product::find($productId);
+            
+            if (!$product) {
+                $removedItems[] = $item['name'];
+                continue;
+            }
+            
+            // Update stock info and adjust quantity if needed
+            if ($item['qty'] > $product->stock) {
+                if ($product->stock > 0) {
+                    $item['qty'] = $product->stock;
+                    $item['stock'] = $product->stock;
+                    $validCart[$productId] = $item;
+                } else {
+                    $removedItems[] = $item['name'];
+                }
+            } else {
+                $item['stock'] = $product->stock;
+                $validCart[$productId] = $item;
+            }
+        }
+        
+        $this->cart = $validCart;
+        session()->put('pos_cart', $this->cart);
+        
+        if (!empty($removedItems)) {
+            session()->flash('error', 'Beberapa produk dihapus dari keranjang: ' . implode(', ', $removedItems));
+        }
     }
     public function updatingSearch()
     {
@@ -185,6 +222,19 @@ class Cashier extends Component
             $orderId = $order->getKey();
             foreach ($this->cart as $productId => $item) {
                 $product = Product::find($productId);
+                
+                // Skip if product doesn't exist (was deleted)
+                if (!$product) {
+                    session()->flash('error', "Produk '{$item['name']}' tidak ditemukan. Mungkin telah dihapus.");
+                    continue;
+                }
+                
+                // Check if sufficient stock is available
+                if ($product->stock < $item['qty']) {
+                    session()->flash('error', "Stok '{$product->name}' tidak mencukupi. Tersisa {$product->stock} item.");
+                    continue;
+                }
+                
                 OrderItem::create([
                     'order_id' => $orderId,
                     'product_id' => $productId,
@@ -192,9 +242,8 @@ class Cashier extends Component
                     'harga' => $item['price'],
                     'subtotal' => $item['price'] * $item['qty']
                 ]);
-                if ($product) {
-                    $product->decrement('stock', $item['qty']);
-                }
+                
+                $product->decrement('stock', $item['qty']);
             }
             // Set lastOrder untuk ditampilkan di modal sukses
             $this->lastOrder = $order->load('items.product', 'user');

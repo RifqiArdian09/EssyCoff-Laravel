@@ -308,6 +308,12 @@
                     <span class="font-medium">Tanggal:</span>
                     <span>{{ $selectedOrder->created_at->format('d/m/Y H:i') }}</span>
                 </div>
+                @if($selectedOrder->customer_name)
+                <div class="flex justify-between">
+                    <span class="font-medium">Customer:</span>
+                    <span>{{ $selectedOrder->customer_name }}</span>
+                </div>
+                @endif
             </div>
 
             <hr class="my-1 border-dashed border-black" style="border-top: 1px dashed #000; margin: 4px 0;">

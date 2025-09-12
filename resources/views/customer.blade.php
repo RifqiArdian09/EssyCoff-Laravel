@@ -91,6 +91,36 @@
             stroke-dasharray: 100;
             stroke-dashoffset: 100;
         }
+
+        /* Hide sensitive data from print */
+        @media print {
+            #chat-container,
+            #order-modal,
+            #success-modal,
+            #clear-cart-modal,
+            #chat-bubble,
+            .fixed {
+                display: none !important;
+            }
+            
+            /* Only show the main menu content when printing */
+            body * {
+                visibility: hidden;
+            }
+            
+            main, main * {
+                visibility: visible;
+            }
+            
+            /* Hide floating elements and modals */
+            .fixed,
+            [id*="modal"],
+            [id*="chat"],
+            [id*="cart"] {
+                visibility: hidden !important;
+                display: none !important;
+            }
+        }
     </style>
 </head>
 

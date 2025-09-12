@@ -102,9 +102,8 @@
 <body>
 
     <div class="header">
-        <!-- Opsional: Logo Perusahaan -->
-        <!-- <div class="logo-placeholder"></div> -->
-        <h1>LAPORAN TRANSAKSI POS</h1>
+       
+        <h1>LAPORAN TRANSAKSI ESSYCOFF</h1>
         <div class="info">
             <strong>Periode:</strong> 
             {{ \Carbon\Carbon::parse($fromDate)->translatedFormat('d F Y') }} - 
