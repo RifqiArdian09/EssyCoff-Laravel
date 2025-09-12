@@ -24,7 +24,7 @@
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
 
         body {
             font-family: 'Inter', sans-serif;
@@ -134,7 +134,7 @@
                 <div class="w-16 h-16 bg-gradient-to-br from-coffee-gold to-coffee-medium rounded-2xl flex items-center justify-center mr-4 shadow-lg">
                     <img src="{{ asset('images/logo2.png') }}" alt="EssyCoff Logo" class="w-10 h-10 rounded-xl">
                 </div>
-                <h1 class="text-4xl sm:text-5xl font-bold text-gray-900">
+                <h1 class="text-4xl sm:text-5xl font-bold" style="font-family: 'Playfair Display', serif;">
                     <span class="text-coffee-gold">EssyCoff</span>
                 </h1>
             </div>

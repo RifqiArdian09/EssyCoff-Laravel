@@ -32,13 +32,13 @@
 
         <!-- Right Side - Form -->
         
-        <div class="flex w-full items-center justify-center bg-white">
+        <div class="flex w-full items-center justify-center bg-white p-6 lg:p-8">
          
-            <div class="mx-auto w-full sm:w-[400px] flex flex-col justify-center space-y-6">
+            <div class="mx-auto w-full sm:w-[500px] lg:w-[550px] flex flex-col justify-center space-y-8">
                 <!-- Mobile Logo -->
-                <div class="flex flex-col items-center gap-3 lg:hidden">
-                    <img src="{{ asset('images/logo.png') }}" alt="EssyCoff Logo" class="w-16 h-16">
-                    <h1 class="text-2xl font-bold text-primary">EssyCoff</h1>
+                <div class="flex flex-col items-center gap-4 lg:hidden">
+                    <img src="{{ asset('images/logo.png') }}" alt="EssyCoff Logo" class="w-20 h-20">
+                    <h1 class="text-5xl font-bold text-primary">EssyCoff</h1>
                 </div>
 
                 <!-- Slot langsung tanpa card -->

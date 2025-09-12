@@ -83,14 +83,15 @@ new #[Layout('components.layouts.auth')] class extends Component {
 }; ?>
 
 
-<div class="flex flex-col gap-6">
-        <div class="flex flex-col items-center gap-2">
-            <img src="{{ asset('images/tanpajudul.png') }}" alt="EssyCoff Logo" class="w-30 h-30 sm:w-28 sm:h-28">
-
+<div class="flex flex-col gap-8">
+        <div class="flex flex-col items-center gap-4">
+            <img src="{{ asset('images/tanpajudul.png') }}" alt="EssyCoff Logo" class="w-32 h-32 sm:w-36 sm:h-36">
+            <h2 class="text-2xl font-bold text-primary">Selamat Datang Kembali</h2>
+            <p class="text-gray-600 text-center">Silakan masuk ke akun Anda untuk melanjutkan</p>
         </div>
 
     <!-- Session Status -->
-    <x-auth-session-status class="text-center" :status="session('status')" />
+    <x-auth-session-status class="text-center mb-4" :status="session('status')" />
 
     <form method="POST" wire:submit="login" class="flex flex-col gap-6">
         <!-- Email Address -->
@@ -107,8 +108,8 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 autofocus
                 autocomplete="email"
                 placeholder="contoh@email.com"
- class="w-full px-4 py-3 border border-secondary rounded-xl transition-all duration-200 
-           bg-accent bg-opacity-30 text-dark hover:bg-black focus:bg-black focus:text-white focus:ring-2 focus:ring-primary focus:border-primary">
+ class="w-full px-6 py-4 text-lg border-2 border-secondary rounded-2xl transition-all duration-300 
+           bg-accent bg-opacity-20 text-dark hover:bg-black focus:bg-black focus:text-white focus:ring-2 focus:ring-primary focus:border-primary shadow-sm hover:shadow-md">
                        @error('email')
                 <p class="text-red-600 text-sm mt-1">
                     <i class="fas fa-exclamation-circle mr-1"></i>
@@ -124,13 +125,6 @@ new #[Layout('components.layouts.auth')] class extends Component {
                     <i class="fas fa-lock mr-2 text-primary"></i>
                     Password
                 </label>
-                @if (Route::has('password.request'))
-                    <a href="{{ route('password.request') }}" 
-                       class="text-sm text-primary hover:text-dark transition-colors duration-200"
-                       wire:navigate>
-                        Lupa password?
-                    </a>
-                @endif
             </div>
             <div class="relative">
                 <input
@@ -140,8 +134,9 @@ new #[Layout('components.layouts.auth')] class extends Component {
                     required
                     autocomplete="current-password"
                     placeholder="Masukkan password"
- class="w-full px-4 py-3 border border-secondary rounded-xl transition-all duration-200 
-           bg-accent bg-opacity-30 text-dark hover:bg-black focus:bg-black focus:text-white focus:ring-2 focus:ring-primary focus:border-primary"                <button type="button" 
+ class="w-full px-6 py-4 text-lg border-2 border-secondary rounded-2xl transition-all duration-300 
+           bg-accent bg-opacity-20 text-dark hover:bg-black focus:bg-black focus:text-white focus:ring-2 focus:ring-primary focus:border-primary shadow-sm hover:shadow-md">
+                <button type="button" 
                         onclick="togglePassword()"
                         class="absolute right-3 top-1/2 transform -translate-y-1/2 text-secondary hover:text-primary transition-colors">
                     <i class="fas fa-eye" id="toggleIcon"></i>
@@ -156,37 +151,32 @@ new #[Layout('components.layouts.auth')] class extends Component {
         </div>
 
         <!-- Remember Me -->
-        <div class="flex items-center">
-            <input
-                wire:model="remember"
-                id="remember"
-                type="checkbox"
-                class="h-4 w-4 text-primary focus:ring-primary border-secondary rounded"
-            />
-            <label for="remember" class="ml-2 block text-sm text-dark">
-                Ingat saya
-            </label>
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <input
+                    wire:model="remember"
+                    id="remember"
+                    type="checkbox"
+                    class="h-5 w-5 text-primary focus:ring-primary border-secondary rounded"
+                />
+                <label for="remember" class="ml-3 block text-sm font-medium text-dark">
+                    Ingat saya
+                </label>
+            </div>
+    
         </div>
 
         <!-- Login Button -->
         <button
             type="submit"
-            class="w-full bg-primary hover:bg-dark text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg flex items-center justify-center"
+            class="w-full bg-primary hover:bg-dark text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl flex items-center justify-center text-lg"
         >
-            <i class="fas fa-sign-in-alt mr-2"></i>
-            Masuk
+            <i class="fas fa-sign-in-alt mr-3"></i>
+            Masuk ke Akun
         </button>
     </form>
+    
 
-    <!-- Back to Home -->
-    <div class="text-center">
-        <a href="{{ url('/') }}" 
-           class="text-secondary hover:text-primary text-sm transition-colors duration-200"
-           wire:navigate>
-            <i class="fas fa-arrow-left mr-1"></i>
-            Kembali ke Beranda
-        </a>
-    </div>
 </div>
 
 <script>
