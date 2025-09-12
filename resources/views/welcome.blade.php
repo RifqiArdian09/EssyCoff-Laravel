@@ -25,7 +25,11 @@
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
         body {
             font-family: 'Poppins', sans-serif;
-            background: #2A1A0A;
+            background: linear-gradient(rgba(42, 26, 10, 0.7), rgba(42, 26, 10, 0.8)), url('/images/coffee-shop-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
         }
         .logo-text {
             font-family: 'Playfair Display', serif;
@@ -33,6 +37,17 @@
             background: linear-gradient(135deg, #D4A76A 0%, #BF8B45 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+        }
+        .content-overlay {
+            backdrop-filter: blur(2px);
+            background: rgba(42, 26, 10, 0.3);
+            border-radius: 20px;
+            border: 1px solid rgba(212, 167, 106, 0.2);
+        }
+        .feature-card {
+            backdrop-filter: blur(10px);
+            background: rgba(62, 40, 19, 0.8);
+            border: 1px solid rgba(212, 167, 106, 0.3);
         }
     </style>
 </head>
@@ -49,22 +64,18 @@
             <p class="text-lg md:text-xl text-coffee-gold mb-10 max-w-2xl mx-auto">
                 Temukan kenikmatan kopi terbaik dengan cara yang mudah.
             </p>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                <div class="bg-coffee-light p-6 rounded-xl shadow-lg">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                <div class="feature-card p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105">
                     <i class="fas fa-coffee text-coffee-gold text-2xl mb-3"></i>
                     <h3 class="text-coffee-gold font-semibold text-lg mb-2">Kopi Premium</h3>
-                    <p class="text-coffee-cream text-sm opacity-80">Biji pilihan terbaik dengan racikan khusus barista kami</p>
+                    <p class="text-coffee-cream text-sm opacity-90">Biji pilihan terbaik dengan racikan khusus barista kami</p>
                 </div>
-                <div class="bg-coffee-light p-6 rounded-xl shadow-lg">
+                <div class="feature-card p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105">
                     <i class="fas fa-bolt text-coffee-gold text-2xl mb-3"></i>
                     <h3 class="text-coffee-gold font-semibold text-lg mb-2">Pesan Cepat</h3>
-                    <p class="text-coffee-cream text-sm opacity-80">Tanpa antri, cukup pesan dari genggaman tangan</p>
+                    <p class="text-coffee-cream text-sm opacity-90">Tanpa antri, cukup pesan dari genggaman tangan</p>
                 </div>
-                <div class="bg-coffee-light p-6 rounded-xl shadow-lg">
-                    <i class="fas fa-tag text-coffee-gold text-2xl mb-3"></i>
-                    <h3 class="text-coffee-gold font-semibold text-lg mb-2">Promo Spesial</h3>
-                    <p class="text-coffee-cream text-sm opacity-80">Penawaran menarik setiap hari untuk pelanggan setia</p>
-                </div>
+               
             </div>
         </div>
 

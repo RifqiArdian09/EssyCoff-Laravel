@@ -15,24 +15,7 @@ class CustomerController extends Controller
         $search = $request->get('search');
         $category = $request->get('category');
         
-        $products = Product::with('category')
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                      ->orWhereHas('category', function ($cat) use ($search) {
-                          $cat->where('name', 'like', "%{$search}%");
-                      });
-                });
-            })
-            ->when($category && $category !== 'all', function ($query) use ($category) {
-                $query->whereHas('category', function ($cat) use ($category) {
-                    $cat->where('name', 'like', "%{$category}%");
-                });
-            })
-            ->latest()
-            ->get();
-
-        // Get favorite counts for each product
+        // Get favorite counts for each product first
         $orders = Order::with(['items.product'])->get();
         $favoriteData = [];
         
@@ -50,12 +33,38 @@ class CustomerController extends Controller
             }
         }
 
+        $products = Product::with('category')
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhereHas('category', function ($cat) use ($search) {
+                          $cat->where('name', 'like', "%{$search}%");
+                      });
+                });
+            })
+            ->when($category && $category !== 'all' && $category !== 'favorite', function ($query) use ($category) {
+                $query->whereHas('category', function ($cat) use ($category) {
+                    $cat->where('name', 'like', "%{$category}%");
+                });
+            })
+            ->latest()
+            ->get();
+
         // Add favorite data to products
         foreach ($products as $product) {
             $product->favorite_data = $favoriteData[$product->id] ?? [
                 'total_ordered' => 0,
                 'order_count' => 0
             ];
+        }
+
+        // Filter favorites if requested
+        if ($category === 'favorite') {
+            $products = $products->filter(function ($product) {
+                return $product->favorite_data['total_ordered'] > 0;
+            })->sortByDesc(function ($product) {
+                return $product->favorite_data['total_ordered'];
+            })->values();
         }
             
         $categories = Category::all();
