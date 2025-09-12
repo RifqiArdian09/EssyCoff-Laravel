@@ -83,27 +83,6 @@
 </head>
 
 <body class="min-h-screen bg-coffee-cream">
-    <!-- Modern Header -->
-    <header class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-gradient-to-br from-coffee-gold to-coffee-medium rounded-xl flex items-center justify-center shadow-lg">
-                        <img src="{{ asset('images/logo2.png') }}" alt="EssyCoff" class="w-8 h-8 rounded-lg">
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-900">EssyCoff</h1>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <button id="history-btn" class="flex items-center px-4 py-2 text-gray-700 hover:text-coffee-medium hover:bg-coffee-cream rounded-lg transition-all duration-200">
-                        <i class="fas fa-heart mr-2"></i>
-                        <span class="hidden sm:inline">Favorit</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Hero Section -->
@@ -113,7 +92,7 @@
                 Menu Terbaru & Terlezat
             </div>
             <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
-                Selamat Datang di <span class="text-coffee-gold">EssyCoff</span>
+                <span class="text-coffee-gold">EssyCoff</span>
             </h1>
             <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
                 Nikmati pengalaman kuliner terbaik dengan menu pilihan berkualitas premium
@@ -155,21 +134,37 @@
 
                     // Mapping kategori ke ikon yang sesuai
                     if (strpos($categoryName, 'kopi') !== false || strpos($categoryName, 'coffee') !== false) {
-                    $icon = 'fa-mug-saucer';
+                        $icon = 'fa-mug-saucer';
                     } elseif (strpos($categoryName, 'teh') !== false || strpos($categoryName, 'tea') !== false) {
-                    $icon = 'fa-mug-hot';
+                        $icon = 'fa-mug-hot';
                     } elseif (strpos($categoryName, 'minuman') !== false || strpos($categoryName, 'drink') !== false || strpos($categoryName, 'beverage') !== false) {
-                    $icon = 'fa-wine-glass';
+                        $icon = 'fa-wine-glass';
                     } elseif (strpos($categoryName, 'makanan') !== false || strpos($categoryName, 'food') !== false) {
-                    $icon = 'fa-plate-utensils';
+                        $icon = 'fa-hamburger';
+                    } elseif (strpos($categoryName, 'nasi') !== false || strpos($categoryName, 'rice') !== false) {
+                        $icon = 'fa-bowl-rice';
+                    } elseif (strpos($categoryName, 'mie') !== false || strpos($categoryName, 'noodle') !== false || strpos($categoryName, 'pasta') !== false) {
+                        $icon = 'fa-bowl-food';
+                    } elseif (strpos($categoryName, 'ayam') !== false || strpos($categoryName, 'chicken') !== false) {
+                        $icon = 'fa-drumstick-bite';
+                    } elseif (strpos($categoryName, 'pizza') !== false) {
+                        $icon = 'fa-pizza-slice';
+                    } elseif (strpos($categoryName, 'sandwich') !== false || strpos($categoryName, 'burger') !== false) {
+                        $icon = 'fa-hamburger';
                     } elseif (strpos($categoryName, 'snack') !== false || strpos($categoryName, 'cemilan') !== false) {
-                    $icon = 'fa-cookie';
-                    } elseif (strpos($categoryName, 'dessert') !== false || strpos($categoryName, 'manis') !== false) {
-                    $icon = 'fa-ice-cream';
+                        $icon = 'fa-cookie';
+                    } elseif (strpos($categoryName, 'dessert') !== false || strpos($categoryName, 'manis') !== false || strpos($categoryName, 'cake') !== false) {
+                        $icon = 'fa-cake-candles';
+                    } elseif (strpos($categoryName, 'es krim') !== false || strpos($categoryName, 'ice cream') !== false) {
+                        $icon = 'fa-ice-cream';
                     } elseif (strpos($categoryName, 'sarapan') !== false || strpos($categoryName, 'breakfast') !== false) {
-                    $icon = 'fa-egg';
+                        $icon = 'fa-egg';
+                    } elseif (strpos($categoryName, 'salad') !== false) {
+                        $icon = 'fa-leaf';
+                    } elseif (strpos($categoryName, 'soup') !== false || strpos($categoryName, 'sop') !== false) {
+                        $icon = 'fa-bowl-hot';
                     } else {
-                    $icon = 'fa-utensils'; // fallback
+                        $icon = 'fa-utensils'; // fallback
                     }
                     @endphp
                     <i class="fas {{ $icon }} mr-2"></i>{{ $cat->name }}
@@ -208,9 +203,17 @@
             <div class="p-4">
                 <div class="mb-3">
                     <h3 class="font-semibold text-gray-900 text-lg mb-1">{{ $product->name }}</h3>
-                    <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-coffee-gold bg-opacity-20 text-coffee-dark">
-                        {{ $product->category->name ?? 'Kategori tidak tersedia' }}
-                    </span>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-coffee-gold bg-opacity-20 text-coffee-dark">
+                            {{ $product->category->name ?? 'Kategori tidak tersedia' }}
+                        </span>
+                        @if($product->favorite_data['total_ordered'] > 0)
+                        <div class="flex items-center text-xs text-red-500">
+                            <i class="fas fa-heart mr-1"></i>
+                            <span class="font-medium">{{ $product->favorite_data['total_ordered'] }}x dipesan</span>
+                        </div>
+                        @endif
+                    </div>
                 </div>
 
                 <div class="flex items-center justify-between">
@@ -246,7 +249,7 @@
     </main>
 
     <!-- Floating Cart Button -->
-    <div class="fixed bottom-6 right-6 z-50">
+    <div class="fixed bottom-6 right-6 z-10">
         <button id="chat-bubble" class="bg-coffee-medium hover:bg-coffee-dark text-white w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center">
             <i class="fas fa-shopping-cart text-lg"></i>
             <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">0</span>
@@ -286,31 +289,7 @@
         </div>
     </div>
 
-    <!-- History Sidebar -->
-    <div class="fixed inset-y-0 right-0 w-96 bg-white shadow-xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto" id="history-panel">
-        <div class="p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-bold text-gray-900">Menu Favorit</h2>
-                <button id="close-history" class="text-gray-500 hover:text-gray-700 p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <div class="mb-6">
-                <button id="load-favorites" class="w-full bg-coffee-medium hover:bg-coffee-dark text-white px-4 py-3 rounded-lg font-medium transition-colors">
-                    <i class="fas fa-star mr-2"></i>Muat Menu Favorit
-                </button>
-            </div>
-
-            <div id="favorites-content">
-                <div class="text-center py-12 text-gray-500">
-                    <i class="fas fa-star text-4xl mb-4 text-gray-300"></i>
-                    <p class="font-medium mb-2">Belum ada menu favorit</p>
-                    <p class="text-sm text-gray-400">Klik tombol di atas untuk melihat menu favorit Anda</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- History Sidebar Removed -->
 
     <!-- Order Modal -->
     <div id="order-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
@@ -397,9 +376,7 @@
             const cartTotal = document.getElementById('cart-total');
             const checkoutBtn = document.getElementById('checkout-btn');
             const closeChat = document.getElementById('close-chat');
-            const historyBtn = document.getElementById('history-btn');
-            const historyPanel = document.getElementById('history-panel');
-            const closeHistory = document.getElementById('close-history');
+            // History panel variables removed
             const tabs = document.querySelectorAll('.tab');
             const orderModal = document.getElementById('order-modal');
             const modalTotal = document.getElementById('modal-total');
@@ -542,22 +519,7 @@
                 chatContainer.classList.remove('translate-x-0');
             });
 
-            // Toggle history panel
-            historyBtn.addEventListener('click', function() {
-                if (historyPanel.classList.contains('translate-x-full')) {
-                    historyPanel.classList.remove('translate-x-full');
-                    historyPanel.classList.add('translate-x-0');
-                } else {
-                    historyPanel.classList.add('translate-x-full');
-                    historyPanel.classList.remove('translate-x-0');
-                }
-            });
-
-            // Close history panel
-            closeHistory.addEventListener('click', function() {
-                historyPanel.classList.add('translate-x-full');
-                historyPanel.classList.remove('translate-x-0');
-            });
+            // History panel functionality removed
 
             // Tab functionality
             tabs.forEach(tab => {
@@ -682,108 +644,7 @@
                     });
             }
 
-            // Load favorites functionality
-            document.getElementById('load-favorites').addEventListener('click', function() {
-                loadFavorites();
-            });
-
-            // Load favorites from server
-            function loadFavorites() {
-                const favoritesContent = document.getElementById('favorites-content');
-                favoritesContent.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i><p class="mt-2 text-gray-500">Memuat favorit...</p></div>';
-
-                fetch(`{{ route('customer.history') }}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success && data.favorites.length > 0) {
-                            displayFavorites(data.favorites);
-                        } else {
-                            favoritesContent.innerHTML = `
-                            <div class="text-center py-10 text-gray-500">
-                                <i class="fas fa-heart-broken text-3xl mb-3"></i>
-                                <p class="font-medium">Belum ada item favorit</p>
-                                <p class="text-sm mt-1">Lakukan pemesanan untuk membuat daftar favorit</p>
-                            </div>
-                        `;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        favoritesContent.innerHTML = `
-                        <div class="text-center py-10 text-red-500">
-                            <i class="fas fa-exclamation-triangle text-3xl mb-3"></i>
-                            <p class="font-medium">Gagal memuat favorit</p>
-                            <p class="text-sm mt-1">Silakan coba lagi</p>
-                        </div>
-                    `;
-                    });
-            }
-
-            // Display favorites
-            function displayFavorites(favorites) {
-                const favoritesContent = document.getElementById('favorites-content');
-                favoritesContent.innerHTML = '';
-
-                favorites.forEach((item, index) => {
-                    const favoriteItem = document.createElement('div');
-                    favoriteItem.className = 'bg-gray-50 rounded-lg p-4 mb-3 border border-gray-200 hover:bg-gray-100 transition-colors';
-                    favoriteItem.innerHTML = `
-                        <div class="flex items-center justify-between">
-                            <div class="flex-1">
-                                <h4 class="font-medium text-gray-800">${item.product.name}</h4>
-                                <p class="text-sm text-gray-600">Rp ${parseInt(item.product.price).toLocaleString('id-ID')}</p>
-                                <p class="text-xs text-gray-500 mt-1">
-                                    <i class="fas fa-heart text-red-400"></i> 
-                                    Dipesan ${item.total_ordered}x dalam ${item.order_count} pesanan
-                                </p>
-                            </div>
-                            ${item.product.stock > 0 ? `
-                                <button class="add-favorite-to-cart bg-coffee-medium hover:bg-coffee-dark text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors" 
-                                        data-id="${item.product.id}" 
-                                        data-name="${item.product.name}" 
-                                        data-price="${item.product.price}">
-                                    <i class="fas fa-plus mr-1"></i>Tambah
-                                </button>
-                            ` : `
-                                <span class="text-gray-400 text-sm font-medium">
-                                    Habis
-                                </span>
-                            `}
-                        </div>
-                    `;
-                    favoritesContent.appendChild(favoriteItem);
-                });
-
-                // Add event listeners to favorite buttons
-                document.querySelectorAll('.add-favorite-to-cart').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const id = this.dataset.id;
-                        const name = this.dataset.name;
-                        const price = parseInt(this.dataset.price);
-
-                        // Check if item already in cart
-                        const existingItem = cart.find(item => item.id === id);
-
-                        if (existingItem) {
-                            existingItem.quantity += 1;
-                        } else {
-                            cart.push({
-                                id: id,
-                                name: name,
-                                price: price,
-                                quantity: 1
-                            });
-                        }
-
-                        updateCart();
-                        showNotification(`${name} ditambahkan ke keranjang dari favorit`);
-
-                        // Always open cart when item is added from favorites
-                        chatContainer.classList.remove('translate-x-full');
-                        chatContainer.classList.add('translate-x-0');
-                    });
-                });
-            }
+            // Favorites functionality removed
 
             // Show notification
             function showNotification(message, type = 'success') {

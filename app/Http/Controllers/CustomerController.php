@@ -31,6 +31,32 @@ class CustomerController extends Controller
             })
             ->latest()
             ->get();
+
+        // Get favorite counts for each product
+        $orders = Order::with(['items.product'])->get();
+        $favoriteData = [];
+        
+        foreach ($orders as $order) {
+            foreach ($order->items as $item) {
+                $productId = $item->product_id;
+                if (!isset($favoriteData[$productId])) {
+                    $favoriteData[$productId] = [
+                        'total_ordered' => 0,
+                        'order_count' => 0
+                    ];
+                }
+                $favoriteData[$productId]['total_ordered'] += $item->qty;
+                $favoriteData[$productId]['order_count']++;
+            }
+        }
+
+        // Add favorite data to products
+        foreach ($products as $product) {
+            $product->favorite_data = $favoriteData[$product->id] ?? [
+                'total_ordered' => 0,
+                'order_count' => 0
+            ];
+        }
             
         $categories = Category::all();
         

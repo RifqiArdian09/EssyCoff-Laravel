@@ -2,6 +2,7 @@
 
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
@@ -41,11 +42,13 @@ new #[Layout('components.layouts.auth')] class extends Component {
         Session::regenerate();
 
         $user = Auth::user();
-        $defaultRoute = ($user && $user->role === 'cashier')
-            ? route('pos.cashier', absolute: false)
-            : route('dashboard', absolute: false);
-
-        $this->redirectIntended(default: $defaultRoute, navigate: true);
+        
+        // Direct redirect based on role
+        if ($user->role === 'cashier') {
+            $this->redirect(route('pos.cashier'), navigate: true);
+        } else {
+            $this->redirect(route('dashboard'), navigate: true);
+        }
     }
 
     /**
