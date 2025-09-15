@@ -1,30 +1,10 @@
-
+ 
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     @include('partials.head')
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#6f4e37',
-                        secondary: '#c0a080',
-                        accent: '#e7c9a9',
-                        dark: '#4a3c2d',
-                    },
-                    fontFamily: {
-                        'inter': ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
 </head>
-<body class="font-inter min-h-screen antialiased">
+<body class="font-sans min-h-screen antialiased">
     <div class="grid h-screen lg:grid-cols-2">
         <!-- Left Side - Background Image Only -->
         <div class="hidden lg:block bg-cover bg-center" style="background-image: url('{{ asset('images/background.jpg') }}');">

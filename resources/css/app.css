@@ -64,3 +64,31 @@ select:focus[data-flux-control] {
 /* \[:where(&)\]:size-4 {
     @apply size-4;
 } */
+
+@layer utilities {
+    :root {
+        --color-primary: #6f4e37;
+        --color-secondary: #c0a080;
+        --color-accent-soft: #e7c9a9;
+        --color-dark: #4a3c2d;
+    }
+
+    /* Text colors */
+    .text-primary { color: var(--color-primary) !important; }
+    .text-secondary { color: var(--color-secondary) !important; }
+    .text-accent { color: var(--color-accent-soft) !important; }
+    .text-dark { color: var(--color-dark) !important; }
+
+    /* Background colors */
+    .bg-primary { background-color: var(--color-primary) !important; }
+    .bg-secondary { background-color: var(--color-secondary) !important; }
+    .bg-accent { background-color: var(--color-accent-soft) !important; }
+    .bg-dark { background-color: var(--color-dark) !important; }
+
+    /* Hover variants (limited common cases) */
+    .hover\:bg-dark:hover { background-color: var(--color-dark) !important; }
+
+    /* Focus ring and border utilities to mirror Tailwind naming used in views */
+    .focus\:ring-primary:focus { --tw-ring-color: var(--color-primary) !important; }
+    .focus\:border-primary:focus { border-color: var(--color-primary) !important; }
+}

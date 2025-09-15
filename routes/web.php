@@ -28,8 +28,11 @@ use App\Livewire\User\Create;
 use App\Livewire\User\Edit;
 
 // Dashboard
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\CustomerController;
+use App\Livewire\Dashboard\Index as DashboardIndex;
+use App\Livewire\Actions\CreateOrder;
+use App\Livewire\Actions\GetOrderHistory;
+    
+
 
 use App\Livewire\Pos\OrderDetail;
 use App\Livewire\Pos\Receipt\Index as ReceiptIndex;
@@ -41,19 +44,15 @@ use App\Livewire\Pos\Receipt\Index as ReceiptIndex;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', \App\Livewire\Customer\Home::class)->name('home');
 
-Route::view('dashboard', 'dashboard')
+Volt::route('dashboard', DashboardIndex::class)
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-
-    Route::get('dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
-
+// Customer-facing menu and ordering (Livewire component for UI)
+Route::get('customer', \App\Livewire\Customer\Order::class)->name('customer');
+Route::post('customer/order', CreateOrder::class)->name('customer.order');
 /*
 |--------------------------------------------------------------------------
 | Settings (Volt Routes)
@@ -116,8 +115,6 @@ Route::middleware(['auth'])->prefix('report')->group(function() {
     Volt::route('/', ReportIndex::class)->name('report.index');
 });
 
-Route::get('customer', [CustomerController::class, 'index'])->name('customer');
-Route::post('customer/order', [CustomerController::class, 'createOrder'])->name('customer.order');
-Route::get('customer/history', [CustomerController::class, 'getOrderHistory'])->name('customer.history');
+
 
 require __DIR__.'/auth.php';

@@ -29,29 +29,24 @@
             <flux:select.option value="cashier">Cashier</flux:select.option>
         </flux:select>
 
-        <div class="relative">
-        <flux:input 
-            wire:model.live="password" 
-            type="{{ $showPassword ? 'text' : 'password' }}" 
-            label="Password" 
-            required 
-            class="dark:text-gray-200"
-            icon-end="eye-slash"
-            wire:click="$toggle('showPassword')"
+        <flux:input
+            wire:model="password"
+            :label="__('Password')"
+            type="password"
+            required
+            autocomplete="current-password"
+            :placeholder="__('Password')"
+            viewable
         />
-    </div>
 
-    <div class="relative">
-        <flux:input 
-            wire:model.live="password_confirmation" 
-            type="{{ $showPasswordConfirmation ? 'text' : 'password' }}" 
-            label="Konfirmasi Password" 
-            required 
-            class="dark:text-gray-200"
-            icon-end="eye-slash"
-            wire:click="$toggle('showPasswordConfirmation')"
+        <flux:input
+            wire:model="password_confirmation"
+            :label="__('Konfirmasi Password')"
+            type="password"
+            required
+            :placeholder="__('Konfirmasi Password')"
+            viewable
         />
-    </div>
 
         <div class="flex gap-2">
             <flux:button type="submit" icon="check" variant="primary">Create</flux:button>

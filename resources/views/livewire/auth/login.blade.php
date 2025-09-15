@@ -20,7 +20,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
     #[Validate('required|string')]
     public string $password = '';
 
-    public bool $remember = false;
+    public bool $remember = true;
 
     /**
      * Handle an incoming authentication request.
@@ -91,107 +91,77 @@ new #[Layout('components.layouts.auth')] class extends Component {
         </div>
 
     <!-- Session Status -->
-    <x-auth-session-status class="text-center mb-4" :status="session('status')" />
+    <x-auth-session-status class="text-center mb-2" :status="session('status')" />
+
+    <!-- Auth/Validation Alert -->
+    @if ($errors->has('email') || $errors->has('password'))
+        <div class="rounded-md bg-red-50 border border-red-200 text-red-700 px-4 py-3 text-sm">
+            {{ $errors->first('email') ?: $errors->first('password') }}
+        </div>
+    @endif
 
     <form method="POST" wire:submit="login" class="flex flex-col gap-6">
         <!-- Email Address -->
         <div class="space-y-2">
-            <label for="email" class="block text-sm font-medium text-dark">
-                <i class="fas fa-envelope mr-2 text-primary"></i>
-                Alamat Email
-            </label>
-            <input
-                wire:model="email"
+            <label for="email" class="block text-sm font-medium text-primary">{{ __('Email address') }}</label>
+            <flux:input
                 id="email"
+                wire:model="email"
+                :label="null"
                 type="email"
                 required
                 autofocus
                 autocomplete="email"
-                placeholder="contoh@email.com"
- class="w-full px-6 py-4 text-lg border-2 border-secondary rounded-2xl transition-all duration-300 
-           bg-accent bg-opacity-20 text-dark hover:bg-black focus:bg-black focus:text-white focus:ring-2 focus:ring-primary focus:border-primary shadow-sm hover:shadow-md">
-                       @error('email')
-                <p class="text-red-600 text-sm mt-1">
-                    <i class="fas fa-exclamation-circle mr-1"></i>
-                    {{ $message }}
-                </p>
+                placeholder="email@example.com"
+                color="primary"
+                input-class="{{ $errors->has('email') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'focus:ring-primary focus:border-primary' }} text-dark placeholder:text-dark/60"
+            />
+            @error('email')
+                <p class="text-sm text-red-600">{{ $message }}</p>
             @enderror
         </div>
 
         <!-- Password -->
         <div class="space-y-2">
-            <div class="flex justify-between items-center">
-                <label for="password" class="block text-sm font-medium text-dark">
-                    <i class="fas fa-lock mr-2 text-primary"></i>
-                    Password
-                </label>
-            </div>
-            <div class="relative">
-                <input
-                    wire:model="password"
-                    id="password"
-                    type="password"
-                    required
-                    autocomplete="current-password"
-                    placeholder="Masukkan password"
- class="w-full px-6 py-4 text-lg border-2 border-secondary rounded-2xl transition-all duration-300 
-           bg-accent bg-opacity-20 text-dark hover:bg-black focus:bg-black focus:text-white focus:ring-2 focus:ring-primary focus:border-primary shadow-sm hover:shadow-md">
-                <button type="button" 
-                        onclick="togglePassword()"
-                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-secondary hover:text-primary transition-colors">
-                    <i class="fas fa-eye" id="toggleIcon"></i>
-                </button>
-            </div>
+            <label for="password" class="block text-sm font-medium text-primary">{{ __('Password') }}</label>
+            <flux:input
+                id="password"
+                wire:model="password"
+                :label="null"
+                type="password"
+                required
+                autocomplete="current-password"
+                :placeholder="__('Password')"
+                viewable
+                color="primary"
+                input-class="{{ $errors->has('password') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'focus:ring-primary focus:border-primary' }} text-dark placeholder:text-dark/60"
+            />
             @error('password')
-                <p class="text-red-600 text-sm mt-1">
-                    <i class="fas fa-exclamation-circle mr-1"></i>
-                    {{ $message }}
-                </p>
+                <p class="text-sm text-red-600">{{ $message }}</p>
             @enderror
+        
         </div>
 
         <!-- Remember Me -->
-        <div class="flex items-center justify-between">
-            <div class="flex items-center">
-                <input
-                    wire:model="remember"
-                    id="remember"
-                    type="checkbox"
-                    class="h-5 w-5 text-primary focus:ring-primary border-secondary rounded"
-                />
-                <label for="remember" class="ml-3 block text-sm font-medium text-dark">
-                    Ingat saya
-                </label>
-            </div>
-    
+        <div class="flex items-center gap-2">
+            <flux:checkbox
+                id="remember"
+                wire:model="remember"
+                :label="null"
+                checked
+                color="primary"
+                input-class="accent-[#6f4e37] focus:ring-[#6f4e37] border-[#6f4e37]"
+            />
+            <label for="remember" class="text-primary select-none cursor-pointer">Ingatkan saya</label>
         </div>
 
         <!-- Login Button -->
-        <button
-            type="submit"
-            class="w-full bg-primary hover:bg-dark text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl flex items-center justify-center text-lg"
-        >
-            <i class="fas fa-sign-in-alt mr-3"></i>
-            Masuk ke Akun
-        </button>
+        <div class="flex items-center justify-end">
+            <flux:button type="submit" variant="primary" icon="arrow-right-start-on-rectangle" color="primary" class="w-full bg-primary text-white hover:bg-dark focus:ring-2 focus:ring-primary focus:outline-none inline-flex items-center justify-center gap-2">
+                {{ __('Log in') }}
+            </flux:button>
+        </div>
     </form>
     
 
 </div>
-
-<script>
-function togglePassword() {
-    const passwordField = document.getElementById('password');
-    const toggleIcon = document.getElementById('toggleIcon');
-    
-    if (passwordField.type === 'password') {
-        passwordField.type = 'text';
-        toggleIcon.classList.remove('fa-eye');
-        toggleIcon.classList.add('fa-eye-slash');
-    } else {
-        passwordField.type = 'password';
-        toggleIcon.classList.remove('fa-eye-slash');
-        toggleIcon.classList.add('fa-eye');
-    }
-}
-</script>
