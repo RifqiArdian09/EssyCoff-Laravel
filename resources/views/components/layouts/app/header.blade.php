@@ -10,7 +10,7 @@
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
         <!-- Logo -->
-        <a href="{{ route('dashboard') }}" 
+        <a href="{{ ($user = auth()->user()) && $user->role === 'cashier' ? route('pos.cashier') : route('dashboard') }}" 
            class="ms-2 me-5 flex items-center space-x-2 rtl:space-x-reverse lg:ms-0" 
            wire:navigate>
             <x-app-logo />
@@ -18,13 +18,6 @@
 
         <!-- Navbar -->
         <flux:navbar class="-mb-px max-lg:hidden">
-            <flux:navbar.item icon="layout-grid" 
-                :href="route('dashboard')" 
-                :current="request()->routeIs('dashboard')" 
-                wire:navigate>
-                {{ __('Dashboard') }}
-            </flux:navbar.item>
-
             @php
             $user = auth()->user();
             $isManager = $user && $user->role === 'manager';
@@ -34,6 +27,15 @@
             $lowStockCount = $lowStockCount ?? 0;
             $outOfStockCount = $outOfStockCount ?? 0;
             @endphp
+
+            @if($isManager)
+            <flux:navbar.item icon="layout-grid" 
+                :href="route('dashboard')" 
+                :current="request()->routeIs('dashboard')" 
+                wire:navigate>
+                {{ __('Dashboard') }}
+            </flux:navbar.item>
+            @endif
 
             @if($isManager)
             <!-- Products -->
@@ -99,6 +101,14 @@
                 :current="request()->routeIs('pos.cashier')" 
                 wire:navigate>
                 {{ __('POS') }}
+            </flux:navbar.item>
+
+            <!-- Tables -->
+            <flux:navbar.item icon="table-cells"
+                :href="route('pos.tables')"
+                :current="request()->routeIs('pos.tables')"
+                wire:navigate>
+                {{ __('Tables') }}
             </flux:navbar.item>
 
             <!-- Transaction History -->

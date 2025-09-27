@@ -137,6 +137,20 @@
                 <i class="fas fa-fire mr-2"></i>
                 Menu Terbaru & Terlezat
             </div>
+            @php
+                $tableFromQuery = request()->query('table');
+            @endphp
+            @if(session('table_error'))
+            <div class="mt-4 inline-flex items-center px-4 py-2 bg-red-600/90 text-white rounded-full text-sm font-medium mb-4 shadow">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                {{ session('table_error') }}
+            </div>
+            @elseif($tableFromQuery)
+            <div class="mt-4 inline-flex items-center px-4 py-2 bg-green-600/80 text-white rounded-full text-sm font-medium mb-4 shadow">
+                <i class="fas fa-chair mr-2"></i>
+                Pesanan untuk Meja: <span class="ml-1 font-semibold">{{ $tableFromQuery }}</span>
+            </div>
+            @endif
             <p class="text-xl text-white max-w-3xl mx-auto leading-relaxed">
                 Nikmati pengalaman kuliner terbaik dengan menu pilihan berkualitas premium
             </p>
@@ -404,6 +418,31 @@
         </div>
     </div>
 
+    <!-- Table Error Modal -->
+    <div id="table-error-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 text-center">
+            <!-- Error Icon -->
+            <div class="w-20 h-20 mx-auto mb-6 relative">
+                <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-red-500 text-3xl"></i>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <h3 class="text-2xl font-bold text-gray-900 mb-3">Meja Tidak Ditemukan</h3>
+            <p class="text-gray-600 mb-2" id="table-error-message">Meja yang Anda cari tidak tersedia.</p>
+            <div class="inline-flex items-center px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium mb-6">
+                <i class="fas fa-info-circle mr-2"></i>
+                Silakan hubungi staff untuk bantuan
+            </div>
+
+            <!-- Action Button -->
+            <button id="close-table-error-modal" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition-colors">
+                <i class="fas fa-times mr-2"></i>Tutup
+            </button>
+        </div>
+    </div>
+
     <!-- Success Modal -->
     <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="success-modal bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center">
@@ -445,6 +484,30 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Table context from URL ?table=CODE
+            const urlParams = new URLSearchParams(window.location.search);
+            const tableCode = urlParams.get('table');
+            if (tableCode) {
+                try { localStorage.setItem('customer_table_code', tableCode); } catch (e) {}
+            }
+            // Initialize table select from storage or URL
+            const tableSelect = document.getElementById('customer-table-select');
+            const initialTable = tableCode || (function(){ try { return localStorage.getItem('customer_table_code') } catch(e){ return null } })();
+            if (tableSelect && initialTable) {
+                tableSelect.value = initialTable;
+            }
+
+            // Validate table code on page load if present
+            if (tableCode) {
+                // Check if table banner shows error (means table not found)
+                const hasTableError = document.querySelector('[class*="bg-red-600"]');
+                if (hasTableError) {
+                    // Clear invalid table from localStorage
+                    try {
+                        localStorage.removeItem('customer_table_code');
+                    } catch (e) {}
+                }
+            }
             let cart = [];
             const chatBubble = document.getElementById('chat-bubble');
             const chatContainer = document.getElementById('chat-container');
@@ -467,6 +530,8 @@
             const clearCartModal = document.getElementById('clear-cart-modal');
             const cancelClearCart = document.getElementById('cancel-clear-cart');
             const confirmClearCart = document.getElementById('confirm-clear-cart');
+            const tableErrorModal = document.getElementById('table-error-modal');
+            const closeTableErrorModal = document.getElementById('close-table-error-modal');
 
             // Add to cart functionality
             document.querySelectorAll('.add-to-cart').forEach(button => {
@@ -649,6 +714,35 @@
                 
                 orderModal.classList.remove('hidden');
             });
+
+            // Persist selected table on change
+            if (tableSelect) {
+                tableSelect.addEventListener('change', function() {
+                    const val = tableSelect.value;
+                    try {
+                        if (val) {
+                            localStorage.setItem('customer_table_code', val);
+                        } else {
+                            localStorage.removeItem('customer_table_code');
+                        }
+                    } catch (e) {}
+                    // Update banner (create if not exists)
+                    const bannerHtml = `<div class=\"mt-4 inline-flex items-center px-4 py-2 bg-green-600/80 text-white rounded-full text-sm font-medium mb-4 shadow\"><i class=\"fas fa-chair mr-2\"></i>Pesanan untuk Meja: <span class=\"ml-1 font-semibold\">${val || '-'}<\/span><\/div>`;
+                    let existing = document.querySelector('#table-banner');
+                    if (!existing) {
+                        const ref = document.querySelector('.inline-flex.items-center.px-4.py-2.bg-coffee-gold');
+                        if (ref && val) {
+                            const wrap = document.createElement('div');
+                            wrap.id = 'table-banner';
+                            wrap.innerHTML = bannerHtml;
+                            ref.insertAdjacentElement('afterend', wrap);
+                        }
+                    } else {
+                        existing.innerHTML = bannerHtml;
+                        if (!val) existing.remove();
+                    }
+                });
+            }
             
             // Clear cart button
             clearCartBtn.addEventListener('click', function() {
@@ -697,6 +791,13 @@
             closeSuccessModal.addEventListener('click', function() {
                 successModal.classList.add('hidden');
             });
+
+            // Close table error modal
+            closeTableErrorModal.addEventListener('click', function() {
+                tableErrorModal.classList.add('hidden');
+                // Redirect to customer page without table parameter
+                window.location.href = '{{ route("customer") }}';
+            });
             
             // Close modals when clicking outside
             clearCartModal.addEventListener('click', function(e) {
@@ -729,7 +830,11 @@
             function sendOrderToServer(orderData) {
                 // Add CSRF token
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
+                const tableFromStorage = (() => { try { return localStorage.getItem('customer_table_code'); } catch (e) { return null; } })();
+                // Attach table code to payload if present
+                if (tableFromStorage && !orderData.table) {
+                    orderData.table = tableFromStorage;
+                }
                 fetch('{{ route("customer.order") }}', {
                         method: 'POST',
                         headers: {
@@ -739,7 +844,14 @@
                         },
                         body: JSON.stringify(orderData)
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(errorData => {
+                                throw new Error(errorData.message || 'Network error');
+                            });
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         if (data.success) {
                             // Hide order modal
@@ -773,7 +885,18 @@
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        showNotification('Terjadi kesalahan saat mengirim pesanan', 'error');
+                        
+                        // Check if it's a table not found error
+                        if (error.message && error.message.includes('tidak ditemukan')) {
+                            // Hide order modal
+                            orderModal.classList.add('hidden');
+                            
+                            // Show table error modal
+                            document.getElementById('table-error-message').textContent = error.message;
+                            tableErrorModal.classList.remove('hidden');
+                        } else {
+                            showNotification('Terjadi kesalahan saat mengirim pesanan: ' + error.message, 'error');
+                        }
                     });
             }
 

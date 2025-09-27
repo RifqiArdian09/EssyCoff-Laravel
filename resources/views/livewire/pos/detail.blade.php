@@ -20,6 +20,14 @@
                 <p class="text-sm text-gray-600 dark:text-zinc-400">Status</p>
                 <p class="font-medium text-emerald-600 dark:text-emerald-400">{{ ucfirst(str_replace('_', ' ', $order->status)) }}</p>
             </div>
+            <div class="md:col-span-3">
+                <p class="text-sm text-gray-600 dark:text-zinc-400">Meja</p>
+                @if($order->table)
+                <p class="font-medium text-gray-900 dark:text-white">{{ $order->table->name }} <span class="text-xs text-gray-500 dark:text-zinc-400">({{ $order->table->code }})</span></p>
+                @else
+                <p class="font-medium text-gray-400">-</p>
+                @endif
+            </div>
         </div>
     </div>
 
@@ -69,13 +77,38 @@
                 </span>
             </div>
 
-            @if($order->uang_dibayar)
-                <div class="flex justify-between pt-1 border-t border-gray-200 dark:border-zinc-700">
-                    <span class="text-gray-600 dark:text-zinc-300">Tunai</span>
-                    <span class="font-semibold text-gray-900 dark:text-white">
-                        Rp {{ number_format($order->uang_dibayar, 0, ',', '.') }}
-                    </span>
-                </div>
+            <div class="flex justify-between pt-1 border-t border-gray-200 dark:border-zinc-700">
+                <span class="text-gray-600 dark:text-zinc-300">Metode</span>
+                <span class="font-medium text-gray-900 dark:text-white">{{ strtoupper($order->payment_method ?? 'CASH') }}</span>
+            </div>
+
+            @if(($order->payment_method === 'qris') && $order->payment_ref)
+            <div class="flex justify-between">
+                <span class="text-gray-600 dark:text-zinc-300">Referensi</span>
+                <span class="font-medium text-gray-900 dark:text-white">{{ $order->payment_ref }}</span>
+            </div>
+            @endif
+
+            @if($order->payment_method === 'card')
+            <div class="flex justify-between">
+                <span class="text-gray-600 dark:text-zinc-300">Kartu</span>
+                <span class="font-medium text-gray-900 dark:text-white">**** **** **** {{ $order->card_last4 }}</span>
+            </div>
+            @if($order->payment_ref)
+            <div class="flex justify-between">
+                <span class="text-gray-600 dark:text-zinc-300">Referensi</span>
+                <span class="font-medium text-gray-900 dark:text-white">{{ $order->payment_ref }}</span>
+            </div>
+            @endif
+            @endif
+
+            @if($order->uang_dibayar !== null)
+            <div class="flex justify-between">
+                <span class="text-gray-600 dark:text-zinc-300">{{ $order->payment_method === 'cash' ? 'Tunai' : 'Dibayar' }}</span>
+                <span class="font-semibold text-gray-900 dark:text-white">
+                    Rp {{ number_format($order->uang_dibayar, 0, ',', '.') }}
+                </span>
+            </div>
             @endif
 
             @if($order->kembalian !== null)
@@ -105,6 +138,15 @@
             wire:click="printReceipt">
             Cetak Ulang Struk
         </flux:button>
+
+        @if($order->table && $order->table->status === 'unavailable')
+        <flux:button 
+            variant="outline" 
+            icon="check"
+            wire:click="markTableAvailable">
+            Tandai Meja Tersedia
+        </flux:button>
+        @endif
     </div>
 
     @php
@@ -143,6 +185,12 @@
                     <span class="font-medium">Tanggal:</span>
                     <span>{{ $order->created_at->format('d/m/Y H:i') }}</span>
                 </div>
+                @if($order->table)
+                <div class="flex justify-between">
+                    <span class="font-medium">Meja:</span>
+                    <span>{{ $order->table->name }} ({{ $order->table->code }})</span>
+                </div>
+                @endif
             </div>
 
             <hr class="my-1 border-dashed border-black" style="border-top: 1px dashed #000; margin: 4px 0;">
@@ -198,13 +246,34 @@
                     <span>Rp {{ number_format($order->grand_total ?? $order->total, 0, ',', '.') }}</span>
                 </div>
 
-                @if($order->uang_dibayar !== null)
                 <div class="flex justify-between pt-1 border-t border-black mt-1">
-                    <span>Tunai</span>
+                    <span>Metode</span>
+                    <span>{{ strtoupper($order->payment_method ?? 'CASH') }}</span>
+                </div>
+                @if($order->payment_method === 'qris' && $order->payment_ref)
+                <div class="flex justify-between">
+                    <span>Referensi</span>
+                    <span>{{ $order->payment_ref }}</span>
+                </div>
+                @endif
+                @if($order->payment_method === 'card')
+                <div class="flex justify-between">
+                    <span>Kartu</span>
+                    <span>**** **** **** {{ $order->card_last4 }}</span>
+                </div>
+                @if($order->payment_ref)
+                <div class="flex justify-between">
+                    <span>Referensi</span>
+                    <span>{{ $order->payment_ref }}</span>
+                </div>
+                @endif
+                @endif
+                @if($order->uang_dibayar !== null)
+                <div class="flex justify-between">
+                    <span>{{ $order->payment_method === 'cash' ? 'Tunai' : 'Dibayar' }}</span>
                     <span>Rp {{ number_format($order->uang_dibayar, 0, ',', '.') }}</span>
                 </div>
                 @endif
-
                 {{-- Selalu tampilkan kembalian, meskipun 0 --}}
                 <div class="flex justify-between">
                     <span>Kembali</span>

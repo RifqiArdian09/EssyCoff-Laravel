@@ -12,6 +12,17 @@ class Logout
      */
     public function __invoke()
     {
+        // Clear the user's active session ID
+        if (Auth::check()) {
+            $user = Auth::user();
+            try {
+                $user->active_session_id = null;
+                $user->save();
+            } catch (\Throwable $e) {
+                // swallow
+            }
+        }
+
         Auth::guard('web')->logout();
 
         Session::invalidate();

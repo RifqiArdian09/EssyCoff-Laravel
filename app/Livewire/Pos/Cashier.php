@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Category;
+use App\Models\CafeTable;
 use Illuminate\Support\Facades\Auth;
 class Cashier extends Component
 {
@@ -17,6 +18,10 @@ class Cashier extends Component
     public $kembalian = 0;
     public $categoryId = null;
     public $customerName = '';
+    public $paymentMethod = 'cash'; // cash, qris, card
+    public $paymentRef = '';
+    public $cardLast4 = '';
+    public $selectedTableId = null; // dropdown meja
     public $showClearCartModal = false;
     public $showOutOfStockModal = false;
     public $outOfStockName = '';
@@ -186,6 +191,11 @@ class Cashier extends Component
     }
     public function calculateKembalian()
     {
+        // Kembalian hanya relevan untuk metode cash
+        if ($this->paymentMethod !== 'cash') {
+            $this->kembalian = 0;
+            return;
+        }
         $uang = $this->uangCustomer === '' ? 0 : (float) $this->uangCustomer;
         $total = (float) $this->total;
         $this->kembalian = ($uang >= $total && $total > 0) ? $uang - $total : 0;
@@ -201,23 +211,38 @@ class Cashier extends Component
             return;
         }
         $uangCustomer = $this->uangCustomer === '' ? 0 : (float) $this->uangCustomer;
-        if ($uangCustomer < $this->total) {
-            session()->flash('error', 'Uang customer tidak cukup!');
-            return;
+        if ($this->paymentMethod === 'cash') {
+            if ($uangCustomer < $this->total) {
+                session()->flash('error', 'Uang customer tidak cukup!');
+                return;
+            }
+        } elseif ($this->paymentMethod === 'card') {
+            // Validasi minimal 4 digit terakhir
+            if (empty($this->cardLast4) || !preg_match('/^\d{4}$/', $this->cardLast4)) {
+                session()->flash('error', 'Masukkan 4 digit terakhir kartu.');
+                return;
+            }
         }
         if (empty($this->customerName)) {
             session()->flash('error', 'Nama customer harus diisi!');
             return;
         }
         try {
+            // Tentukan nilai pembayaran berdasarkan metode
+            $uangDibayar = $this->paymentMethod === 'cash' ? $uangCustomer : $this->total;
+            $kembalian = $this->paymentMethod === 'cash' ? $this->kembalian : 0;
             $order = Order::create([
                 'no_order' => 'ORD-' . date('YmdHis') . '-' . str_pad(Order::whereDate('created_at', today())->count() + 1, 3, '0', STR_PAD_LEFT),
                 'user_id' => Auth::id(),
+                'table_id' => $this->selectedTableId,
                 'customer_name' => $this->customerName,
                 'total' => $this->total,
-                'uang_dibayar' => $uangCustomer,
-                'kembalian' => $this->kembalian,
-                'status' => 'paid'
+                'uang_dibayar' => $uangDibayar,
+                'kembalian' => $kembalian,
+                'status' => 'paid',
+                'payment_method' => $this->paymentMethod,
+                'payment_ref' => $this->paymentMethod === 'qris' ? ($this->paymentRef ?: null) : null,
+                'card_last4' => $this->paymentMethod === 'card' ? $this->cardLast4 : null,
             ]);
             $orderId = $order->getKey();
             foreach ($this->cart as $productId => $item) {
@@ -247,6 +272,10 @@ class Cashier extends Component
             }
             // Set lastOrder untuk ditampilkan di modal sukses
             $this->lastOrder = $order->load('items.product', 'user');
+            // Jika ada meja dipilih, set status meja menjadi unavailable (otomatis setelah bayar)
+            if ($this->selectedTableId) {
+                CafeTable::whereKey($this->selectedTableId)->update(['status' => 'unavailable']);
+            }
             // Hanya tampilkan modal sukses. JANGAN tampilkan struk di sini.
             $this->showReceiptModal = true;
             // Reset cart setelah checkout berhasil
@@ -256,6 +285,10 @@ class Cashier extends Component
             $this->kembalian = 0;
             $this->customerName = '';
             $this->uangCustomer = '';
+            $this->paymentMethod = 'cash';
+            $this->paymentRef = '';
+            $this->cardLast4 = '';
+            $this->selectedTableId = null;
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
@@ -290,9 +323,11 @@ class Cashier extends Component
         }
         $products = $query->orderBy('name')->paginate(12);
         $categories = Category::orderBy('name')->get();
+        $tables = CafeTable::orderBy('name')->get();
         return view('livewire.pos.cashier', [
             'products' => $products,
             'categories' => $categories,
+            'tables' => $tables,
         ]);
     }
 }

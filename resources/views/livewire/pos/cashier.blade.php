@@ -263,12 +263,63 @@
             <div class="bg-white dark:bg-zinc-900 p-5 rounded-lg shadow-lg border border-gray-200 dark:border-zinc-700">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Pembayaran</h2>
                 <div class="space-y-4">
+                    <!-- Pilih Meja (hanya meja available ditampilkan) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">Meja</label>
+                        <flux:select wire:model.live="selectedTableId" class="w-full">
+                            <option value="">Tanpa Meja</option>
+                            @foreach(($tables ?? collect()) as $t)
+                                @if(($t->status ?? 'available') === 'available')
+                                    <option value="{{ $t->id }}">
+                                        {{ $t->name }} ({{ $t->code }}) — {{ $t->seats ? $t->seats.' kursi' : 'kursi ?' }}
+                                    </option>
+                                @endif
+                            @endforeach
+                        </flux:select>
+                        @if($selectedTableId)
+                        <p class="mt-1 text-xs text-gray-500 dark:text-zinc-400">Meja akan otomatis diset <span class="font-semibold">Tidak Tersedia</span> setelah pembayaran.</p>
+                        @endif
+                    </div>
+                    <!-- Metode Pembayaran -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">Metode</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button
+                                type="button"
+                                wire:click="$set('paymentMethod','cash')"
+                                class="px-3 py-2 rounded border text-sm transition
+                                    {{ $paymentMethod === 'cash' 
+                                        ? 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700' 
+                                        : 'bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 border-gray-200 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-700' }}">
+                                Cash
+                            </button>
+                            <button
+                                type="button"
+                                wire:click="$set('paymentMethod','qris')"
+                                class="px-3 py-2 rounded border text-sm transition
+                                    {{ $paymentMethod === 'qris' 
+                                        ? 'bg-blue-600 text-white border-blue-700 hover:bg-blue-700' 
+                                        : 'bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 border-gray-200 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-700' }}">
+                                QRIS
+                            </button>
+                            <button
+                                type="button"
+                                wire:click="$set('paymentMethod','card')"
+                                class="px-3 py-2 rounded border text-sm transition
+                                    {{ $paymentMethod === 'card' 
+                                        ? 'bg-purple-600 text-white border-purple-700 hover:bg-purple-700' 
+                                        : 'bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 border-gray-200 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-700' }}">
+                                Card
+                            </button>
+                        </div>
+                    </div>
                     <flux:input
                         wire:model.live="customerName"
                         type="text"
                         label="Nama Customer"
                         placeholder="Masukkan nama customer"
                         required />
+                    @if($paymentMethod === 'cash')
                     <flux:input
                         wire:model.live="uangCustomer"
                         type="number"
@@ -277,8 +328,31 @@
                         min="0"
                         step="1000"
                         required />
+                    @endif
+                    @if($paymentMethod === 'qris')
+                    <flux:input
+                        wire:model.live="paymentRef"
+                        type="text"
+                        label="No. Referensi QRIS (opsional)"
+                        placeholder="Masukkan nomor referensi / approval code" />
+                    @endif
+                    @if($paymentMethod === 'card')
+                    <div class="grid grid-cols-2 gap-3">
+                        <flux:input
+                            wire:model.live="cardLast4"
+                            type="text"
+                            label="Last 4 Digit Kartu"
+                            placeholder="1234"
+                            maxlength="4" />
+                        <flux:input
+                            wire:model.live="paymentRef"
+                            type="text"
+                            label="No. Referensi (opsional)"
+                            placeholder="Auth code / STAN" />
+                    </div>
+                    @endif
                     <!-- Quick Amount Buttons -->
-                    @if($total > 0)
+                    @if($total > 0 && $paymentMethod === 'cash')
                     <div class="grid grid-cols-3 gap-2">
                         <button
                             wire:click="$set('uangCustomer', {{ $total }})"
@@ -297,18 +371,20 @@
                         </button>
                     </div>
                     @endif
+                    @if($paymentMethod === 'cash')
                     <div class="flex justify-between items-center text-lg font-semibold border-t border-gray-200 dark:border-zinc-700 pt-4">
                         <span class="text-gray-900 dark:text-white">Kembalian:</span>
                         <span class="{{ $kembalian > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-zinc-400' }}">
                             Rp {{ number_format($kembalian, 0, ',', '.') }}
                         </span>
                     </div>
+                    @endif
                     <flux:button
                         wire:click="checkout"
                         variant="primary"
                         class="w-full"
                         icon="shopping-cart"
-                        :disabled="count($cart) === 0 || $total <= 0 || ($uangCustomer === '' ? 0 : (float) $uangCustomer) < $total || empty($customerName)"
+                        :disabled="count($cart) === 0 || $total <= 0 || empty($customerName) || ($paymentMethod === 'cash' && (($uangCustomer === '' ? 0 : (float) $uangCustomer) < $total)) || ($paymentMethod === 'card' && (strlen((string) $cardLast4) !== 4))"
                         wire:loading.attr="disabled">
                         <span wire:loading.remove>Buat Transaksi</span>
                         <span wire:loading>Memproses...</span>
@@ -510,14 +586,34 @@
                     <span>Total</span>
                     <span>Rp {{ number_format($lastOrder->grand_total ?? $lastOrder->total, 0, ',', '.') }}</span>
                 </div>
-
-                @if($lastOrder->uang_dibayar !== null)
                 <div class="flex justify-between pt-1 border-t border-black mt-1">
-                    <span>Tunai</span>
+                    <span>Metode</span>
+                    <span>{{ strtoupper($lastOrder->payment_method ?? 'CASH') }}</span>
+                </div>
+                @if($lastOrder->payment_method === 'qris' && $lastOrder->payment_ref)
+                <div class="flex justify-between">
+                    <span>Referensi</span>
+                    <span>{{ $lastOrder->payment_ref }}</span>
+                </div>
+                @endif
+                @if($lastOrder->payment_method === 'card')
+                <div class="flex justify-between">
+                    <span>Kartu</span>
+                    <span>**** **** **** {{ $lastOrder->card_last4 }}</span>
+                </div>
+                @if($lastOrder->payment_ref)
+                <div class="flex justify-between">
+                    <span>Referensi</span>
+                    <span>{{ $lastOrder->payment_ref }}</span>
+                </div>
+                @endif
+                @endif
+                @if($lastOrder->uang_dibayar !== null)
+                <div class="flex justify-between">
+                    <span>{{ $lastOrder->payment_method === 'cash' ? 'Tunai' : 'Dibayar' }}</span>
                     <span>Rp {{ number_format($lastOrder->uang_dibayar, 0, ',', '.') }}</span>
                 </div>
                 @endif
-
                 {{-- Selalu tampilkan kembalian, meskipun 0 --}}
                 <div class="flex justify-between">
                     <span>Kembali</span>

@@ -106,6 +106,15 @@
                     {{ __('POS') }}
                 </flux:navlist.item>
 
+                <!-- Tables Management -->
+                <flux:navlist.item
+                    icon="table-cells"
+                    :href="route('pos.tables')"
+                    :current="request()->routeIs('pos.tables')"
+                    wire:navigate>
+                    {{ __('Tables') }}
+                </flux:navlist.item>
+
                 <!-- Transaction History dengan pending badge -->
                 @if($pendingBadge)
                 <flux:navlist.item

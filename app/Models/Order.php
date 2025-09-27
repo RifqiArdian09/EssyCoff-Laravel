@@ -11,12 +11,16 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
+        'table_id',
         'no_order',
         'customer_name',
         'total',
         'uang_dibayar',
         'kembalian',
         'status',
+        'payment_method',
+        'payment_ref',
+        'card_last4',
     ];
 
     // 🔽 Tambahkan ini: pastikan field numerik jadi float
@@ -36,5 +40,10 @@ class Order extends Model
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function table()
+    {
+        return $this->belongsTo(CafeTable::class, 'table_id');
     }
 }

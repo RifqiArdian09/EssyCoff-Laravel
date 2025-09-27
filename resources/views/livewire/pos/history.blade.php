@@ -40,6 +40,16 @@
                     @endforeach
                 </flux:select>
             </div>
+            <!-- Table Filter -->
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Filter Meja</label>
+                <flux:select wire:model.live="selectedTableId" class="w-full">
+                    <option value="">Semua Meja</option>
+                    @foreach(($tables ?? collect()) as $t)
+                        <option value="{{ $t->id }}">{{ $t->name }} ({{ $t->code }})</option>
+                    @endforeach
+                </flux:select>
+            </div>
         </div>
 
         <!-- Summary Info -->
@@ -66,9 +76,11 @@
                         <th class="px-4 py-3">#</th>
                         <th class="px-4 py-3">No Order</th>
                         <th class="px-4 py-3">Customer</th>
+                        <th class="px-4 py-3">Meja</th>
                         <th class="px-4 py-3">Tanggal</th>
                         <th class="px-4 py-3">Kasir</th>
                         <th class="px-4 py-3 text-right">Total</th>
+                        <th class="px-4 py-3">Metode</th>
                         <th class="px-4 py-3">Status</th>
                         <th class="px-4 py-3 text-right">Aksi</th>
                     </tr>
@@ -87,6 +99,16 @@
                                 {{ $order->customer_name ?? '-' }}
                             </span>
                         </td>
+                        <td class="px-4 py-3">
+                            @if($order->table)
+                                <div class="flex flex-col">
+                                    <span class="text-gray-900 dark:text-white font-medium">{{ $order->table->name }}</span>
+                                    <span class="text-xs text-gray-500 dark:text-zinc-400 font-mono">({{ $order->table->code }})</span>
+                                </div>
+                            @else
+                                <span class="text-gray-400 dark:text-zinc-500">-</span>
+                            @endif
+                        </td>
                         <td class="px-4 py-3 text-sm text-gray-600 dark:text-zinc-400">
                             {{ $order->created_at->format('d M, H:i') }}
                         </td>
@@ -95,6 +117,20 @@
                         </td>
                         <td class="px-4 py-3 font-semibold text-emerald-600 dark:text-emerald-400 text-right">
                             Rp {{ number_format((float)$order->total, 0, ',', '.') }}
+                        </td>
+                        <td class="px-4 py-3">
+                            @php $method = $order->payment_method; @endphp
+                            @if($order->status === 'pending_payment' || !$method)
+                                <span class="px-2 py-1 bg-gray-100 dark:bg-zinc-700 text-gray-700 dark:text-zinc-300 rounded-full text-xs font-medium">-</span>
+                            @elseif($method === 'cash')
+                                <span class="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 rounded-full text-xs font-medium">Cash</span>
+                            @elseif($method === 'qris')
+                                <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-xs font-medium">QRIS</span>
+                            @elseif($method === 'card')
+                                <span class="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-full text-xs font-medium">Card</span>
+                            @else
+                                <span class="px-2 py-1 bg-gray-100 dark:bg-zinc-700 text-gray-700 dark:text-zinc-300 rounded-full text-xs font-medium">{{ strtoupper($method) }}</span>
+                            @endif
                         </td>
                         <td class="px-4 py-3 text-center">
                             @if($order->status === 'pending_payment')
@@ -112,25 +148,47 @@
                                 @if($order->status === 'pending_payment')
                                 <flux:button
                                     variant="primary"
+                                    color="emerald"
                                     size="sm"
                                     icon="credit-card"
-                                    wire:click="confirmPayment({{ $order->id }})">
+                                    wire:click="confirmPayment({{ $order->id }})"
+                                    class="bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600">
                                     Bayar
                                 </flux:button>
-                                @endif
+                                @else
                                 <flux:button
-                                    variant="primary"
+                                    variant="outline"
+                                    color="blue"
                                     size="sm"
                                     icon="document-text"
-                                    href="{{ route('pos.detail', $order) }}">
+                                    href="{{ route('pos.detail', $order) }}"
+                                    class="text-blue-600 border-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-400 dark:hover:bg-blue-900/20">
                                     Detail
+                                </flux:button>
+                                @if($order->table && $order->table->status === 'unavailable')
+                                <flux:button
+                                    variant="outline"
+                                    size="sm"
+                                    icon="check"
+                                    wire:click="markTableAvailable({{ $order->id }})">
+                                    Free Table
+                                </flux:button>
+                                @endif
+                                @endif
+                                
+                                <flux:button
+                                    variant="danger"
+                                    icon="trash"
+                                    size="sm"
+                                    wire:click="confirmDelete({{ $order->id }})">
+                                    Hapus
                                 </flux:button>
                             </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="px-4 py-8 text-center text-gray-500 dark:text-zinc-500">
+                        <td colspan="10" class="px-4 py-8 text-center text-gray-500 dark:text-zinc-500">
                             <div class="flex flex-col items-center justify-center gap-2">
                                 <svg class="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -191,51 +249,107 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">
-                        Uang yang Dibayar
-                    </label>
                     @php
-                    $minUang = (float) $selectedOrder->total;
-                    @endphp
-
-                    <flux:input
-                        wire:model.live="uangDibayar"
-                        type="number"
-                        placeholder="15000"
-                        :min="$minUang"
-                        step="1"
-                        class="w-full" />
-                    @error('uangDibayar')
-                    <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
-                    @enderror
-
-                    <!-- Quick Amount Buttons -->
-                    @php
-                    $total = (float)$selectedOrder->total;
+                    // Pastikan variabel total tersedia untuk semua metode
+                    $total = (float) ($selectedOrder->total ?? 0);
                     $rounded50k = ceil($total / 50000) * 50000;
                     $rounded100k = ceil($total / 100000) * 100000;
                     @endphp
-
-                    <div class="grid grid-cols-3 gap-2 mt-2">
-                        <button
-                            type="button"
-                            wire:click="$set('uangDibayar', {{ $total }})"
-                            class="px-3 py-2 text-xs bg-gray-100 dark:bg-zinc-700 rounded hover:bg-gray-200 dark:hover:bg-zinc-600 transition text-gray-800 dark:text-zinc-300 font-medium">
-                            Pas
-                        </button>
-                        <button
-                            type="button"
-                            wire:click="$set('uangDibayar', {{ $rounded50k }})"
-                            class="px-3 py-2 text-xs bg-blue-100 dark:bg-blue-900/40 rounded hover:bg-blue-200 dark:hover:bg-blue-800 transition text-blue-800 dark:text-blue-300 font-medium">
-                            Rp {{ number_format($rounded50k, 0, ',', '.') }}
-                        </button>
-                        <button
-                            type="button"
-                            wire:click="$set('uangDibayar', {{ $rounded100k }})"
-                            class="px-3 py-2 text-xs bg-emerald-100 dark:bg-emerald-900/40 rounded hover:bg-emerald-200 dark:hover:bg-emerald-800 transition text-emerald-800 dark:text-emerald-300 font-medium">
-                            Rp {{ number_format($rounded100k, 0, ',', '.') }}
-                        </button>
+                    <!-- Metode Pembayaran -->
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Metode</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" wire:click="$set('paymentMethod','cash')"
+                                class="px-3 py-2 rounded border text-sm transition
+                                    {{ $paymentMethod === 'cash'
+                                        ? 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700'
+                                        : 'bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 border-gray-200 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-700' }}">
+                                Cash
+                            </button>
+                            <button type="button" wire:click="$set('paymentMethod','qris')"
+                                class="px-3 py-2 rounded border text-sm transition
+                                    {{ $paymentMethod === 'qris'
+                                        ? 'bg-blue-600 text-white border-blue-700 hover:bg-blue-700'
+                                        : 'bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 border-gray-200 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-700' }}">
+                                QRIS
+                            </button>
+                            <button type="button" wire:click="$set('paymentMethod','card')"
+                                class="px-3 py-2 rounded border text-sm transition
+                                    {{ $paymentMethod === 'card'
+                                        ? 'bg-purple-600 text-white border-purple-700 hover:bg-purple-700'
+                                        : 'bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 border-gray-200 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-700' }}">
+                                Card
+                            </button>
+                        </div>
                     </div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">
+                        @if($paymentMethod === 'cash')
+                            Uang yang Dibayar
+                        @elseif($paymentMethod === 'qris')
+                            Referensi QRIS (opsional)
+                        @else
+                            Detail Kartu
+                        @endif
+                    </label>
+                    @php $minUang = (float) $selectedOrder->total; @endphp
+
+                    @if($paymentMethod === 'cash')
+                        <flux:input
+                            wire:model.live="uangDibayar"
+                            type="number"
+                            placeholder="15000"
+                            :min="$minUang"
+                            step="1"
+                            class="w-full" />
+                        @error('uangDibayar')
+                        <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
+
+                        <!-- Quick Amount Buttons -->
+                        <div class="grid grid-cols-3 gap-2 mt-2">
+                            <button
+                                type="button"
+                                wire:click="$set('uangDibayar', {{ $total }})"
+                                class="px-3 py-2 text-xs bg-gray-100 dark:bg-zinc-700 rounded hover:bg-gray-200 dark:hover:bg-zinc-600 transition text-gray-800 dark:text-zinc-300 font-medium">
+                                Pas
+                            </button>
+                            <button
+                                type="button"
+                                wire:click="$set('uangDibayar', {{ $rounded50k }})"
+                                class="px-3 py-2 text-xs bg-blue-100 dark:bg-blue-900/40 rounded hover:bg-blue-200 dark:hover:bg-blue-800 transition text-blue-800 dark:text-blue-300 font-medium">
+                                Rp {{ number_format($rounded50k, 0, ',', '.') }}
+                            </button>
+                            <button
+                                type="button"
+                                wire:click="$set('uangDibayar', {{ $rounded100k }})"
+                                class="px-3 py-2 text-xs bg-emerald-100 dark:bg-emerald-900/40 rounded hover:bg-emerald-200 dark:hover:bg-emerald-800 transition text-emerald-800 dark:text-emerald-300 font-medium">
+                                Rp {{ number_format($rounded100k, 0, ',', '.') }}
+                            </button>
+                        </div>
+                    @elseif($paymentMethod === 'qris')
+                        <flux:input
+                            wire:model.live="paymentRef"
+                            type="text"
+                            placeholder="No. Referensi (opsional)"
+                            class="w-full" />
+                    @else
+                        <div class="grid grid-cols-2 gap-3">
+                            <flux:input
+                                wire:model.live="cardLast4"
+                                type="text"
+                                placeholder="Last 4 Digit"
+                                maxlength="4"
+                                class="w-full" />
+                            <flux:input
+                                wire:model.live="paymentRef"
+                                type="text"
+                                placeholder="No. Referensi (opsional)"
+                                class="w-full" />
+                        </div>
+                        @error('cardLast4')
+                        <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
+                    @endif
                 </div>
 
                 @php
@@ -243,7 +357,7 @@
                 $kembalian = $uangDibayarFloat - $total;
                 @endphp
 
-                @if($uangDibayarFloat >= $total)
+                @if($paymentMethod === 'cash' && $uangDibayarFloat >= $total)
                 <div class="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg">
                     <div class="flex justify-between text-sm">
                         <span class="text-blue-700 dark:text-blue-300">Kembalian:</span>
@@ -262,10 +376,35 @@
                 <flux:button
                     variant="primary"
                     wire:click="processPayment"
-                    :disabled="!$uangDibayar || $uangDibayar < $total"
+                    :disabled="($paymentMethod === 'cash' && ((!$uangDibayar) || ($uangDibayar < $total))) || ($paymentMethod === 'card' && (strlen((string) $cardLast4) !== 4))"
                     class="flex-1">
                     Konfirmasi & Cetak
                 </flux:button>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- ✅ Modal: Konfirmasi Hapus -->
+    @if($showDeleteModal && $orderToDelete)
+    <div class="fixed inset-0 z-50 flex items-center justify-center" wire:click.self="closeDeleteModal">
+        <div class="relative bg-white dark:bg-zinc-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6 border border-gray-200 dark:border-zinc-700">
+
+            <div class="flex items-start gap-3">
+                <div class="shrink-0 mt-0.5 text-red-600 dark:text-red-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 4h.01M4.93 4.93l14.14 14.14M9 3h6a2 2 0 012 2v1H7V5a2 2 0 012-2zm10 5H5l1 12a2 2 0 002 2h8a2 2 0 002-2l1-12z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Hapus Transaksi?</h3>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-zinc-300">Tindakan ini tidak dapat dibatalkan. Anda akan menghapus transaksi dengan No. Order <span class="font-semibold">{{ $orderToDelete->no_order }}</span>.</p>
+                </div>
+            </div>
+
+            <div class="mt-6 flex gap-3">
+                <flux:button variant="ghost" wire:click="closeDeleteModal" class="flex-1">Batal</flux:button>
+                <flux:button variant="primary" class="flex-1 bg-red-600 hover:bg-red-700 text-white border-red-600" icon="trash" wire:click="deleteOrder">Hapus</flux:button>
             </div>
         </div>
     </div>
@@ -308,6 +447,12 @@
                     <span class="font-medium">Tanggal:</span>
                     <span>{{ $selectedOrder->created_at->format('d/m/Y H:i') }}</span>
                 </div>
+                @if($selectedOrder->table)
+                <div class="flex justify-between">
+                    <span class="font-medium">Meja:</span>
+                    <span>{{ $selectedOrder->table->name }} ({{ $selectedOrder->table->code }})</span>
+                </div>
+                @endif
                 @if($selectedOrder->customer_name)
                 <div class="flex justify-between">
                     <span class="font-medium">Customer:</span>
@@ -369,13 +514,34 @@
                     <span>Rp {{ number_format($selectedOrder->grand_total ?? $selectedOrder->total, 0, ',', '.') }}</span>
                 </div>
 
-                @if($selectedOrder->uang_dibayar !== null)
                 <div class="flex justify-between pt-1 border-t border-black mt-1">
-                    <span>Tunai</span>
+                    <span>Metode</span>
+                    <span>{{ strtoupper($selectedOrder->payment_method ?? 'CASH') }}</span>
+                </div>
+                @if($selectedOrder->payment_method === 'qris' && $selectedOrder->payment_ref)
+                <div class="flex justify-between">
+                    <span>Referensi</span>
+                    <span>{{ $selectedOrder->payment_ref }}</span>
+                </div>
+                @endif
+                @if($selectedOrder->payment_method === 'card')
+                <div class="flex justify-between">
+                    <span>Kartu</span>
+                    <span>**** **** **** {{ $selectedOrder->card_last4 }}</span>
+                </div>
+                @if($selectedOrder->payment_ref)
+                <div class="flex justify-between">
+                    <span>Referensi</span>
+                    <span>{{ $selectedOrder->payment_ref }}</span>
+                </div>
+                @endif
+                @endif
+                @if($selectedOrder->uang_dibayar !== null)
+                <div class="flex justify-between">
+                    <span>{{ $selectedOrder->payment_method === 'cash' ? 'Tunai' : 'Dibayar' }}</span>
                     <span>Rp {{ number_format($selectedOrder->uang_dibayar, 0, ',', '.') }}</span>
                 </div>
                 @endif
-
                 {{-- Selalu tampilkan kembalian, meskipun 0 --}}
                 <div class="flex justify-between">
                     <span>Kembali</span>

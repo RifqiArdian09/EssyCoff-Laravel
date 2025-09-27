@@ -12,6 +12,7 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Volt\Component;
+use App\Models\User;
 
 new #[Layout('components.layouts.auth')] class extends Component {
     #[Validate('required|string|email')]
@@ -31,7 +32,27 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
+        // Validate credentials without logging in yet
+        $credentials = ['email' => $this->email, 'password' => $this->password];
+        if (! Auth::validate($credentials)) {
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => __('auth.failed'),
+            ]);
+        }
+
+        // Fetch user and enforce single active session
+        $user = User::where('email', $this->email)->first();
+        if ($user && !empty($user->active_session_id) && $user->active_session_id !== Session::getId()) {
+            // Another device is already using this account
+            throw ValidationException::withMessages([
+                'email' => 'Akun ini sedang aktif di perangkat lain. Silakan keluar dari perangkat tersebut terlebih dahulu.',
+            ]);
+        }
+
+        // Proceed with normal login
+        if (! Auth::attempt($credentials, $this->remember)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -42,7 +63,14 @@ new #[Layout('components.layouts.auth')] class extends Component {
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();
 
+        // Store the new session ID as the active session for the user
         $user = Auth::user();
+        try {
+            $user->active_session_id = Session::getId();
+            $user->save();
+        } catch (\Throwable $e) {
+            Log::error('Failed to set active_session_id for user ID '.$user->id.': '.$e->getMessage());
+        }
         
         // Direct redirect based on role
         if ($user->role === 'cashier') {

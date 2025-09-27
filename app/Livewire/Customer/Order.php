@@ -5,6 +5,7 @@ namespace App\Livewire\Customer;
 use Livewire\Component;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\CafeTable;
 
 class Order extends Component
 {
@@ -15,6 +16,16 @@ class Order extends Component
     {
         $this->search = request()->query('search', '');
         $this->category = request()->query('category', 'all');
+        
+        // Validasi meja jika ada parameter table (sebagai backup, route sudah handle ini)
+        $tableCode = request()->query('table');
+        if ($tableCode) {
+            $table = CafeTable::where('code', $tableCode)->first();
+            if (!$table) {
+                // Set flash message untuk ditampilkan di view
+                session()->flash('table_error', 'Meja dengan kode "' . $tableCode . '" tidak ditemukan. Silakan hubungi staff untuk bantuan.');
+            }
+        }
     }
 
     public function render()
