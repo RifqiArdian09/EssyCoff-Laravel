@@ -18,7 +18,7 @@
             </div>
             <div>
                 <p class="text-sm text-gray-600 dark:text-zinc-400">Status</p>
-                <p class="font-medium text-emerald-600 dark:text-emerald-400">{{ ucfirst(str_replace('_', ' ', $order->status)) }}</p>
+                <p class="font-medium {{ $order->status === 'pending_payment' ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400' }}">{{ ucfirst(str_replace('_', ' ', $order->status)) }}</p>
             </div>
             <div class="md:col-span-3">
                 <p class="text-sm text-gray-600 dark:text-zinc-400">Meja</p>
@@ -79,7 +79,9 @@
 
             <div class="flex justify-between pt-1 border-t border-gray-200 dark:border-zinc-700">
                 <span class="text-gray-600 dark:text-zinc-300">Metode</span>
-                <span class="font-medium text-gray-900 dark:text-white">{{ strtoupper($order->payment_method ?? 'CASH') }}</span>
+                <span class="font-medium text-gray-900 dark:text-white">
+                    {{ $order->status === 'pending_payment' ? '' : strtoupper($order->payment_method ?? '') }}
+                </span>
             </div>
 
             @if(($order->payment_method === 'qris') && $order->payment_ref)
@@ -89,7 +91,7 @@
             </div>
             @endif
 
-            @if($order->payment_method === 'card')
+            @if($order->payment_method === 'card' && $order->status !== 'pending_payment')
             <div class="flex justify-between">
                 <span class="text-gray-600 dark:text-zinc-300">Kartu</span>
                 <span class="font-medium text-gray-900 dark:text-white">**** **** **** {{ $order->card_last4 }}</span>
@@ -102,7 +104,7 @@
             @endif
             @endif
 
-            @if($order->uang_dibayar !== null)
+            @if($order->uang_dibayar !== null && $order->status !== 'pending_payment')
             <div class="flex justify-between">
                 <span class="text-gray-600 dark:text-zinc-300">{{ $order->payment_method === 'cash' ? 'Tunai' : 'Dibayar' }}</span>
                 <span class="font-semibold text-gray-900 dark:text-white">
@@ -111,7 +113,7 @@
             </div>
             @endif
 
-            @if($order->kembalian !== null)
+            @if($order->kembalian !== null && $order->status !== 'pending_payment')
                 <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-zinc-300">Kembalian</span>
                     <span class="font-semibold text-emerald-600 dark:text-emerald-400">
@@ -124,13 +126,24 @@
 
     <!-- Tombol Aksi -->
     <div class="flex flex-wrap gap-3">
+       
         <flux:button 
             variant="outline" 
             icon="arrow-left"
             href="{{ route('pos.history') }}">
             Kembali
         </flux:button>
+        
+        @if($order->status === 'pending_payment')
+        <flux:button 
+            variant="primary" 
+            icon="credit-card"
+            wire:click="openPaymentModal">
+            Bayar
+        </flux:button>
+        @endif
 
+        @if($order->status === 'paid')
         <!-- Tombol Cetak Ulang Struk -->
         <flux:button 
             variant="primary" 
@@ -138,6 +151,7 @@
             wire:click="printReceipt">
             Cetak Ulang Struk
         </flux:button>
+        @endif
 
         @if($order->table && $order->table->status === 'unavailable')
         <flux:button 
@@ -148,6 +162,163 @@
         </flux:button>
         @endif
     </div>
+
+    <!-- Modal Pembayaran -->
+    @if($showPaymentModal)
+    <div class="fixed inset-0 z-[70] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50" wire:click="closePaymentModal"></div>
+        <div class="relative bg-white dark:bg-zinc-800 rounded-lg p-6 w-full max-w-md z-[71] border border-gray-200 dark:border-zinc-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Pembayaran</h3>
+            <!-- Info ringkas: No. Order, Customer, Total -->
+            <div class="mb-4 rounded-md border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-900 p-3 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-zinc-300">No. Order</span>
+                    <span class="font-semibold text-gray-900 dark:text-white">{{ $order->no_order }}</span>
+                </div>
+                <div class="flex justify-between mt-1">
+                    <span class="text-gray-600 dark:text-zinc-300">Customer</span>
+                    <span class="font-medium text-gray-900 dark:text-white">{{ $order->customer_name ?? '-' }}</span>
+                </div>
+                <div class="flex justify-between mt-1">
+                    <span class="text-gray-600 dark:text-zinc-300">Total</span>
+                    <span class="font-bold text-gray-900 dark:text-white">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                @php
+                $total = (float) ($order->total ?? 0);
+                $rounded50k = ceil($total / 50000) * 50000;
+                $rounded100k = ceil($total / 100000) * 100000;
+                @endphp
+
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-600 dark:text-zinc-300">Total</span>
+                    <span class="font-semibold text-gray-900 dark:text-white">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
+                </div>
+
+                <!-- Metode Pembayaran -->
+                <div class="mb-3">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Metode</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" wire:click="$set('paymentMethod','cash')"
+                            class="px-3 py-2 rounded border text-sm transition
+                                {{ $paymentMethod === 'cash'
+                                    ? 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700'
+                                    : 'bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 border-gray-200 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-700' }}">
+                            Cash
+                        </button>
+                        <button type="button" wire:click="$set('paymentMethod','qris')"
+                            class="px-3 py-2 rounded border text-sm transition
+                                {{ $paymentMethod === 'qris'
+                                    ? 'bg-blue-600 text-white border-blue-700 hover:bg-blue-700'
+                                    : 'bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 border-gray-200 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-700' }}">
+                            QRIS
+                        </button>
+                        <button type="button" wire:click="$set('paymentMethod','card')"
+                            class="px-3 py-2 rounded border text-sm transition
+                                {{ $paymentMethod === 'card'
+                                    ? 'bg-purple-600 text-white border-purple-700 hover:bg-purple-700'
+                                    : 'bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 border-gray-200 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-700' }}">
+                            Card
+                        </button>
+                    </div>
+                </div>
+
+                <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">
+                    @if($paymentMethod === 'cash')
+                        Uang yang Dibayar
+                    @elseif($paymentMethod === 'qris')
+                        Referensi QRIS (opsional)
+                    @else
+                        Detail Kartu
+                    @endif
+                </label>
+
+                @php $minUang = (float) $order->total; @endphp
+
+                @if($paymentMethod === 'cash')
+                    <flux:input
+                        wire:model.live="uangDibayar"
+                        type="number"
+                        placeholder="15000"
+                        :min="$minUang"
+                        step="1"
+                        class="w-full" />
+                    @error('uangDibayar')
+                    <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+
+                    <!-- Quick Amount Buttons -->
+                    <div class="grid grid-cols-3 gap-2 mt-2">
+                        <button
+                            type="button"
+                            wire:click="$set('uangDibayar', {{ $total }})"
+                            class="px-3 py-2 text-xs bg-gray-100 dark:bg-zinc-700 rounded hover:bg-gray-200 dark:hover:bg-zinc-600 transition text-gray-800 dark:text-zinc-300 font-medium">
+                            Pas
+                        </button>
+                        <button
+                            type="button"
+                            wire:click="$set('uangDibayar', {{ $rounded50k }})"
+                            class="px-3 py-2 text-xs bg-blue-100 dark:bg-blue-900/40 rounded hover:bg-blue-200 dark:hover:bg-blue-800 transition text-blue-800 dark:text-blue-300 font-medium">
+                            Rp {{ number_format($rounded50k, 0, ',', '.') }}
+                        </button>
+                        <button
+                            type="button"
+                            wire:click="$set('uangDibayar', {{ $rounded100k }})"
+                            class="px-3 py-2 text-xs bg-emerald-100 dark:bg-emerald-900/40 rounded hover:bg-emerald-200 dark:hover:bg-emerald-800 transition text-emerald-800 dark:text-emerald-300 font-medium">
+                            Rp {{ number_format($rounded100k, 0, ',', '.') }}
+                        </button>
+                    </div>
+                @elseif($paymentMethod === 'qris')
+                    <flux:input
+                        wire:model.live="paymentRef"
+                        type="text"
+                        placeholder="No. Referensi (opsional)"
+                        class="w-full" />
+                @else
+                    <div class="grid grid-cols-2 gap-3">
+                        <flux:input
+                            wire:model.live="cardLast4"
+                            type="text"
+                            placeholder="Last 4 Digit"
+                            maxlength="4"
+                            class="w-full" />
+                        <flux:input
+                            wire:model.live="paymentRef"
+                            type="text"
+                            placeholder="No. Referensi (opsional)"
+                            class="w-full" />
+                    </div>
+                    @error('cardLast4')
+                    <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                @endif
+
+                @php
+                $uangDibayarFloat = (float)($uangDibayar ?? 0);
+                $kembalian = $uangDibayarFloat - $total;
+                @endphp
+
+                @if($paymentMethod === 'cash' && $uangDibayarFloat >= $total)
+                <div class="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-blue-700 dark:text-blue-300">Kembalian:</span>
+                        <span class="font-bold text-blue-700 dark:text-blue-300">
+                            Rp {{ number_format($kembalian, 0, ',', '.') }}
+                        </span>
+                    </div>
+                </div>
+                @endif
+            </div>
+
+            <div class="flex justify-end gap-2 mt-6">
+                <flux:button variant="outline" wire:click="closePaymentModal">Batal</flux:button>
+                <flux:button variant="primary" icon="check" wire:click="processPayment">Proses Pembayaran</flux:button>
+            </div>
+        </div>
+    </div>
+    @endif
 
     @php
     $width = $receiptWidth ?? '80mm'; // Default 80mm, bisa diubah jadi '58mm'

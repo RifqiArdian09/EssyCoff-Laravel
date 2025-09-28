@@ -111,27 +111,24 @@ new #[Layout('components.layouts.auth')] class extends Component {
 }; ?>
 
 
-<div class="flex flex-col gap-8">
-        <div class="flex flex-col items-center gap-4">
-            <img src="{{ asset('images/tanpajudul.png') }}" alt="EssyCoff Logo" class="w-32 h-32 sm:w-36 sm:h-36">
-            <h2 class="text-2xl font-bold text-primary">Selamat Datang Kembali</h2>
-            <p class="text-gray-600 text-center">Silakan masuk ke akun Anda untuk melanjutkan</p>
+<div class="mx-auto w-full max-w-sm px-4 py-6 sm:max-w-md sm:px-6 sm:py-8 flex flex-col gap-6 sm:gap-8">
+        <div class="flex flex-col items-center gap-3 sm:gap-4">
+            <img src="{{ asset('images/tanpajudul.png') }}" alt="EssyCoff Logo" class="w-20 h-20 sm:w-36 sm:h-36">
+            <h2 class="text-xl sm:text-2xl font-bold text-primary">Selamat Datang Kembali</h2>
+            <p class="hidden sm:block text-gray-600 text-center">Silakan masuk ke akun Anda untuk melanjutkan</p>
         </div>
 
-    <!-- Session Status -->
-    <x-auth-session-status class="text-center mb-2" :status="session('status')" />
-
-    <!-- Auth/Validation Alert -->
-    @if ($errors->has('email') || $errors->has('password'))
-        <div class="rounded-md bg-red-50 border border-red-200 text-red-700 px-4 py-3 text-sm">
-            {{ $errors->first('email') ?: $errors->first('password') }}
-        </div>
+    <!-- Session Status (minimal) -->
+    @if (session('status'))
+        <p class="text-center text-sm text-primary mb-2">{{ session('status') }}</p>
     @endif
 
-    <form method="POST" wire:submit="login" class="flex flex-col gap-6">
+    <!-- Global error bubble removed; errors shown per field below -->
+
+    <form method="POST" wire:submit="login" class="flex flex-col gap-4 sm:gap-6">
         <!-- Email Address -->
         <div class="space-y-2">
-            <label for="email" class="block text-sm font-medium text-primary">{{ __('Email address') }}</label>
+            <label for="email" class="hidden sm:block text-sm font-medium text-primary">{{ __('Email address') }}</label>
             <flux:input
                 id="email"
                 wire:model="email"
@@ -142,7 +139,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 autocomplete="email"
                 placeholder="email@example.com"
                 color="primary"
-                input-class="{{ $errors->has('email') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'focus:ring-primary focus:border-primary' }} text-dark placeholder:text-dark/60"
+                input-class="{{ $errors->has('email') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'focus:ring-primary focus:border-primary' }} h-11 sm:h-10 text-base sm:text-sm placeholder:text-dark/60"
             />
             @error('email')
                 <p class="text-sm text-red-600">{{ $message }}</p>
@@ -151,7 +148,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         <!-- Password -->
         <div class="space-y-2">
-            <label for="password" class="block text-sm font-medium text-primary">{{ __('Password') }}</label>
+            <label for="password" class="hidden sm:block text-sm font-medium text-primary">{{ __('Password') }}</label>
             <flux:input
                 id="password"
                 wire:model="password"
@@ -162,7 +159,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 :placeholder="__('Password')"
                 viewable
                 color="primary"
-                input-class="{{ $errors->has('password') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'focus:ring-primary focus:border-primary' }} text-dark placeholder:text-dark/60"
+                input-class="{{ $errors->has('password') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'focus:ring-primary focus:border-primary' }} h-11 sm:h-10 text-base sm:text-sm placeholder:text-dark/60"
             />
             @error('password')
                 <p class="text-sm text-red-600">{{ $message }}</p>
@@ -180,12 +177,12 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 color="primary"
                 input-class="accent-[#6f4e37] focus:ring-[#6f4e37] border-[#6f4e37]"
             />
-            <label for="remember" class="text-primary select-none cursor-pointer">Ingatkan saya</label>
+            <label for="remember" class="text-sm text-primary select-none cursor-pointer">Ingatkan saya</label>
         </div>
 
         <!-- Login Button -->
         <div class="flex items-center justify-end">
-            <flux:button type="submit" variant="primary" icon="arrow-right-start-on-rectangle" color="primary" class="w-full bg-primary text-white hover:bg-dark focus:ring-2 focus:ring-primary focus:outline-none inline-flex items-center justify-center gap-2">
+            <flux:button type="submit" variant="primary" icon="arrow-right-start-on-rectangle" color="primary" class="w-full h-11 sm:h-10 text-base sm:text-sm bg-primary text-white hover:bg-dark focus:ring-2 focus:ring-primary focus:outline-none inline-flex items-center justify-center gap-2">
                 {{ __('Log in') }}
             </flux:button>
         </div>

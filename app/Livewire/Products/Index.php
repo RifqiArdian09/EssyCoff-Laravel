@@ -70,6 +70,12 @@ class Index extends Component
         
         $product->delete();
         session()->flash('message', 'Product deleted successfully.');
+        $this->dispatch('toast', [
+            'type' => 'success',
+            'title' => 'Berhasil',
+            'message' => 'Produk berhasil dihapus.',
+            'timeout' => 3000,
+        ]);
         
         // Close the modal after successful deletion
         $this->confirmingProductDeletion = false;

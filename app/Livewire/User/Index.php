@@ -40,12 +40,24 @@ class Index extends Component
         // Prevent deleting the currently logged in user
         if ($user->id === auth()->id()) {
             session()->flash('error', 'Tidak dapat menghapus akun yang sedang digunakan.');
+            $this->dispatch('toast', [
+                'type' => 'error',
+                'title' => 'Gagal',
+                'message' => 'Tidak dapat menghapus akun yang sedang digunakan.',
+                'timeout' => 4000,
+            ]);
             $this->confirmingUserDeletion = false;
             return;
         }
         
         $user->delete();
         session()->flash('message', 'Pengguna berhasil dihapus.');
+        $this->dispatch('toast', [
+            'type' => 'success',
+            'title' => 'Berhasil',
+            'message' => 'Pengguna berhasil dihapus.',
+            'timeout' => 3000,
+        ]);
         
         // Close the modal after successful deletion
         $this->confirmingUserDeletion = false;

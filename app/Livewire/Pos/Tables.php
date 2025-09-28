@@ -98,6 +98,12 @@ class Tables extends Component
     {
         CafeTable::whereKey($id)->delete();
         session()->flash('message', 'Meja berhasil dihapus.');
+        $this->dispatch('toast', [
+            'type' => 'success',
+            'title' => 'Berhasil',
+            'message' => 'Meja berhasil dihapus.',
+            'timeout' => 3000,
+        ]);
     }
 
     public function toggleStatus(int $id)
@@ -151,6 +157,12 @@ class Tables extends Component
             $this->confirmingDeletion = false;
             $this->tableIdToDelete = null;
             session()->flash('message', 'Meja berhasil dihapus.');
+            $this->dispatch('toast', [
+                'type' => 'success',
+                'title' => 'Berhasil',
+                'message' => 'Meja berhasil dihapus.',
+                'timeout' => 3000,
+            ]);
         }
     }
 

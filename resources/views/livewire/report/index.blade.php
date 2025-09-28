@@ -132,9 +132,12 @@
                         <th class="px-4 py-3">No Order</th>
                         <th class="px-4 py-3">Tanggal</th>
                         <th class="px-4 py-3">Kasir</th>
+                        <th class="px-4 py-3">Customer</th>
+                        <th class="px-4 py-3">Meja</th>
+                        <th class="px-4 py-3">Metode</th>
                         <th class="px-4 py-3 text-right">Total</th>
-                        <th class="px-4 py-3 text-right">Bayar</th>
-                        <th class="px-4 py-3 text-right">Kembali</th>
+                        <th class="px-4 py-3 text-right">Uang Dibayar</th>
+                        <th class="px-4 py-3 text-right">Kembalian</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
@@ -152,6 +155,15 @@
                         <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
                             {{ $order->user?->name ?? 'Sistem' }}
                         </td>
+                        <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                            {{ $order->customer_name ?? '-' }}
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                            {{ $order->table ? ($order->table->name . ' (' . $order->table->code . ')') : '-' }}
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                            {{ strtoupper($order->payment_method ?? '') }}
+                        </td>
                         <td class="px-4 py-3 font-semibold text-emerald-600 dark:text-emerald-400 text-right">
                             Rp {{ number_format($order->total, 0, ',', '.') }}
                         </td>
@@ -164,7 +176,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-zinc-500">
+                        <td colspan="10" class="px-4 py-8 text-center text-gray-500 dark:text-zinc-500">
                             <div class="flex flex-col items-center justify-center gap-2">
                                 <svg class="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>

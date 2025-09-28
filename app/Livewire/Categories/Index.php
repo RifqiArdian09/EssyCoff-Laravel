@@ -24,6 +24,12 @@ class Index extends Component
         $id = $id ?? $this->categoryIdToDelete;
         Category::findOrFail($id)->delete();
         session()->flash('message', 'Kategori berhasil dihapus.');
+        $this->dispatch('toast', [
+            'type' => 'success',
+            'title' => 'Berhasil',
+            'message' => 'Kategori berhasil dihapus.',
+            'timeout' => 3000,
+        ]);
         
         // Close the modal after successful deletion
         $this->confirmingCategoryDeletion = false;

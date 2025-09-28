@@ -1,14 +1,9 @@
-<div class="p-6 space-y-8 bg-white dark:bg-zinc-800 min-h-screen text-gray-900 dark:text-white" x-data="{ loading: false }" x-on:item-added.window="loading = false">
+<div class="p-6 space-y-8 bg-white dark:bg-zinc-800 min-h-screen text-gray-900 dark:text-white" x-data="{ loading: false }" x-on:toast.window="loading = false">
     <div class="flex flex-col lg:flex-row gap-6">
         <!-- Left Panel - Products -->
         <section class="lg:w-3/5">
             <div class="bg-white dark:bg-zinc-900 p-5 rounded-lg shadow-lg border border-gray-200 dark:border-zinc-700 space-y-6">
-                <!-- Success Message -->
-                @if(session()->has('success'))
-                <div class="bg-green-50 dark:bg-green-900/50 border border-green-200 dark:border-green-700 text-green-700 dark:text-green-300 px-4 py-2 rounded-lg text-sm">
-                    {{ session('success') }}
-                </div>
-                @endif
+
                 <!-- Modal Produk Habis -->
                 @if($showOutOfStockModal)
                 <div
@@ -718,26 +713,6 @@
                     if (result.isConfirmed) {
                         @this.call(e.accept.method);
                     }
-                });
-            });
-            @this.on('item-added', (e) => {
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                    }
-                });
-                Toast.fire({
-                    icon: 'success',
-                    title: e.message || 'Produk ditambahkan ke keranjang',
-                    background: '#10b981',
-                    color: '#ffffff',
-                    iconColor: '#ffffff'
                 });
             });
         });

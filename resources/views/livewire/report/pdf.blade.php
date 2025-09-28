@@ -111,36 +111,66 @@
         </div>
     </div>
 
+    @php
+        // Filter hanya yang status paid
+        $paidOrders = collect($orders ?? [])->filter(function($o){ return ($o->status ?? null) === 'paid'; });
+        // Normalisasi nilai numerik
+        $paidOrders = $paidOrders->map(function($o){
+            $o->total = (float) ($o->total ?? 0);
+            $o->uang_dibayar = (float) ($o->uang_dibayar ?? 0);
+            $o->kembalian = (float) ($o->kembalian ?? 0);
+            $o->payment_method = strtoupper($o->payment_method ?? '');
+            return $o;
+        });
+        $totalPaid = $paidOrders->sum('total');
+        $byMethod = $paidOrders->groupBy('payment_method')->map->sum('total');
+    @endphp
+
     <table>
         <thead>
             <tr>
                 <th style="width: 5%;">No</th>
-                <th style="width: 15%;">No Order</th>
-                <th style="width: 20%;">Tanggal</th>
-                <th style="width: 20%;">Kasir</th>
-                <th style="width: 13%; text-align: right;">Total</th>
-                <th style="width: 13%; text-align: right;">Bayar</th>
-                <th style="width: 14%; text-align: right;">Kembali</th>
+                <th style="width: 14%;">No Order</th>
+                <th style="width: 16%;">Tanggal</th>
+                <th style="width: 16%;">Kasir</th>
+                <th style="width: 16%;">Customer</th>
+                <th style="width: 9%; text-align: left;">Metode</th>
+                <th style="width: 12%; text-align: right;">Total</th>
+                <th style="width: 6%; text-align: right;">Bayar</th>
+                <th style="width: 6%; text-align: right;">Kembali</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($orders as $order)
+            @forelse($paidOrders as $order)
             <tr>
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $order->no_order }}</td>
                 <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
                 <td>{{ $order->user?->name ?? 'Sistem' }}</td>
+                <td>{{ $order->customer_name ?? '-' }}</td>
+                <td style="text-transform: uppercase;">{{ $order->payment_method }}</td>
                 <td style="text-align: right;">Rp {{ number_format($order->total, 0, ',', '.') }}</td>
                 <td style="text-align: right;">Rp {{ number_format($order->uang_dibayar, 0, ',', '.') }}</td>
                 <td style="text-align: right;">Rp {{ number_format($order->kembalian, 0, ',', '.') }}</td>
             </tr>
-            @endforeach
+            @empty
+            <tr>
+                <td colspan="9" style="text-align:center; color:#6b7280;">Tidak ada transaksi paid pada periode ini.</td>
+            </tr>
+            @endforelse
         </tbody>
     </table>
 
     <!-- Ringkasan Total -->
     <div class="summary-box">
-        <p>📊 <strong>TOTAL PENDAPATAN PERIODE INI:</strong> Rp {{ number_format($totalFiltered ?? 0, 0, ',', '.') }}</p>
+        <p>📊 <strong>TOTAL PENDAPATAN (PAID):</strong> Rp {{ number_format($totalPaid ?? 0, 0, ',', '.') }}</p>
+        <div style="margin-top:6px; font-weight:500;">
+            <span>• CASH:</span> Rp {{ number_format((float)($byMethod['CASH'] ?? 0), 0, ',', '.') }}
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            <span>• QRIS:</span> Rp {{ number_format((float)($byMethod['QRIS'] ?? 0), 0, ',', '.') }}
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            <span>• CARD:</span> Rp {{ number_format((float)($byMethod['CARD'] ?? 0), 0, ',', '.') }}
+        </div>
     </div>
 
     <div class="footer">

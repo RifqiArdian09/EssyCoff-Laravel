@@ -15,6 +15,7 @@ class History extends Component
     public string $search = '';
     public string $selectedMonth = '';
     public string $selectedTableId = '';
+    public string $status = 'all'; // all | pending_payment | paid
     public bool $showPaymentModal = false;
     public $selectedOrder = null;
     public $uangDibayar = '';
@@ -43,6 +44,11 @@ class History extends Component
     }
 
     public function updatingSelectedTableId()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingStatus()
     {
         $this->resetPage();
     }
@@ -133,6 +139,12 @@ class History extends Component
 
         // Flash message dan trigger cetak
         session()->flash('message', 'Pembayaran berhasil! Struk akan dicetak.');
+        $this->dispatch('toast', [
+            'type' => 'success',
+            'title' => 'Berhasil',
+            'message' => 'Pembayaran berhasil! Struk akan dicetak.',
+            'timeout' => 3000,
+        ]);
         $this->dispatch('printReceipt');
     }
 
@@ -201,6 +213,12 @@ class History extends Component
         $this->resetPage();
 
         session()->flash('message', 'Transaksi berhasil dihapus.');
+        $this->dispatch('toast', [
+            'type' => 'success',
+            'title' => 'Berhasil',
+            'message' => 'Transaksi berhasil dihapus.',
+            'timeout' => 3000,
+        ]);
     }
 
     /**
@@ -231,6 +249,12 @@ class History extends Component
         if (!$order || !$order->table_id) return;
         CafeTable::whereKey($order->table_id)->update(['status' => 'available']);
         session()->flash('message', 'Meja telah ditandai Tersedia.');
+        $this->dispatch('toast', [
+            'type' => 'success',
+            'title' => 'Berhasil',
+            'message' => 'Meja telah ditandai Tersedia.',
+            'timeout' => 3000,
+        ]);
     }
 
     /**
@@ -250,6 +274,13 @@ class History extends Component
             })
             ->when($this->selectedMonth, function ($query) {
                 $query->whereRaw('DATE_FORMAT(created_at, "%Y-%m") = ?', [$this->selectedMonth]);
+            })
+            ->when($this->status !== 'all', function ($query) {
+                if ($this->status === 'pending_payment') {
+                    $query->where('status', 'pending_payment');
+                } elseif ($this->status === 'paid') {
+                    $query->where('status', 'paid');
+                }
             })
             ->orderByDesc('created_at')
             ->paginate($this->perPage);

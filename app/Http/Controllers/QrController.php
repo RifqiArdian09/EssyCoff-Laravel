@@ -11,16 +11,27 @@ class QrController extends Controller
     {
         $size = (int) $request->query('size', 160);
         $margin = (int) $request->query('margin', 1);
+        $forceDownload = (bool) $request->boolean('download', false);
 
         // Data encoded: pretty route for customer order by table code
         $data = route('customer.table', ['code' => $code]);
 
         $format = in_array(strtolower((string) $format), ['png', 'svg', 'eps']) ? strtolower((string) $format) : 'png';
 
-        $qr = QrCode::format($format)
-            ->margin($margin)
-            ->size($size)
-            ->generate($data);
+        // Generate QR with graceful fallback if PNG renderer unavailable
+        try {
+            $qr = QrCode::format($format)
+                ->margin($margin)
+                ->size($size)
+                ->generate($data);
+        } catch (\Throwable $e) {
+            // Fallback to SVG if PNG/EPS generation fails (e.g., missing GD/Imagick)
+            $format = 'svg';
+            $qr = QrCode::format($format)
+                ->margin($margin)
+                ->size($size)
+                ->generate($data);
+        }
 
         $mime = match ($format) {
             'svg' => 'image/svg+xml',
@@ -28,6 +39,12 @@ class QrController extends Controller
             default => 'image/png',
         };
 
-        return response($qr, 200)->header('Content-Type', $mime);
+        $response = response($qr, 200)->header('Content-Type', $mime);
+        if ($forceDownload) {
+            $ext = $format === 'svg' ? 'svg' : ($format === 'eps' ? 'eps' : 'png');
+            $filename = "QR-{$code}.{$ext}";
+            $response->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        }
+        return $response;
     }
 }

@@ -8,6 +8,8 @@ use App\Models\OrderItem;
 use App\Models\Category;
 use App\Models\CafeTable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
 class Cashier extends Component
 {
     use WithPagination;
@@ -92,14 +94,20 @@ class Cashier extends Component
         $product = Product::find($productId);
         if (!$product || $product->stock <= 0) {
             $this->openOutOfStockModal($product->name ?? '');
+            // Toast warning: out of stock
+            $this->dispatch('toast', type: 'warning', title: 'Stok Habis', message: ($product->name ?? 'Produk') . ' tidak tersedia.');
             return;
         }
         if (isset($this->cart[$productId])) {
             if ($this->cart[$productId]['qty'] < $product->stock) {
                 $this->cart[$productId]['qty']++;
+                // Emit lightweight event for front-end to show toast (Alpine listener)
                 $this->dispatch('item-added', message: $product->name . ' ditambahkan ke keranjang');
+                // Global toast success
+                $this->dispatch('toast', type: 'success', title: 'Ditambahkan', message: $product->name . ' ditambahkan ke keranjang');
             } else {
                 $this->openOutOfStockModal($product->name);
+                $this->dispatch('toast', type: 'warning', title: 'Stok Terbatas', message: 'Stok ' . $product->name . ' tidak mencukupi.');
                 return;
             }
         } else {
@@ -110,7 +118,9 @@ class Cashier extends Component
                 'qty' => 1,
                 'stock' => $product->stock
             ];
+            // Emit lightweight event for front-end to show toast (Alpine listener)
             $this->dispatch('item-added', message: $product->name . ' ditambahkan ke keranjang');
+            $this->dispatch('toast', type: 'success', title: 'Ditambahkan', message: $product->name . ' ditambahkan ke keranjang');
         }
         // Simpan cart ke session
         session()->put('pos_cart', $this->cart);
@@ -123,6 +133,8 @@ class Cashier extends Component
             // Update session
             session()->put('pos_cart', $this->cart);
             $this->calculateTotal();
+            // Toast info
+            $this->dispatch('toast', type: 'success', title: 'Dihapus', message: 'Item dihapus dari keranjang');
         }
     }
     public function openClearCartModal()
@@ -147,6 +159,7 @@ class Cashier extends Component
         $this->uangCustomer = '';
         $this->showClearCartModal = false;
         session()->flash('success', 'Keranjang berhasil dikosongkan!');
+        $this->dispatch('toast', type: 'success', title: 'Berhasil', message: 'Keranjang berhasil dikosongkan!');
     }
     public function openOutOfStockModal($name = '')
     {
@@ -231,19 +244,61 @@ class Cashier extends Component
             // Tentukan nilai pembayaran berdasarkan metode
             $uangDibayar = $this->paymentMethod === 'cash' ? $uangCustomer : $this->total;
             $kembalian = $this->paymentMethod === 'cash' ? $this->kembalian : 0;
-            $order = Order::create([
-                'no_order' => 'ORD-' . date('YmdHis') . '-' . str_pad(Order::whereDate('created_at', today())->count() + 1, 3, '0', STR_PAD_LEFT),
-                'user_id' => Auth::id(),
-                'table_id' => $this->selectedTableId,
-                'customer_name' => $this->customerName,
-                'total' => $this->total,
-                'uang_dibayar' => $uangDibayar,
-                'kembalian' => $kembalian,
-                'status' => 'paid',
-                'payment_method' => $this->paymentMethod,
-                'payment_ref' => $this->paymentMethod === 'qris' ? ($this->paymentRef ?: null) : null,
-                'card_last4' => $this->paymentMethod === 'card' ? $this->cardLast4 : null,
-            ]);
+
+            // Generate unique no_order: ORD-YYYYMMDD-#### using advisory lock to avoid race
+            $today = now();
+            $prefix = 'ORD-' . $today->format('Ymd') . '-';
+            $lockKey = 'orders_seq_' . $today->format('Ymd');
+            $lockAcquired = false;
+            $attempts = 0;
+            $order = null;
+            try {
+                $lockAcquired = (bool) collect(DB::select('SELECT GET_LOCK(?, 5) as l', [$lockKey]))->first()->l;
+                // Retry create with fresh sequence on duplicate
+                do {
+                    $attempts++;
+                    $lastNo = Order::where('no_order', 'like', $prefix . '%')
+                        ->orderBy('no_order', 'desc')
+                        ->value('no_order');
+                    $seq = 0;
+                    if ($lastNo && preg_match('/^ORD-\d{8}-(\d{4})$/', $lastNo, $m)) {
+                        $seq = (int) $m[1];
+                    }
+                    $seq++;
+                    $noOrder = $prefix . str_pad($seq, 4, '0', STR_PAD_LEFT);
+
+                    try {
+                        $order = Order::create([
+                            'no_order' => $noOrder,
+                            'user_id' => Auth::id(),
+                            'table_id' => $this->selectedTableId,
+                            'customer_name' => $this->customerName,
+                            'total' => $this->total,
+                            'uang_dibayar' => $uangDibayar,
+                            'kembalian' => $kembalian,
+                            'status' => 'paid',
+                            'payment_method' => $this->paymentMethod,
+                            'payment_ref' => $this->paymentMethod === 'qris' ? ($this->paymentRef ?: null) : null,
+                            'card_last4' => $this->paymentMethod === 'card' ? $this->cardLast4 : null,
+                        ]);
+                    } catch (QueryException $e) {
+                        $isDuplicate = ($e->getCode() === '23000') || (isset($e->errorInfo[1]) && (int)$e->errorInfo[1] === 1062);
+                        if ($isDuplicate) {
+                            usleep(50000);
+                            $order = null;
+                        } else {
+                            throw $e;
+                        }
+                    }
+                } while (!$order && $attempts < 10);
+            } finally {
+                if ($lockAcquired) {
+                    DB::select('SELECT RELEASE_LOCK(?)', [$lockKey]);
+                }
+            }
+            if (!$order) {
+                throw new \RuntimeException('Gagal membuat nomor pesanan unik. Silakan coba lagi.');
+            }
             $orderId = $order->getKey();
             foreach ($this->cart as $productId => $item) {
                 $product = Product::find($productId);
@@ -272,6 +327,8 @@ class Cashier extends Component
             }
             // Set lastOrder untuk ditampilkan di modal sukses
             $this->lastOrder = $order->load('items.product', 'user');
+            // Toast success with order number
+            $this->dispatch('toast', type: 'success', title: 'Transaksi Berhasil', message: 'No. Order: ' . $order->no_order, playSound: true);
             // Jika ada meja dipilih, set status meja menjadi unavailable (otomatis setelah bayar)
             if ($this->selectedTableId) {
                 CafeTable::whereKey($this->selectedTableId)->update(['status' => 'unavailable']);
@@ -291,6 +348,7 @@ class Cashier extends Component
             $this->selectedTableId = null;
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            $this->dispatch('toast', type: 'error', title: 'Gagal', message: $e->getMessage());
         }
     }
     public function preparePrintReceipt()

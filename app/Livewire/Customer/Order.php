@@ -22,8 +22,9 @@ class Order extends Component
         if ($tableCode) {
             $table = CafeTable::where('code', $tableCode)->first();
             if (!$table) {
-                // Set flash message untuk ditampilkan di view
-                session()->flash('table_error', 'Meja dengan kode "' . $tableCode . '" tidak ditemukan. Silakan hubungi staff untuk bantuan.');
+                // Untuk customer: arahkan ke halaman not-found yang ramah pengguna
+                $this->redirect(route('customer.table.not-found', ['code' => $tableCode]), navigate: true);
+                return;
             }
         }
     }

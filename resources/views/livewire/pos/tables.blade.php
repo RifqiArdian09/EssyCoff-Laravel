@@ -6,18 +6,30 @@
             const card = document.getElementById('qr-card');
             if(!card) return;
 
-            // Adjust card width for visual layout
+            // Explicit sizes in mm so it fits 1 page
+            const qrImg = card.querySelector('img[alt^="QR "]');
             if(size === 'A5'){
-                card.style.width = '148mm';
+                card.style.setProperty('width', '148mm', 'important');
+                card.style.setProperty('padding', '8mm', 'important');
+                if(qrImg){
+                    qrImg.style.setProperty('width', '88mm', 'important');
+                    qrImg.style.setProperty('height', '88mm', 'important');
+                }
             } else {
-                card.style.width = '105mm'; // A6
+                // A6 default
+                card.style.setProperty('width', '105mm', 'important');
+                card.style.setProperty('padding', '6mm', 'important');
+                if(qrImg){
+                    qrImg.style.setProperty('width', '54mm', 'important');
+                    qrImg.style.setProperty('height', '54mm', 'important');
+                }
             }
 
-            // Inject a temporary @page rule to enforce paper size
+            // Inject a temporary @page rule to enforce paper size and zero margins
             const style = document.createElement('style');
             style.setAttribute('id', 'tmp-print-size');
             style.media = 'print';
-            style.innerHTML = `@page { size: ${size}; margin: 8mm; }`;
+            style.innerHTML = `@page { size: ${size}; margin: 0; }`;
             document.head.appendChild(style);
 
             // Trigger print
@@ -49,12 +61,7 @@
         </div>
     </div>
 
-    @if (session()->has('message'))
-        <div class="px-4 py-3 rounded-lg bg-emerald-50 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-100 border border-emerald-200 dark:border-emerald-700 flex items-center gap-2 shadow-sm">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-            <span>{{ session('message') }}</span>
-        </div>
-    @endif
+    
 
     <!-- Pencarian & Filter -->
     <div class="bg-white dark:bg-zinc-800 p-5 rounded-lg shadow-lg border border-gray-200 dark:border-zinc-700 space-y-4 transition-colors duration-200">
@@ -263,21 +270,14 @@
             <div class="flex flex-col items-center gap-3">
                 <!-- Printable Card -->
                 <div id="qr-card" class="bg-white text-black rounded-lg shadow-lg border-2 border-gray-200 p-6 w-[105mm] hidden print:block print:shadow-none print:border-0">
-                    <!-- Header dengan Logo dan Brand -->
-                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-10" onerror="this.style.display='none'">
-                        <div class="text-right">
-                            <div class="text-lg font-bold text-gray-800">EssyCoff</div>
-                            <div class="text-xs text-gray-500">Coffee Shop</div>
-                        </div>
-                    </div>
+                    
                     
                     <!-- Konten Utama -->
                     <div class="text-center space-y-3">
                         <div class="text-xl font-bold text-gray-800 mb-2">Scan untuk Order</div>
                         @if($qrName)
                         <div class="bg-blue-50 border border-blue-200 rounded-lg p-2 mb-3">
-                            <div class="text-sm text-blue-700">Meja: <span class="font-bold text-blue-800">{{ $qrName }}</span></div>
+                            <div class="text-sm text-blue-700"><span class="font-bold text-blue-800">{{ $qrName }}</span></div>
                         </div>
                         @endif
                         
@@ -290,14 +290,6 @@
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 mt-4">
                             <div class="text-sm font-medium text-gray-700">Kode Meja</div>
                             <div class="text-lg font-bold text-gray-900 font-mono">{{ $qrCode }}</div>
-                        </div>
-                        
-                        <!-- URL -->
-                        <div class="text-xs text-gray-500 mt-2 break-all">{{ route('customer.table', ['code' => $qrCode]) }}</div>
-                        
-                        <!-- Footer -->
-                        <div class="text-xs text-gray-400 mt-4 pt-3 border-t border-gray-200">
-                            Tunjukkan QR ini ke pelanggan untuk pemesanan langsung
                         </div>
                     </div>
                 </div>
@@ -325,57 +317,27 @@
             </div>
             <style>
                 @media print {
-                    @page { 
-                        size: auto; 
-                        margin: 15mm 10mm; 
+                    @page {
+                        size: auto; /* Will be overridden by tmp @page from printQr */
+                        margin: 10mm;
                     }
-                    body * { 
-                        visibility: hidden; 
-                    }
-                    #qr-card, #qr-card * { 
-                        visibility: visible; 
-                    }
-                    #qr-card { 
-                        position: absolute; 
-                        left: 50%; 
-                        top: 20mm; 
-                        transform: translateX(-50%);
-                        width: 105mm !important;
+                    /* Show only the printable card */
+                    body * { visibility: hidden !important; }
+                    #qr-card, #qr-card * { visibility: visible !important; }
+                    /* Center the card without absolute positioning to prevent split */
+                    #qr-card {
+                        position: static !important;
+                        margin: 0 auto !important;
+                        transform: none !important;
                         box-shadow: none !important;
                         border: none !important;
+                        page-break-inside: avoid !important;
+                        line-height: 1.2 !important;
                     }
+                    /* Shrink QR wrapper padding when printing */
+                    #qr-card .qr-box { padding: 2mm !important; border-width: 1px !important; }
                 }
             </style>
-            <script>
-                // Expose globally to avoid Livewire scoping issues
-                window.printQr = function(size){
-                    const card = document.getElementById('qr-card');
-                    if(!card) return;
-
-                    // Adjust card width for visual layout
-                    if(size === 'A5'){
-                        card.style.width = '148mm';
-                    } else {
-                        card.style.width = '105mm'; // A6
-                    }
-
-                    // Inject a temporary @page rule to enforce paper size
-                    const style = document.createElement('style');
-                    style.setAttribute('id', 'tmp-print-size');
-                    style.media = 'print';
-                    style.innerHTML = `@page { size: ${size}; margin: 8mm; }`;
-                    document.head.appendChild(style);
-
-                    // Trigger print
-                    window.print();
-
-                    // Cleanup the temporary style after a short delay
-                    setTimeout(() => {
-                        const s = document.getElementById('tmp-print-size');
-                        if (s) s.remove();
-                    }, 500);
-                }
-            </script>
         </div>
     </div>
     @endif

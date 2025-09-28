@@ -50,7 +50,7 @@ use App\Http\Controllers\QrController;
 Route::get('/', \App\Livewire\Customer\Home::class)->name('home');
 
 Volt::route('dashboard', DashboardIndex::class)
-    ->middleware(['auth', 'single.session', 'verified'])
+    ->middleware(['auth', 'single.session', 'deny.roles:cashier', 'verified'])
     ->name('dashboard');
 
 // Customer-facing menu and ordering (Livewire component for UI)
@@ -60,7 +60,9 @@ Route::get('customer/table/{code}', function (Request $request, string $code) {
     // Check if table exists before redirecting
     $table = \App\Models\CafeTable::where('code', $code)->first();
     if (!$table) {
-        return redirect()->route('customer.table.not-found', ['code' => $code]);
+        // For customers: show a friendly not-found page instead of POS
+        return redirect()->route('customer.table.not-found', ['code' => $code])
+            ->with('warning', 'Kode meja "'.$code.'" tidak ditemukan.');
     }
     return redirect()->route('customer', ['table' => $code] + $request->only(['search','category']));
 })->name('customer.table');
@@ -72,7 +74,7 @@ Route::post('customer/order', CreateOrder::class)->name('customer.order');
 | Settings (Volt Routes)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'single.session'])->group(function () {
+Route::middleware(['auth', 'single.session', 'deny.roles:cashier'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
     Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
@@ -85,7 +87,7 @@ Route::middleware(['auth', 'single.session'])->group(function () {
 | Categories CRUD
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'single.session'])->group(function () {
+Route::middleware(['auth', 'single.session', 'deny.roles:cashier'])->group(function () {
     Volt::route('categories', CategoryIndex::class)->name('categories.index');
     Volt::route('categories/create', CategoryCreate::class)->name('categories.create');
     Volt::route('categories/{category}/edit', CategoryEdit::class)->name('categories.edit');
@@ -96,13 +98,13 @@ Route::middleware(['auth', 'single.session'])->group(function () {
 | Products CRUD
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'single.session'])->prefix('products')->name('products.')->group(function() {
+Route::middleware(['auth', 'single.session', 'deny.roles:cashier'])->prefix('products')->name('products.')->group(function() {
     Volt::route('/', ProductIndex::class)->name('index');
     Volt::route('/create', ProductCreate::class)->name('create');
     Volt::route('/{product}/edit', ProductEdit::class)->name('edit');
 });
 
-Route::middleware(['auth', 'single.session'])->prefix('users')->name('users.')->group(function() {
+Route::middleware(['auth', 'single.session', 'deny.roles:cashier'])->prefix('users')->name('users.')->group(function() {
     Volt::route('/', Index::class)->name('index');
     Volt::route('/create', Create::class)->name('create');
     Volt::route('/{user}/edit', Edit::class)->name('edit');
@@ -123,7 +125,7 @@ Route::middleware(['auth', 'single.session'])->prefix('pos')->group(function() {
 | Reports
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'single.session'])->prefix('report')->group(function() {
+Route::middleware(['auth', 'single.session', 'deny.roles:cashier'])->prefix('report')->group(function() {
     Volt::route('/', ReportIndex::class)->name('report.index');
 });
 // Local QR generator for tables

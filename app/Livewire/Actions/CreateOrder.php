@@ -4,6 +4,9 @@ namespace App\Livewire\Actions;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -22,7 +25,10 @@ class CreateOrder
             'table' => 'nullable|string|max:100', // table code from URL/QR
         ]);
 
-        $orderNumber = 'ORD-' . date('Ymd') . '-' . str_pad(Order::whereDate('created_at', today())->count() + 1, 4, '0', STR_PAD_LEFT);
+        // Generate unique order number resiliently to avoid duplicates under concurrency
+        $order = null;
+        $orderNumber = null;
+        $attempts = 0;
 
         // Resolve table by code if provided and available
         $tableId = null;
@@ -46,7 +52,6 @@ class CreateOrder
             }
             $tableId = $table->id;
             
-            // Log successful table validation
             Log::info('Order created with valid table', [
                 'table_code' => $tableCode,
                 'table_name' => $table->name,
@@ -54,13 +59,65 @@ class CreateOrder
             ]);
         }
 
-        $order = Order::create([
-            'no_order' => $orderNumber,
-            'table_id' => $tableId,
-            'customer_name' => $request->customer_name,
-            'total' => $request->total,
-            'status' => 'pending_payment',
-        ]);
+        // Serialize number generation using MySQL advisory lock to avoid race conditions
+        $today = now();
+        $prefix = 'ORD-' . $today->format('Ymd') . '-';
+        $lockKey = 'orders_seq_' . $today->format('Ymd');
+        $lockAcquired = false;
+
+        try {
+            $lockAcquired = (bool) collect(DB::select('SELECT GET_LOCK(?, 5) as l', [$lockKey]))->first()->l;
+            if (!$lockAcquired) {
+                Log::warning('Could not acquire order number lock');
+            }
+
+            // Retry in case of a very rare duplicate even under lock
+            do {
+                $attempts++;
+                $lastNo = Order::where('no_order', 'like', $prefix . '%')
+                    ->orderBy('no_order', 'desc')
+                    ->value('no_order');
+
+                $seq = 0;
+                if ($lastNo && preg_match('/^ORD-\\d{8}-(\\d{4})$/', $lastNo, $m)) {
+                    $seq = (int) $m[1];
+                }
+                $seq++;
+                $orderNumber = $prefix . str_pad($seq, 4, '0', STR_PAD_LEFT);
+
+                try {
+                    $order = Order::create([
+                        'no_order' => $orderNumber,
+                        'table_id' => $tableId,
+                        'customer_name' => $request->customer_name,
+                        'total' => $request->total,
+                        'status' => 'pending_payment',
+                    ]);
+                } catch (QueryException $e) {
+                    // Detect duplicate key reliably (MySQL error code 1062)
+                    $isDuplicate = ($e->getCode() === '23000') || (isset($e->errorInfo[1]) && (int)$e->errorInfo[1] === 1062);
+                    if ($isDuplicate) {
+                        usleep(50000);
+                        $order = null;
+                    } else {
+                        throw $e;
+                    }
+                }
+            } while (!$order && $attempts < 10);
+        } finally {
+            if ($lockAcquired) {
+                DB::select('SELECT RELEASE_LOCK(?)', [$lockKey]);
+            }
+        }
+
+        if (!$order) {
+            Log::error('Failed to generate unique order number after retries');
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membuat nomor pesanan unik. Silakan coba lagi.',
+                'error_type' => 'order_number_conflict'
+            ], 409);
+        }
 
         foreach ($request->items as $item) {
             $product = Product::find($item['id']);
@@ -92,4 +149,14 @@ class CreateOrder
             ] : null,
         ]);
     }
+
+    // Helper to parse sequence (kept simple within this class)
+    private function parseSeq(?string $no): int
+    {
+        if ($no && preg_match('/^ORD-\\d{8}-(\\d{4})$/', $no, $m)) {
+            return (int) $m[1];
+        }
+        return 0;
+    }
 }
+

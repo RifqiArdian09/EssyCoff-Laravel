@@ -91,4 +91,8 @@ select:focus[data-flux-control] {
     /* Focus ring and border utilities to mirror Tailwind naming used in views */
     .focus\:ring-primary:focus { --tw-ring-color: var(--color-primary) !important; }
     .focus\:border-primary:focus { border-color: var(--color-primary) !important; }
+
+    /* Hide scrollbar but keep scrollable */
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
 }

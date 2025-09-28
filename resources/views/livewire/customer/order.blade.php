@@ -317,7 +317,7 @@
     </div>
 
     <!-- Cart Sidebar -->
-    <div class="fixed inset-y-0 right-0 w-96 bg-white shadow-xl z-40 transform translate-x-full transition-transform duration-300 ease-in-out" id="chat-container">
+    <div class="fixed inset-y-0 right-0 w-full sm:w-96 max-w-full sm:max-w-none bg-white shadow-xl z-40 transform translate-x-full transition-transform duration-300 ease-in-out" id="chat-container">
         <div class="flex flex-col h-full">
             <!-- Cart Header -->
             <div class="bg-coffee-medium text-white p-4 flex items-center justify-between">
@@ -473,6 +473,29 @@
                     <span class="text-sm text-gray-600">Total Pembayaran:</span>
                     <span class="font-bold text-lg text-coffee-medium">Rp <span id="success-total">0</span></span>
                 </div>
+                <div class="flex justify-between items-center mt-2">
+                    <span class="text-sm text-gray-600">Meja:</span>
+                    <span class="font-medium text-gray-900" id="success-table">-</span>
+                </div>
+            </div>
+
+            <!-- Instruction to go to cashier -->
+            <div class="mb-6 text-left">
+                <div class="flex items-start gap-3 p-3 rounded-lg bg-coffee-gold/15 border border-coffee-gold/30">
+                    <div class="shrink-0">
+                        <i class="fas fa-cash-register text-coffee-dark"></i>
+                    </div>
+                    <div class="text-sm text-coffee-dark leading-relaxed">
+                        <div class="font-semibold">Silakan menuju Kasir untuk pembayaran dan proses makanan.</div>
+                        <div id="success-instruction" class="mt-1">Sebutkan nomor/meja Anda agar pesanan segera diproses.</div>
+                        <div id="success-table-highlight" class="mt-2 hidden">
+                            <span class="inline-flex items-center px-2.5 py-1.5 rounded-md bg-white text-coffee-dark border border-coffee-gold/40 text-sm font-semibold">
+                                <i class="fas fa-chair mr-2"></i>
+                                <span id="success-table-badge">Meja -</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Action Button -->
@@ -567,9 +590,12 @@
                     updateCart();
                     showNotification(`${name} ditambahkan ke keranjang`);
 
-                    // Always open cart when item is added
-                    chatContainer.classList.remove('translate-x-full');
-                    chatContainer.classList.add('translate-x-0');
+                    // On larger screens, auto-open cart; on mobile keep it closed to avoid covering UI
+                    const isDesktopOrTablet = window.matchMedia('(min-width: 768px)').matches; // md breakpoint
+                    if (isDesktopOrTablet) {
+                        chatContainer.classList.remove('translate-x-full');
+                        chatContainer.classList.add('translate-x-0');
+                    }
                 });
             });
 
@@ -831,9 +857,11 @@
                 // Add CSRF token
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 const tableFromStorage = (() => { try { return localStorage.getItem('customer_table_code'); } catch (e) { return null; } })();
+                // Prefer URL param first (most accurate for current session), fallback to localStorage
+                const effectiveTableCode = (typeof tableCode !== 'undefined' && tableCode) ? tableCode : tableFromStorage;
                 // Attach table code to payload if present
-                if (tableFromStorage && !orderData.table) {
-                    orderData.table = tableFromStorage;
+                if (effectiveTableCode && !orderData.table) {
+                    orderData.table = effectiveTableCode;
                 }
                 fetch('{{ route("customer.order") }}', {
                         method: 'POST',
@@ -863,6 +891,27 @@
 
                             document.getElementById('success-customer-name').textContent = customerName;
                             document.getElementById('success-total').textContent = parseInt(totalAmount).toLocaleString('id-ID');
+                            // Set table info and instruction
+                            const tableInfoEl = document.getElementById('success-table');
+                            const tableBadgeWrap = document.getElementById('success-table-highlight');
+                            const tableBadge = document.getElementById('success-table-badge');
+                            const instructionEl = document.getElementById('success-instruction');
+                            if (data.table_info && (data.table_info.code || data.table_info.name)) {
+                                const label = data.table_info.name ? `${data.table_info.name} (${data.table_info.code || '-'})` : (data.table_info.code || '-');
+                                tableInfoEl.textContent = label;
+                                if (tableBadge && tableBadgeWrap) {
+                                    tableBadge.textContent = `Meja ${data.table_info.name ? data.table_info.name : (data.table_info.code || '-')}`;
+                                    tableBadgeWrap.classList.remove('hidden');
+                                }
+                                if (instructionEl) {
+                                    const readable = data.table_info.name || data.table_info.code || '-';
+                                    instructionEl.textContent = `Sebutkan ${readable} di kasir agar pesanan segera diproses.`;
+                                }
+                            } else {
+                                tableInfoEl.textContent = 'Tanpa Meja';
+                                if (tableBadgeWrap) tableBadgeWrap.classList.add('hidden');
+                                if (instructionEl) instructionEl.textContent = 'Sebutkan nama pemesan di kasir agar pesanan segera diproses.';
+                            }
 
                             successModal.classList.remove('hidden');
 

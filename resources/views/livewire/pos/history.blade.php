@@ -7,15 +7,7 @@
         </div>
     </div>
 
-    <!-- Flash Message -->
-    @if (session()->has('message'))
-    <div class="px-4 py-3 rounded-lg bg-emerald-50 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-100 border border-emerald-200 dark:border-emerald-700 flex items-center gap-2 shadow-sm">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-        </svg>
-        <span>{{ session('message') }}</span>
-    </div>
-    @endif
+    
 
     <!-- Filter Bar -->
     <div class="bg-white dark:bg-zinc-800 p-5 rounded-lg shadow-lg border border-gray-200 dark:border-zinc-700 space-y-4 transition-colors duration-200">
@@ -49,6 +41,37 @@
                         <option value="{{ $t->id }}">{{ $t->name }} ({{ $t->code }})</option>
                     @endforeach
                 </flux:select>
+            </div>
+
+            <!-- Status Filter -->
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Status</label>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button"
+                        wire:click="$set('status','all')"
+                        class="px-3 py-1.5 rounded-md border text-sm transition
+                            {{ $status === 'all'
+                                ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900 border-transparent'
+                                : 'bg-white dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 border-gray-200 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-700' }}">
+                        Semua
+                    </button>
+                    <button type="button"
+                        wire:click="$set('status','pending_payment')"
+                        class="px-3 py-1.5 rounded-md border text-sm transition
+                            {{ $status === 'pending_payment'
+                                ? 'bg-yellow-500 text-white border-yellow-600'
+                                : 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700 hover:bg-yellow-100 dark:hover:bg-yellow-800/40' }}">
+                        Pending Payment
+                    </button>
+                    <button type="button"
+                        wire:click="$set('status','paid')"
+                        class="px-3 py-1.5 rounded-md border text-sm transition
+                            {{ $status === 'paid'
+                                ? 'bg-emerald-600 text-white border-emerald-700'
+                                : 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-800/40' }}">
+                        Paid
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -491,24 +514,6 @@
                     <span>Subtotal</span>
                     <span>Rp {{ number_format($selectedOrder->total, 0, ',', '.') }}</span>
                 </div>
-                @if($selectedOrder->discount > 0)
-                <div class="flex justify-between">
-                    <span>Diskon</span>
-                    <span class="text-red-600">- Rp {{ number_format($selectedOrder->discount, 0, ',', '.') }}</span>
-                </div>
-                @endif
-                @if($selectedOrder->tax > 0)
-                <div class="flex justify-between">
-                    <span>Pajak ({{ $selectedOrder->tax }}%)</span>
-                    <span>Rp {{ number_format(($selectedOrder->total * $selectedOrder->tax) / 100, 0, ',', '.') }}</span>
-                </div>
-                @endif
-                @if($selectedOrder->service_charge > 0)
-                <div class="flex justify-between">
-                    <span>Service Charge ({{ $selectedOrder->service_charge }}%)</span>
-                    <span>Rp {{ number_format(($selectedOrder->total * $selectedOrder->service_charge) / 100, 0, ',', '.') }}</span>
-                </div>
-                @endif
                 <div class="flex justify-between font-bold pt-1 mt-1 border-t border-black" style="font-size: {{ $width === '58mm' ? '10px' : '12px' }};">
                     <span>Total</span>
                     <span>Rp {{ number_format($selectedOrder->grand_total ?? $selectedOrder->total, 0, ',', '.') }}</span>

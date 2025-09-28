@@ -15,15 +15,7 @@
         </flux:button>
     </div>
 
-    <!-- Flash Message -->
-    @if (session()->has('message'))
-        <div class="px-4 py-3 rounded-lg bg-emerald-50 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-100 border border-emerald-200 dark:border-emerald-700 flex items-center gap-2 shadow-sm">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            <span>{{ session('message') }}</span>
-        </div>
-    @endif
+    
 
 
     <!-- Tabel Kategori -->
