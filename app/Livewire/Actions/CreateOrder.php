@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Str;
 use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -16,6 +19,29 @@ class CreateOrder
 {
     public function __invoke(Request $request)
     {
+        // Device identification via persistent cookie
+        $deviceId = $request->cookie('device_id');
+        if (!$deviceId) {
+            $deviceId = (string) Str::uuid();
+            // Persist for 1 year
+            Cookie::queue(cookie('device_id', $deviceId, 60 * 24 * 365));
+        }
+
+        // Rate limit: max 3 orders per 3 minutes per device
+        $rateKey = 'orders:device:' . $deviceId;
+        $maxAttempts = 3; // max 3 pesan
+        $decaySeconds = 180; // 3 menit
+
+        if (RateLimiter::tooManyAttempts($rateKey, $maxAttempts)) {
+            $seconds = RateLimiter::availableIn($rateKey);
+            return response()->json([
+                'success' => false,
+                'message' => 'Terlalu sering memesan. Silakan coba lagi dalam ' . $seconds . ' detik.',
+                'error_type' => 'rate_limited',
+                'retry_after' => $seconds,
+            ], 429);
+        }
+
         $request->validate([
             'customer_name' => 'required|string|max:255',
             'items' => 'required|array|min:1',
@@ -137,6 +163,9 @@ class CreateOrder
             $tableName = CafeTable::find($tableId)->name ?? 'Unknown';
             $message = 'Pesanan berhasil dibuat untuk ' . $tableName . ' dengan status Pending Payment';
         }
+
+        // Count only successful orders towards the rate limit window
+        RateLimiter::hit($rateKey, $decaySeconds);
 
         return response()->json([
             'success' => true,

@@ -96,14 +96,7 @@
                     class="w-full"
                     icon="magnifying-glass" />
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Status</label>
-                <flux:select wire:model.live="status" class="w-full">
-                    <option value="">Semua Status</option>
-                    <option value="available">Tersedia</option>
-                    <option value="unavailable">Tidak Tersedia</option>
-                </flux:select>
-            </div>
+            
         </div>
     </div>
 

@@ -868,13 +868,23 @@
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': csrfToken || '',
+                            'X-Requested-With': 'XMLHttpRequest',
                             'Accept': 'application/json'
                         },
+                        credentials: 'same-origin',
                         body: JSON.stringify(orderData)
                     })
                     .then(response => {
                         if (!response.ok) {
                             return response.json().then(errorData => {
+                                if (response.status === 429) {
+                                    // Pass structured error for rate limit handling
+                                    throw {
+                                        isRateLimit: true,
+                                        message: errorData.message || 'Anda mencapai batas pemesanan.',
+                                        retry_after: errorData.retry_after || 60
+                                    };
+                                }
                                 throw new Error(errorData.message || 'Network error');
                             });
                         }
@@ -934,6 +944,14 @@
                     })
                     .catch(error => {
                         console.error('Error:', error);
+                        // Handle rate limit (HTTP 429)
+                        if (error && error.isRateLimit) {
+                            // Hide order modal
+                            orderModal.classList.add('hidden');
+                            const seconds = Math.max(1, parseInt(error.retry_after || 60, 10));
+                            showRateLimitCountdown(seconds, error.message);
+                            return;
+                        }
                         
                         // Check if it's a table not found error
                         if (error.message && error.message.includes('tidak ditemukan')) {
@@ -981,6 +999,105 @@
                         notification.remove();
                     }, 300);
                 }, 3000);
+            }
+
+            // Show a sticky countdown banner for rate limiting (enhanced UI)
+            function showRateLimitCountdown(seconds, baseMessage = 'Terlalu sering memesan.') {
+                // Reuse or create wrapper
+                let banner = document.getElementById('rate-limit-banner');
+                if (!banner) {
+                    banner = document.createElement('div');
+                    banner.id = 'rate-limit-banner';
+                    // Full width on mobile, safe-area aware, centered inner on larger screens
+                    banner.className = 'fixed top-0 left-0 right-0 z-[100] w-screen sm:w-auto';
+                    banner.style.marginTop = 'calc(env(safe-area-inset-top, 0px) + 8px)';
+                    banner.innerHTML = `
+                        <div role="alert" aria-live="polite" class="mx-2 sm:mx-auto sm:max-w-xl">
+                        <div class="flex items-start gap-3 px-4 py-3 rounded-xl shadow-2xl border border-amber-300/60 bg-gradient-to-br from-amber-500 to-amber-600 text-white">
+                            <div class="shrink-0 mt-0.5">
+                                <i class="fas fa-hourglass-half"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-sm font-semibold leading-5 break-words">
+                                    <span class="banner-message"></span>
+                                </div>
+                                <div class="mt-2 h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
+                                    <div class="progress-bar h-full bg-white/90" style="width:100%"></div>
+                                </div>
+                            </div>
+                            <button type="button" class="ml-3 text-white/80 hover:text-white close-banner" aria-label="Tutup">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        </div>`;
+                    document.body.appendChild(banner);
+                }
+
+                const messageEl = banner.querySelector('.banner-message');
+                const progressEl = banner.querySelector('.progress-bar');
+                const closeBtn = banner.querySelector('.close-banner');
+
+                // Disable confirm button to prevent spam while waiting
+                if (confirmOrder) {
+                    confirmOrder.disabled = true;
+                    confirmOrder.classList.add('opacity-60', 'cursor-not-allowed');
+                }
+
+                let remaining = Math.max(1, parseInt(seconds, 10));
+                const total = remaining;
+
+                function updateUI() {
+                    if (messageEl) {
+                        messageEl.textContent = `${baseMessage} Coba lagi dalam ${remaining} detik.`;
+                    }
+                    if (progressEl) {
+                        const pct = Math.max(0, Math.min(100, Math.round((remaining / total) * 100)));
+                        progressEl.style.width = pct + '%';
+                    }
+                }
+
+                // Clear any existing interval stored on element
+                if (banner._intervalId) {
+                    clearInterval(banner._intervalId);
+                }
+
+                updateUI();
+                banner.style.display = 'block';
+
+                const tick = () => {
+                    remaining -= 1;
+                    if (remaining <= 0) {
+                        clearInterval(banner._intervalId);
+                        banner._intervalId = null;
+                        // Remove banner and re-enable button
+                        if (banner && banner.parentNode) banner.parentNode.removeChild(banner);
+                        if (confirmOrder) {
+                            confirmOrder.disabled = false;
+                            confirmOrder.classList.remove('opacity-60', 'cursor-not-allowed');
+                        }
+                        showNotification('Anda dapat memesan kembali sekarang');
+                        return;
+                    }
+                    updateUI();
+                };
+
+                banner._intervalId = setInterval(tick, 1000);
+
+                // Close button handler
+                if (closeBtn) {
+                    closeBtn.onclick = () => {
+                        if (banner._intervalId) {
+                            clearInterval(banner._intervalId);
+                            banner._intervalId = null;
+                        }
+                        if (banner && banner.parentNode) banner.parentNode.removeChild(banner);
+                        // Still keep confirm disabled until window passes? Re-enable here for UX.
+                        if (confirmOrder) {
+                            confirmOrder.disabled = false;
+                            confirmOrder.classList.remove('opacity-60', 'cursor-not-allowed');
+                        }
+                    };
+                }
             }
         });
     </script>

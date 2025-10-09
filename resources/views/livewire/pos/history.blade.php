@@ -92,7 +92,7 @@
 
     <!-- Tabel Transaksi -->
     <div class="bg-white dark:bg-zinc-800 shadow rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700 transition-colors duration-200">
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto" wire:poll.visible.3s>
             <table class="w-full text-left text-sm text-gray-700 dark:text-zinc-200">
                 <thead class="bg-gray-100 dark:bg-zinc-700 text-gray-900 dark:text-zinc-100 uppercase text-xs font-semibold">
                     <tr>
