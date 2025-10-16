@@ -68,9 +68,7 @@
                     @forelse($products as $product)
                     <div
                         wire:click="addToCart({{ $product->id }})"
-                        x-on:click="loading = true"
                         class="bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 p-3 rounded-lg shadow hover:shadow-lg cursor-pointer transition duration-200 flex flex-col items-center space-y-2 {{ $product->stock <= 0 ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105' }}"
-                        :class="loading ? 'opacity-50' : ''"
                         {{ $product->stock <= 0 ? 'wire:click="openOutOfStockModal(\'' . addslashes($product->name) . '\')"' : '' }}>
                         @if($product->image_url)
                         <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-16 h-16 object-cover rounded-full">

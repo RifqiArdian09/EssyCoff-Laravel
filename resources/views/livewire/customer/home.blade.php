@@ -20,6 +20,11 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
 
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(rgba(42, 26, 10, 0.7), rgba(42, 26, 10, 0.8)), url('/images/coffee-shop-bg.jpg');
@@ -50,9 +55,18 @@
             background: rgba(62, 40, 19, 0.8);
             border: 1px solid rgba(212, 167, 106, 0.3);
         }
+
+        .livewire-customer-home {
+            overflow-x: hidden;
+        }
+
+        img, svg {
+            max-width: 100%;
+            height: auto;
+        }
     </style>
-    <div class="min-h-screen flex items-center justify-center pt-6">
-        <div class="w-full max-w-4xl mx-auto text-center flex flex-col justify-between min-h-[90vh] py-8">
+    <div class="min-h-screen flex items-center justify-center pt-6 px-4 sm:px-6 md:px-8">
+        <div class="w-full max-w-4xl mx-auto text-center flex flex-col justify-between min-h-[90vh] py-8 px-2 sm:px-4 md:px-0">
             <div>
                 <div class="mb-6" data-aos="zoom-in" data-aos-duration="1000">
                     <i class="fas fa-mug-hot text-7xl text-coffee-gold"></i>
@@ -65,12 +79,12 @@
                     Temukan kenikmatan kopi terbaik dengan cara yang mudah.
                 </p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                    <div class="feature-card p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300  data-aos=" fade-right" data-aos-delay="600" data-aos-duration="800">
+                    <div class="feature-card p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300" data-aos="fade-right" data-aos-delay="600" data-aos-duration="800">
                         <i class="fas fa-coffee text-coffee-gold text-2xl mb-3"></i>
                         <h3 class="text-coffee-gold font-semibold text-lg mb-2">Kopi Premium</h3>
                         <p class="text-coffee-cream text-sm opacity-90">Biji pilihan terbaik dengan racikan khusus barista kami</p>
                     </div>
-                    <div class="feature-card p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300  data-aos=" fade-left" data-aos-delay="800" data-aos-duration="800">
+                    <div class="feature-card p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300" data-aos="fade-left" data-aos-delay="800" data-aos-duration="800">
                         <i class="fas fa-bolt text-coffee-gold text-2xl mb-3"></i>
                         <h3 class="text-coffee-gold font-semibold text-lg mb-2">Pesan Cepat</h3>
                         <p class="text-coffee-cream text-sm opacity-90">Tanpa antri, cukup pesan dari genggaman tangan</p>
@@ -80,10 +94,10 @@
 
                 <div class="text-center mt-8">
                     <a href="{{ route('customer') }}"
-                        class="feature-card  rounded-lg w-full max-w-sm mx-auto px-8 py-4 
-                            hover:shadow-2xl transition-all duration-300 
-                            text-coffee-gold font-bold text-lg text-center"
-                        data-aos="fade-up" data-aos-delay="1000" data-aos-duration="800">
+                        class="feature-card rounded-lg w-full max-w-sm mx-auto px-8 py-4
+                            bg-[#3E2813] relative z-10 ring-1 ring-[#D4A76A]/50 border border-[#D4A76A]/30
+                            hover:shadow-2xl transition-all duration-300 block
+                            text-coffee-gold font-bold text-lg text-center">
                         <i class="fas fa-shopping-cart mr-2"></i>Mulai Pesanan <i class="fas fa-arrow-right ml-2"></i>
                     </a>
                 </div>
