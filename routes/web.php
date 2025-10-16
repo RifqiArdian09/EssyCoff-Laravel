@@ -16,7 +16,7 @@ use App\Livewire\Products\Edit as ProductEdit;
 
 // POS
 use App\Livewire\Pos\Cashier;
-use App\Livewire\Pos\History;
+use App\Livewire\Pos\History;       
 use App\Livewire\Pos\TransactionDetail;
 
 // Report
